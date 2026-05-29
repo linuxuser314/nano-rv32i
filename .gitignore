@@ -1,0 +1,19 @@
+# Synthesis and PnR tool outputs
+*.log
+*.rpt
+*.srp
+*.tr
+*.out
+*.json
+*.fs
+*.bin
+
+# Simulation outputs (Verilator / Icarus Verilog)
+obj_dir/
+*.vcd
+*.vvp
+a.out
+
+# OS/IDE junk
+.DS_Store
+.vscode/
