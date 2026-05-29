@@ -4,7 +4,7 @@
     "features": {
         "ghcr.io/devcontainers/features/common-utils:1": {}
     },
-    "postCreateCommand": "sudo apt-get update && sudo apt-get install -y yosys verilator icarus-verilog gtkwave python3-pip",
+    "postCreateCommand": "sudo apt-get update && sudo apt-get install -y yosys verilator iverilog gtkwave python3-pip",
     "customizations": {
         "vscode": {
             "extensions": [
