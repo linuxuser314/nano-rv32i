@@ -11,7 +11,8 @@
                 "mcu-debug.rtos-views",
                 "leafle.gcode",
                 "ethan-barry.systemverilog-lang",
-                "wavetrace.wavetrace"
+                "wavetrace.wavetrace",
+                "surfer-project.surfer"
             ]
         }
     }
