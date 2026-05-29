@@ -1,0 +1,17 @@
+{
+    "name": "RISC-V Hardware Dev Environment",
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:1": {}
+    },
+    "postCreateCommand": "sudo apt-get update && sudo apt-get install -y yosys verilator icarus-verilog gtkwave python3-pip",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "mcu-debug.rtos-views",
+                "leafle.gcode",
+                "ethan-barry.systemverilog-lang"
+            ]
+        }
+    }
+}
