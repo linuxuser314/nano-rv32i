@@ -10,7 +10,8 @@
             "extensions": [
                 "mcu-debug.rtos-views",
                 "leafle.gcode",
-                "ethan-barry.systemverilog-lang"
+                "ethan-barry.systemverilog-lang",
+                "wavetrace.wavetrace"
             ]
         }
     }
