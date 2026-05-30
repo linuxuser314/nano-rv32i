@@ -12,7 +12,9 @@
                 "leafle.gcode",
                 "ethan-barry.systemverilog-lang",
                 "wavetrace.wavetrace",
-                "surfer-project.surfer"
+                "surfer-project.surfer",
+                "chipsalliance.verible",
+                "mshr-h.VerilogHDL"
             ]
         }
     }
