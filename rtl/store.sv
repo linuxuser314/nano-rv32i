@@ -10,5 +10,7 @@ module store(input  logic[31:0] data,
              output logic[31:0] result,
              output logic[3 :0] write_enable);
 
-
+    byte_shift_left(
+        .data(data), .shift1(addr_end[0]), .shift2(addr_end[1]), .fill_bit(1'b0), .result(result)
+    );
 endmodule
