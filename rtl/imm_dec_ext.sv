@@ -1,3 +1,4 @@
+`default_nettype none
 module imm_dec_ext(
     input logic I, S, B, U, J,
     input logic [31:7] instruction,
