@@ -29,6 +29,7 @@ module datapath(input logic clk, reset);
         .in5(),
         .in6(),
         .in7(),
-        .out(result_mux_out)
+        .out(result_mux_out),
+        .select(result_select)
     );
 endmodule
