@@ -1,5 +1,6 @@
 //This module is a barrell shifter designed to support both left and right logical and arithmetic shifting.
 //I will probably add a rotation mode to this module when I add the RISC-V B extension.
+//This module should have a 7-LUT propogation delay (5 stages + 2 reversals) and use 225 LUTs (7 stages * LUTs per stage + 1 fill bit calculator)
 
 `default_nettype none
 module shifter(input logic[31:0] data_in,
