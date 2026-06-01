@@ -1,14 +1,16 @@
 `default_nettype none
 
 module datapath(input logic clk, reset);
-    logic RF_write_enable, ALU_src;
-    logic[31:0] instruction, result_mux_out, RF_rd1, RF_rd2, decoded_immediate, ALU_src_val;
+    logic RF_write_enable, ALU_src, is_right_shift, is_arithmetic_shift;
+    logic[31:0] instruction, result_mux_out, RF_rd1, RF_rd2, decoded_immediate, ALU_src_val,
+    shift_result;
     logic I, S, B, U, J;
 
     decoder(
         .RF_write_enable(RF_write_enable),
         .I(I), .S(S), .B(B), .U(U), .J(J),
-        .ALU_src(ALU_src)
+        .ALU_src(ALU_src),
+        .is_right_shift(is_right_shift), .is_arithmetic_shift(is_arithmetic_shift)
     );
     memory_subsystem();
     PC_subsystem();
@@ -29,15 +31,18 @@ module datapath(input logic clk, reset);
         .in0(decoded_immediate), .in1(RF_rd1), .select(ALU_src), .result(ALU_src_val)
     );
     ALU_comparator();
-    shifter();
+    shifter(
+        .result(shift_result), .data_in(RF_rd1), .shamt(ALU_src_val[4:0]),
+        .is_right_shift(is_right_shift), .is_arithmetic_shift(is_arithmetic_shift)
+    );
     mask();
     mux8(
-        .in0(),
+        .in0(shift_result),
         .in1(),
         .in2(),
         .in3(),
         .in4(),
-        .in5(),
+        .in5(decoded_immediate),//LUI
         .in6(),
         .in7(),
         .out(result_mux_out),
