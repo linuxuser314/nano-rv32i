@@ -1,10 +1,11 @@
+//This module is a barrell shifter designed to support both left and right logical and arithmetic shifting.
+//I will probably add a rotation mode to this module when I add the RISC-V B extension.
+
 `default_nettype none
 module shifter(input logic[31:0] data_in,
                input logic[4:0] shamt,
                input logic is_right_shift, is_arithmetic_shift,
                output logic[31:0] result);
-    //This module is a barrell shifter designed to support both left and right logical and arithmetic shifting.
-    //I will probably add a rotation mode to this module when I add the RISC-V B extension.
 
     logic[31:0] reverse_stage, stage_1, stage_2, stage_3, stage_4, stage_5;
     logic fill_bit;
