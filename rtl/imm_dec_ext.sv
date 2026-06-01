@@ -1,4 +1,4 @@
-//This module decodes immediates from RISC-V instructions.
+//This module decodes immediates from RISC-V instructions. It assumes a one-hot encoding for I, S, B, U, and J lines.
 
 `default_nettype none
 module imm_dec_ext(
