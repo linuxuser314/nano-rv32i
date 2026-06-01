@@ -8,7 +8,7 @@ module decoder(input  logic[31:0] instruction,
                                    MEMORY_OUT_OF_BOUNDS_ERROR,
                 output logic I, S, B, U, J, is_byte, is_half, is_unsigned, is_store,
                              eq, lt, ltu, negate, sub, PC_increment, RF_write_enable,
-                             is_right_shift, is_arithmetic_shift,
+                             is_right_shift, is_arithmetic_shift, ALU_src,
                 output logic[1:0] mask_ctrl, PC_select,
                 output logic[2:0] result_select
                 );
