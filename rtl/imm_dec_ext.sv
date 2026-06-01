@@ -1,9 +1,13 @@
+//This module decodes immediates from RISC-V instructions.
+
 `default_nettype none
 module imm_dec_ext(
     input logic I, S, B, U, J,
     input logic [31:7] instruction,
     output logic [31:0] out);
     always_comb begin
+        //Will probably need to change how this works because iverilog is mad at me
+        //constant selects in always_* processes are not currently supported (all bits will be included).
         unique case(1'b1)
             //I & S-type: 12-bit signed immediate.
             I: out = {{20{instruction[31]}}, instruction[31:20]};
