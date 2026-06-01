@@ -24,9 +24,9 @@ module load(input  logic[31:0] data,
                       (data[15] & (is_half & addr_end[1] | is_byte & addr_end[1] & ~addr_end[0])) |
                       (data[31] & (is_half & addr_end[0] | is_byte & ~addr_end[0] & ~addr_end[0]));
 
-    //Shift the result as appropriate and padd with fill_bits as appropriate.
-    assign stage  = shift2 ? {{16{fill_bit}}, data [31:16]} : data [31:0];
-    assign result = shift1 ? {{ 8{fill_bit}}, stage[31: 8]} : stage[31:0];
+    byte_shift_right byte_shift_right(
+        .shift1(shift1), .shift2(shift2), .fill_bit(fill_bit), .data(data), .result(result)
+    );
 
 
 endmodule

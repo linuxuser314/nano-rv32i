@@ -7,5 +7,8 @@
 module store(input  logic[31:0] data,
              input  logic[1 :0] addr_end,
              input  logic       is_half, is_byte,
-             output logic[31:0] result);
+             output logic[31:0] result,
+             output logic[3 :0] write_enable);
+
+
 endmodule
