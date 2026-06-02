@@ -2,9 +2,10 @@
 
 module datapath(input logic clk, reset);
     logic RF_write_enable, ALU_src, is_right_shift, is_arithmetic_shift,
-          eq, lt, ltu, sub, negate;
+          eq, lt, ltu, sub, negate, PC_increment;
+    logic[1 :0] PC_select;
     logic[31:0] instruction, result_mux_out, RF_rd1, RF_rd2, decoded_immediate, ALU_src_val,
-    shift_result, mask_result, ALU_result, load_result;
+    shift_result, mask_result, ALU_result, load_result, PC_result, prevPC, PC_plus_4, PC_plus_imm;
     logic I, S, B, U, J;
     logic MEMORY_MISALIGNED_ERROR, INSTRUCTION_MISALIGNED_ERROR, MEMORY_OUT_OF_BOUNDS_ERROR;
 
@@ -15,6 +16,8 @@ module datapath(input logic clk, reset);
         .is_right_shift(is_right_shift), .is_arithmetic_shift(is_arithmetic_shift),
         .eq(eq), .lt(lt), .ltu(ltu), .sub(sub), .negate(negate),
         .ALU_result(ALU_result),
+        .PC_select(PC_select),
+        .PC_increment(PC_increment),
         .MEMORY_MISALIGNED_ERROR(MEMORY_MISALIGNED_ERROR),
         .INSTRUCTION_MISALIGNED_ERROR(INSTRUCTION_MISALIGNED_ERROR),
         .MEMORY_OUT_OF_BOUNDS_ERROR(MEMORY_OUT_OF_BOUNDS_ERROR)
@@ -23,13 +26,20 @@ module datapath(input logic clk, reset);
     memory_subsystem(
         .load_result(load_result), .instruction(instruction),
         .is_half(is_half), .is_byte(is_byte), .is_unsigned(is_unsigned), .is_store(is_store),
-        .PC(), .addr(), .store_data(),
+        .PC(PC_result), .addr(ALU_result), .store_data(RF_rd2),
         .MEMORY_MISALIGNED_ERROR(MEMORY_MISALIGNED_ERROR),
         .INSTRUCTION_MISALIGNED_ERROR(INSTRUCTION_MISALIGNED_ERROR),
         .MEMORY_OUT_OF_BOUNDS_ERROR(MEMORY_OUT_OF_BOUNDS_ERROR)
     );
-    PC_subsystem();
-    register_file();
+    PC_subsystem(
+        .PC_result(PC_result), .prev_PC(prev_PC), .PC_plus_4(PC_plus_4), .PC_plus_imm(PC_plus_imm),
+        .imm(decoded_immediate), .ALU_result(ALU_result),
+        .PC_increment(PC_increment), .PC_select(PC_select), .branch_flag(comparison_flag)
+    );
+    register(
+        .clk(clk), .result(result),
+        .in(PC_result), .out(prev_PC)
+    );
     imm_dec_ext(
         .I(I), .S(S), .B(B), .U(U), .J(J),
         .instruction(instruction[31:7]),
