@@ -9,7 +9,7 @@ module ALU_comparator(input  logic[31:0] a, b,
 
     //Returns a + b if sub is false and a + ~b + 1 (a - b) if sub is true
     adder ALU_adder_inst(
-        .a(a), .b(b), .result(ALU_result), .cin(sub), .cout(C)
+        .a(a), .b(b ^ {32{sub}}), .result(ALU_result), .cin(sub), .cout(C)
     );
 
     //Calculate the comparison results by checking the eq/lt/ltu flags and then negate the result using XOR if negate is set.
@@ -17,7 +17,7 @@ module ALU_comparator(input  logic[31:0] a, b,
 
     assign Z = ~(|ALU_result);
     assign N = ALU_result[31];
-    assign V = (a[31] ^ b[31]) & (a[31] ^ ALU_result[31]);
+    assign V = ~(a[31] ^ (b[31] ^ sub)) & (a[31] ^ ALU_result[31]);
     assign comparison_flag = negate ^ (
                                      eq  & (Z) |
                                      lt  & (N ^ V) |
