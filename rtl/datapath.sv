@@ -9,7 +9,7 @@ module datapath(input logic clk, reset);
     logic I, S, B, U, J;
     logic MEMORY_MISALIGNED_ERROR, INSTRUCTION_MISALIGNED_ERROR, MEMORY_OUT_OF_BOUNDS_ERROR;
 
-    decoder(
+    decoder main_decoder(
         .RF_write_enable(RF_write_enable),
         .I(I), .S(S), .B(B), .U(U), .J(J),
         .ALU_src(ALU_src),
@@ -23,7 +23,7 @@ module datapath(input logic clk, reset);
         .MEMORY_OUT_OF_BOUNDS_ERROR(MEMORY_OUT_OF_BOUNDS_ERROR)
     );
 
-    memory_subsystem(
+    memory_subsystem main_memory_system(
         .load_result(load_result), .instruction(instruction),
         .is_half(is_half), .is_byte(is_byte), .is_unsigned(is_unsigned), .is_store(is_store),
         .PC(PC_result), .addr(ALU_result), .store_data(RF_rd2),
@@ -31,43 +31,43 @@ module datapath(input logic clk, reset);
         .INSTRUCTION_MISALIGNED_ERROR(INSTRUCTION_MISALIGNED_ERROR),
         .MEMORY_OUT_OF_BOUNDS_ERROR(MEMORY_OUT_OF_BOUNDS_ERROR)
     );
-    PC_subsystem(
+    PC_subsystem PC_calculation_subsystem(
         .PC_result(PC_result), .prev_PC(prev_PC), .PC_plus_4(PC_plus_4), .PC_plus_imm(PC_plus_imm),
         .imm(decoded_immediate), .ALU_result(ALU_result),
         .PC_increment(PC_increment), .PC_select(PC_select), .branch_flag(comparison_flag)
     );
-    register(
+    register32 PC_tracking_register(
         .clk(clk), .result(result),
         .in(PC_result), .out(prev_PC)
     );
-    imm_dec_ext(
+    imm_dec_ext instruction_immediate_calculator(
         .I(I), .S(S), .B(B), .U(U), .J(J),
         .instruction(instruction[31:7]),
-        .out(decoded_imediate)
+        .out(decoded_immediate)
     );
 
-    register_file(
+    register_file system_register_file(
         .clk(clk), .reset(reset), .write_enable(RF_write_enable),
         .a1(instruction[15:19]), .a2(instruction[20:24]), .a3(instruction[7:11]),
         .rd1(RF_rd1), .rd2(RF_rd2), .wd3(result_mux_out)
     );
 
-    mux2(
+    mux2 ALU_inputb_selector(
         .in0(decoded_immediate), .in1(RF_rd1), .select(ALU_src), .result(ALU_src_val)
     );
-    ALU_comparator(
+    ALU_comparator ALU_comparison_engine(
         .a(RF_rd1), .b(ALU_src_val),
         .eq(eq), .lt(lt), .ltu(ltu), .negate(negate), .sub(sub),
         .ALU_result(ALU_result), .comparison_flag(comparison_flag)
     );
-    shifter(
+    shifter shifting_unit(
         .result(shift_result), .data_in(RF_rd1), .shamt(ALU_src_val[4:0]),
         .is_right_shift(is_right_shift), .is_arithmetic_shift(is_arithmetic_shift)
     );
-    mask(
+    mask masking_unit(
         .a(RF_rd1), .b(ALU_src_val), .ctrl(mask_ctrl), .result(mask_result)
     );
-    mux8(
+    mux8 result_selector_mux(
         .in0(shift_result), //sll, srl, sra, slli, srli, srai
         .in1(mask_result), //and, or, xor, andi, ori, xori
         .in2(comparison_flag), //slt, sltu, slti, sltui
