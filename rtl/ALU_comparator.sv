@@ -1,5 +1,6 @@
 //The ALU and Comparator unit. Provides addition/subtraction and branch condition evaluation/set less than.
 //This module requires the adder.sv submodule.
+//The sub flag MUST BE SET TO 1 for comparisons to function properly! The module does not contain sub-setting logic if eq, lt, or ltu are 1.
 module ALU_comparator(input  logic[31:0] a, b,
                       input  logic       eq, lt, ltu, negate, sub,
                       output logic[31:0] ALU_result,
