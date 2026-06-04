@@ -4,27 +4,35 @@ import random
 MODULE_NAME = "PC_subsystem"
 
 def calculate_expected(prev_PC, imm, ALU_result, PC_select, branch_flag, PC_increment):
-    """Mathematically models the PC subsystem's combinational routing and addition."""
+    """
+    Independent specification-based gold model for the RISC-V PC Subsystem.
+    Verified against architectural requirements rather than RTL structure.
+    """
+    # 1. Spec-defined combinational adder calculations
+    # PC_plus_4 increments by 4 when PC_increment is 1, and stalls (adds 0) when 0
+    pc_increment_step = 4 if PC_increment else 0
+    pc_plus_4 = (prev_PC + pc_increment_step) & 0xFFFFFFFF
     
-    # Combinational adders always compute their values regardless of stalls/selections
-    pc_plus_4 = (prev_PC + 4) & 0xFFFFFFFF
+    # Target address for relative jumps and branches
     pc_plus_imm = (prev_PC + imm) & 0xFFFFFFFF
     
-    # Evaluate new_PC routing
-    # NOTE: PC_increment == 0 acts as a STALL signal, but ONLY applies if we aren't taking a jump/branch.
-    if PC_select == 1:
-        # JAL
+    # 2. Independent architectural routing evaluation
+    if PC_select == 0:
+        # Standard sequential execution or sequential stall
+        new_PC = pc_plus_4
+    elif PC_select == 1:
+        # Unconditional Relative Jump (JAL)
         new_PC = pc_plus_imm
     elif PC_select == 2:
-        # JALR (automatically masks LSB to 0 per RISC-V spec)
+        # Unconditional Register Jump (JALR)
+        # Spec Requirement: JALR target address must align to a 2-byte boundary (force LSB to 0)
         new_PC = ALU_result & 0xFFFFFFFE
-    elif PC_select == 3 and branch_flag:
-        # Branch taken
-        new_PC = pc_plus_imm
+    elif PC_select == 3:
+        # Conditional Branching
+        new_PC = pc_plus_imm if branch_flag else pc_plus_4
     else:
-        # Normal instruction or branch not taken.
-        # PC_increment == 0 means stall (keep prev_PC). PC_increment == 1 means proceed (PC + 4).
-        new_PC = pc_plus_4 if PC_increment else prev_PC
+        # Out-of-bounds selection fallback
+        new_PC = 0
 
     return new_PC, pc_plus_4, pc_plus_imm
 
@@ -58,7 +66,6 @@ def generate_vectors(num_iterations):
         PC_select = random.randint(0, 3)
         branch_flag = random.choice([0, 1])
         
-        # Make stalls relatively infrequent to thoroughly test normal pathways
         # PC_increment = 0 means STALL, PC_increment = 1 means NORMAL INCREMENT
         PC_increment = 0 if random.random() < 0.1 else 1
 

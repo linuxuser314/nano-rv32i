@@ -2,6 +2,7 @@
 //The PC_increment gets set to true for stalls to prevent the PC from increasing.
 //The PC_select is determined by the type of instruction.
 //0 is normal instruction, 1 is for JAL, 2 is for JALR, and 3 is for branches.
+//PC_plus_4 is the same as prev_PC when PC_increment is false.
 `default_nettype none
 
 module PC_subsystem(input  logic[31:0] prev_PC, imm, ALU_result,
