@@ -19,7 +19,7 @@ module memory_subsystem(input  logic[31:0] PC, addr, store_data,
 
     //Wire up the memory unit!
     logic[31:0] RD2, WD2;
-    logic[3:0] write_enable;
+    logic[3:0] write_enable, write_enable_output;
     memory system_ram(
         .A1(PC), .A2(addr), .RD1(instruction), .RD2(RD2), .WD2(WD2), .write_enable(write_enable),
         .MEMORY_OUT_OF_BOUNDS_ERROR(MEMORY_OUT_OF_BOUNDS_ERROR)
@@ -29,8 +29,9 @@ module memory_subsystem(input  logic[31:0] PC, addr, store_data,
     store store_calculation_unit(
         .data(store_data), .result(WD2),
         .addr_end(addr[1:0]), .is_half(is_half), .is_byte(is_byte),
-        .write_enable(write_enable & {4{is_store}})
+        .write_enable(write_enable_output)
     );
+    assign write_enable = write_enable_output & {4{is_store}};
     load load_mask_shift_and_extend(
         .data(RD2), .result(load_result), .addr_end(addr[1:0]),
         .is_byte(is_byte), .is_half(is_half), .is_unsigned(is_unsigned)

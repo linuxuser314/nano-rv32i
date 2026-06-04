@@ -10,7 +10,8 @@ module PC_subsystem(input  logic[31:0] prev_PC, imm, ALU_result,
                     input  logic branch_flag, PC_increment,
                     output logic[31:0] new_PC, PC_plus_4, PC_plus_imm
                     );
-
+    logic[31:0] jalr_addr;
+    assign jalr_addr = {ALU_result[31:1], 1'b0};
     //These are pre-selection calculations that are also used for AUIPC and jal/jalr.
     //The PC_increment increments PC by 4 when 1 and 0 when 0, allowing the decoder to stall the PC.
     assign PC_plus_4 = prev_PC + {29'b0, PC_increment, 2'b0};
@@ -20,7 +21,7 @@ module PC_subsystem(input  logic[31:0] prev_PC, imm, ALU_result,
         case(PC_select)
             0: new_PC = PC_plus_4;
             1: new_PC = PC_plus_imm;
-            2: new_PC = {ALU_result[31:1], 1'b0};
+            2: new_PC = jalr_addr;
             3: new_PC = branch_flag ? PC_plus_imm : PC_plus_4;
             default: new_PC = 32'b0;
         endcase

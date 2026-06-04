@@ -4,7 +4,7 @@
 module register32(input  logic[31:0] data,
                   input  logic       clk, reset,
                   output logic[31:0] result);
-    always_ff @(posedge_clk, posedge_reset) begin
+    always_ff @(posedge clk, posedge reset) begin
         if(reset) result <= 32'b0;
         else result <= data;
     end
