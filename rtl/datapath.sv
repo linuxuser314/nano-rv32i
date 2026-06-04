@@ -22,13 +22,14 @@ module datapath(input logic clk, reset);
         .result_select(result_select),
         .MEMORY_MISALIGNED_ERROR(MEMORY_MISALIGNED_ERROR),
         .INSTRUCTION_MISALIGNED_ERROR(INSTRUCTION_MISALIGNED_ERROR),
-        .MEMORY_OUT_OF_BOUNDS_ERROR(MEMORY_OUT_OF_BOUNDS_ERROR)
+        .MEMORY_OUT_OF_BOUNDS_ERROR(MEMORY_OUT_OF_BOUNDS_ERROR),
+        .instruction(instruction)
     );
 
     memory_subsystem main_memory_system(
         .load_result(load_result), .instruction(instruction),
         .is_half(is_half), .is_byte(is_byte), .is_unsigned(is_unsigned), .is_store(is_store),
-        .PC(PC_result), .addr(ALU_result), .store_data(RF_rd2),
+        .PC(prev_PC), .addr(ALU_result), .store_data(RF_rd2),
         .MEMORY_MISALIGNED_ERROR(MEMORY_MISALIGNED_ERROR),
         .INSTRUCTION_MISALIGNED_ERROR(INSTRUCTION_MISALIGNED_ERROR),
         .MEMORY_OUT_OF_BOUNDS_ERROR(MEMORY_OUT_OF_BOUNDS_ERROR)
@@ -55,7 +56,7 @@ module datapath(input logic clk, reset);
     );
 
     mux2 ALU_inputb_selector(
-        .in0(decoded_immediate), .in1(RF_rd1), .select(ALU_src), .result(ALU_src_val)
+        .in0(decoded_immediate), .in1(RF_rd2), .select(ALU_src), .result(ALU_src_val)
     );
     ALU_comparator ALU_comparison_engine(
         .a(RF_rd1), .b(ALU_src_val),
