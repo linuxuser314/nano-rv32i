@@ -17,3 +17,9 @@ a.out
 # OS/IDE junk
 .DS_Store
 .vscode/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
