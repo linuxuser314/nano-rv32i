@@ -12,4 +12,9 @@ module decoder(input  logic[31:0] instruction,
                 output logic[1:0] mask_ctrl, PC_select,
                 output logic[2:0] result_select
                 );
+    logic[16:0] instruction_data;
+    assign instruction_data = {instruction[6:0], instruction[14:12], instruction[31:25]};}
+    always_comb begin
+        casez(instruction_data)
+        endcase
 endmodule
