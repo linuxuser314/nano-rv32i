@@ -6,9 +6,18 @@
 _start:
 
     # 3. INSTRUCTIONS (The actual RISC-V code)
+
+    #x1 = 8
     addi x1, x0, 5
-    addi x2, x0, 5
-    beq  x1, x2, success
+    addi x1, x1, 3
+
+    #x1 = 64
+    slli x1, x1, 3
+    #x1 = 2
+    srli x1, x1, 5
+
+
+    j end
 
 fail:
     addi x3, x0, 1   # Set error code 1
