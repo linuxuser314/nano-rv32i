@@ -33,8 +33,8 @@ module decoder(input  logic[31:0] instruction,
                 17'b0110011_000_0100000: begin RF_write_enable = 1; ALU_src = 1; sub = 1; result_select = 3; end//sub
                 17'b0110011_000_0000000: begin RF_write_enable = 1; ALU_src = 1; result_select = 3; end//add
                 17'b0010011_000_???????: begin RF_write_enable = 1; I = 1; result_select = 3; end//addi
-                17'b0110011_001_0000000: begin RF_write_enable = 1; ALU_src = 1; result_select = 3; end//sll
-                17'b0010011_001_0000000: begin RF_write_enable = 1; I = 1; result_select = 3; end//slli
+                17'b0110011_001_0000000: begin RF_write_enable = 1; ALU_src = 1; result_select = 0; end//sll
+                17'b0010011_001_0000000: begin RF_write_enable = 1; I = 1; result_select = 0; end//slli
                 17'b0110011_010_0000000: begin RF_write_enable = 1; ALU_src = 1; result_select = 0; sub = 1; lt = 1; end//slt
                 17'b0010011_010_???????: begin RF_write_enable = 1; I = 1; result_select = 0; sub = 1; lt = 1; end//slti
                 17'b0110011_011_0000000: begin RF_write_enable = 1; ALU_src = 1; result_select = 2; sub = 1; ltu = 1; end//sltu
