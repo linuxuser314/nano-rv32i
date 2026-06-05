@@ -5,7 +5,7 @@ module instruction_rom(
     logic[31:0] rom [2048];  // Simple instruction memory
 
     initial begin
-        $readmemh("firmware.hex", rom);
+        $readmemh("/workspaces/nano-rv32i/software/firmware.hex", rom);
     end
 
     // Combinational read (ROM is asynchronous)

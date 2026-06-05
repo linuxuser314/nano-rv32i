@@ -13,6 +13,7 @@ obj_dir/
 *.vcd
 *.vvp
 a.out
+.fst
 
 # OS/IDE junk
 .DS_Store
