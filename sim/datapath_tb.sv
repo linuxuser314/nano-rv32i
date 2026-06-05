@@ -5,7 +5,7 @@ module datapath_tb;
     logic clk, reset;
 
     // Instantiate the datapath
-    datapath uut(
+    datapath dut(
         .clk(clk),
         .reset(reset)
     );
@@ -28,15 +28,15 @@ module datapath_tb;
         // After 1000 cycles, check the value of x3 (gp)
         #1;
         $display("\n=== Simulation Complete ===");
-        $display("x3 (gp) value: 0x%08h", uut.system_register_file.rf[3]);
-        $display("PC value: 0x%08h", uut.PC_tracking_register.result);
-        $display("Instruction: 0x%08h", uut.instruction);
+        $display("x3 (gp) value: 0x%08h", dut.system_register_file.rf[3]);
+        $display("PC value: 0x%08h", dut.PC_tracking_register.result);
+        $display("Instruction: 0x%08h", dut.instruction);
         $finish;
     end
 
     // Optional: dump waveforms for debugging
     initial begin
-        $dumpfile("datapath_sim.vcd");
+        $dumpfile("simulation.fst");
         $dumpvars(0, datapath_tb);
     end
 endmodule
