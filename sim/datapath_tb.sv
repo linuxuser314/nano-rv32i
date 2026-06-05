@@ -36,7 +36,7 @@ module datapath_tb;
 
     // Optional: dump waveforms for debugging
     initial begin
-        $dumpfile("simulation.fst");
+        $dumpfile("/workspace/simulation.fst");
         $dumpvars(0, datapath_tb);
-    end
+    end 
 endmodule
