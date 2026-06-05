@@ -1,7 +1,6 @@
 `default_nettype none
 
 module decoder(input  logic[31:0] instruction,
-               input  logic        clk, reset,
                                    MEMORY_MISALIGNED_ERROR,
                                    INSTRUCTION_MISALIGNED_ERROR,
                                    MEMORY_OUT_OF_BOUNDS_ERROR,
