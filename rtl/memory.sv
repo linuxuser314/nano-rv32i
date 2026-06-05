@@ -10,7 +10,7 @@ module memory(input  logic[31:0] A1, A2, WD2,
     initial begin
         // Clears any unmapped memory slots to 0, then loads your program
         for (int i = 0; i < 576; i++) ram[i] = 32'b0;
-        $readmemh("../software/riscv-test.hex", ram);
+        //$readmemh("../software/riscv-test.hex", ram);
     end
     always_ff @(posedge clk) begin
         if(write_enable) ram[A2[31:2]] <= WD2;

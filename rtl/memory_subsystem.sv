@@ -23,7 +23,7 @@ module memory_subsystem(input  logic[31:0] PC, addr, store_data,
     logic[3:0] write_enable, write_enable_output;
     memory system_ram(
         .A1(PC), .A2(addr), .RD1(instruction), .RD2(RD2), .WD2(WD2), .write_enable(write_enable),
-        .MEMORY_OUT_OF_BOUNDS_ERROR(MEMORY_OUT_OF_BOUNDS_ERROR)
+        .MEMORY_OUT_OF_BOUNDS_ERROR(MEMORY_OUT_OF_BOUNDS_ERROR), .clk(clk)
     );
 
     //Connect load-store units to memory_subsystem inputs and outputs and to main memory module.
