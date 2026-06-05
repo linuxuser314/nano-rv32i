@@ -17,139 +17,218 @@ def set_byte(mem, addr, val):
 
 def generate_vectors(num_iterations):
     """
-    Generates stimulus for the memory subsystem.
-    Python acts as a cycle-accurate golden memory model with 1-cycle read latency.
+    Generates stimulus for the memory subsystem matching single-cycle architecture.
+    
+    Timing Model:
+    - Stores: Address/data presented on cycle i, committed on posedge i, readable on cycle i+1
+    - Loads: TWO-CYCLE operation with automatic pairing:
+      * Cycle i (Address): Address latches on posedge, is_byte/is_half/is_unsigned used
+      * Cycle i+1 (Writeback): Same control signals re-applied, data read on posedge i,
+                                shifted/masked/extended combinationally, written to RF on posedge i+1
+    - Instruction Fetch: Dual-port BRAM, data available combinationally after posedge
+    
+    The generator automatically inserts a writeback cycle after every load address cycle.
     """
     vectors = []
     
-    # Simple virtual byte-addressable memory state
-    # Starts empty, mirroring the hardware's 'initial' block zero-initialization
+    # Virtual byte-addressable memory
     virtual_mem = {}
-
-    # State tracking for 1-cycle pipeline delay
-    # BRAM registers capture and hold the output of the cycle BEFORE.
-    pipeline_instruction = 0
-    pipeline_load_result = 0
+    
+    # State from previous cycle (what gets output THIS cycle)
+    prev_instruction = 0
+    prev_load_result = 0
+    
+    # For tracking load address stage to generate writeback automatically
+    pending_load_writeback = False
+    pending_load_addr = 0
+    pending_load_is_byte = False
+    pending_load_is_half = False
+    pending_load_is_unsigned = False
+    pending_PC = 0
 
     for i in range(num_iterations):
-        # 1. Initialize Control signals
-        is_byte = random.choice([0, 1])
-        is_half = 0 if is_byte else random.choice([0, 1]) # Mutually exclusive widths
-        is_unsigned = random.choice([0, 1])
-        is_store = 1 if (random.random() < 0.4) else 0
-
-        # 2. Pick Address / PC Stimulus (Mix of edge cases and alignment errors)
-        # Avoid generating extreme OOB values that poison your array registers with 'x'
-        stim_type = random.random()
-        
-        if stim_type < 0.20:
-            # Generate misalignment addresses within range (0 to 2303)
-            PC = (random.randint(0, MEM_SIZE - 4) & ~3) + random.randint(1, 3) # Misaligned PC
-            addr = random.randint(0, MEM_SIZE - 4)
-        else:
-            # Normal in-bounds aligned accesses
-            PC = random.randint(0, (MEM_SIZE - 4) // 4) * 4
-            if is_half:
-                addr = random.randint(0, (MEM_SIZE - 2) // 2) * 2
-            elif is_byte:
-                addr = random.randint(0, MEM_SIZE - 1)
+        # ===== Check if this cycle is a load writeback (automatically inserted) =====
+        if pending_load_writeback:
+            # This cycle: Load Writeback Stage
+            is_byte = pending_load_is_byte
+            is_half = pending_load_is_half
+            is_unsigned = pending_load_is_unsigned
+            is_store = 0
+            
+            # Data was latched from memory on previous posedge, now shift/mask/extend
+            load_addr = pending_load_addr
+            load_misaligned = 0
+            if not is_byte:
+                if is_half and (load_addr % 2 != 0):
+                    load_misaligned = 1
+                elif (not is_half) and (load_addr % 4 != 0):
+                    load_misaligned = 1
+            
+            access_size = 1 if is_byte else (2 if is_half else 4)
+            load_oob = 1 if (load_addr < 0 or load_addr + (access_size - 1) >= MEM_SIZE) else 0
+            
+            # Extract loaded data from memory
+            if not load_misaligned and not load_oob:
+                if is_byte:
+                    val = get_byte(virtual_mem, load_addr)
+                    if not is_unsigned and (val & 0x80):
+                        load_result = val | 0xFFFFFF00
+                    else:
+                        load_result = val
+                elif is_half:
+                    val = get_byte(virtual_mem, load_addr) | (get_byte(virtual_mem, load_addr + 1) << 8)
+                    if not is_unsigned and (val & 0x8000):
+                        load_result = val | 0xFFFF0000
+                    else:
+                        load_result = val
+                else:  # Word
+                    b0 = get_byte(virtual_mem, load_addr)
+                    b1 = get_byte(virtual_mem, load_addr + 1)
+                    b2 = get_byte(virtual_mem, load_addr + 2)
+                    b3 = get_byte(virtual_mem, load_addr + 3)
+                    load_result = b0 | (b1 << 8) | (b2 << 16) | (b3 << 24)
             else:
-                addr = random.randint(0, (MEM_SIZE - 4) // 4) * 4
+                load_result = 0
+            
+            # On writeback cycle, PC advances (PC_increment = 1)
+            PC = pending_PC
+            addr = pending_load_addr  # Keep same address (though not used)
+            store_data = 0
+            
+            # Error flags
+            exp_inst_misaligned = 0
+            exp_inst_oob = 0
+            exp_mem_misaligned = load_misaligned
+            exp_mem_oob = load_oob
+            
+            # Outputs visible THIS cycle come from PREVIOUS cycle
+            exp_instruction = prev_instruction
+            exp_load_result = prev_load_result
+            
+            # Clear pending writeback
+            pending_load_writeback = False
+            
+        else:
+            # Normal execution cycle
+            is_byte = random.choice([0, 1])
+            is_half = 0 if is_byte else random.choice([0, 1])  # Mutually exclusive
+            is_unsigned = random.choice([0, 1])
+            
+            # 40% chance of store, otherwise load or other op
+            is_store = 1 if (random.random() < 0.4) else 0
+            
+            # 2. Generate PC and addr (combinationally available)
+            stim_type = random.random()
+            
+            if stim_type < 0.15:
+                # Misaligned PC
+                PC = (random.randint(0, MEM_SIZE - 4) & ~3) + random.randint(1, 3)
+                addr = random.randint(0, MEM_SIZE - 1)
+            elif stim_type < 0.30:
+                # OOB addresses
+                PC = random.randint(MEM_SIZE, MEM_SIZE + 100)
+                addr = random.randint(MEM_SIZE, MEM_SIZE + 100)
+            else:
+                # Normal aligned accesses
+                PC = random.randint(0, (MEM_SIZE - 4) // 4) * 4
+                if is_half:
+                    addr = random.randint(0, (MEM_SIZE - 2) // 2) * 2
+                elif is_byte:
+                    addr = random.randint(0, MEM_SIZE - 1)
+                else:
+                    addr = random.randint(0, (MEM_SIZE - 4) // 4) * 4
+            
+            store_data = random.getrandbits(32)
+            
+            # 3. Check instruction address
+            inst_misaligned = 1 if (PC % 4 != 0) else 0
+            inst_oob = 1 if (PC < 0 or PC + 3 >= MEM_SIZE) else 0
+            
+            # 4. Check data address (if load or store)
+            mem_misaligned = 0
+            if not is_byte:
+                if is_half and (addr % 2 != 0):
+                    mem_misaligned = 1
+                elif (not is_half) and (addr % 4 != 0):
+                    mem_misaligned = 1
+            
+            access_size = 1 if is_byte else (2 if is_half else 4)
+            mem_oob = 1 if (addr < 0 or addr + (access_size - 1) >= MEM_SIZE) else 0
+            
+            # 5. Get combinational instruction data (from previous PC read)
+            next_instruction = 0
+            if not inst_misaligned and not inst_oob:
+                b0 = get_byte(virtual_mem, PC)
+                b1 = get_byte(virtual_mem, PC + 1)
+                b2 = get_byte(virtual_mem, PC + 2)
+                b3 = get_byte(virtual_mem, PC + 3)
+                next_instruction = b0 | (b1 << 8) | (b2 << 16) | (b3 << 24)
+            
+            # 6. Outputs visible THIS cycle are from PREVIOUS cycle
+            exp_instruction = prev_instruction
+            exp_load_result = prev_load_result
+            exp_inst_misaligned = inst_misaligned
+            exp_inst_oob = inst_oob
+            exp_mem_misaligned = mem_misaligned
+            exp_mem_oob = mem_oob
+            
+            # 7. Determine what happens on THIS cycle's posedge
+            if is_store and not mem_misaligned and not mem_oob:
+                # Store commits immediately on posedge
+                if is_byte:
+                    set_byte(virtual_mem, addr, store_data)
+                elif is_half:
+                    set_byte(virtual_mem, addr, store_data)
+                    set_byte(virtual_mem, addr + 1, store_data >> 8)
+                else:  # Word
+                    set_byte(virtual_mem, addr, store_data)
+                    set_byte(virtual_mem, addr + 1, store_data >> 8)
+                    set_byte(virtual_mem, addr + 2, store_data >> 16)
+                    set_byte(virtual_mem, addr + 3, store_data >> 24)
+            
+            elif (is_byte or is_half) and not is_store:
+                # Load: address latches on posedge
+                # Schedule automatic writeback for next cycle
+                pending_load_writeback = True
+                pending_load_addr = addr
+                pending_load_is_byte = is_byte
+                pending_load_is_half = is_half
+                pending_load_is_unsigned = is_unsigned
+                pending_PC = PC + 4  # PC advances on writeback cycle
+            
+            # 8. Update pipeline state for next cycle
+            prev_instruction = next_instruction
+            prev_load_result = 0  # Only updates during load writeback
 
-        store_data = random.getrandbits(32)
-
-        # 3. Mathematically model the expected outcomes for the CURRENT request
-        inst_misaligned = 1 if (PC % 4 != 0) else 0
-        inst_oob = 1 if (PC < 0 or PC + 3 >= MEM_SIZE) else 0
+        # ===== Pack Vector =====
+        # Bits layout:
+        # [196] is_byte
+        # [195] is_half
+        # [194] is_unsigned
+        # [193] is_store
+        # [192:161] PC
+        # [160:129] addr
+        # [128:97] store_data
+        # [96:65] exp_instruction
+        # [64:33] exp_load_result
+        # [32] exp_mem_misaligned
+        # [31] exp_inst_misaligned
+        # [30] exp_mem_oob
+        # [29] exp_inst_oob
         
-        mem_misaligned = 0
-        if not is_byte:
-            if is_half and (addr % 2 != 0):
-                mem_misaligned = 1
-            elif (not is_half) and (addr % 4 != 0):
-                mem_misaligned = 1
-                
-        access_size = 1 if is_byte else (2 if is_half else 4)
-        mem_oob = 1 if (addr < 0 or addr + (access_size - 1) >= MEM_SIZE) else 0
-
-        # Expected error output lines (Combinational - no clock delay)
-        exp_inst_error = inst_misaligned
-        exp_mem_error = mem_misaligned
-        exp_oob_error = inst_oob or mem_oob
-
-        # Compute Asynchronous Instruction Fetch target (will commit to register on next clk)
-        next_instruction = 0
-        if not inst_misaligned and not inst_oob:
-            b0 = get_byte(virtual_mem, PC)
-            b1 = get_byte(virtual_mem, PC + 1)
-            b2 = get_byte(virtual_mem, PC + 2)
-            b3 = get_byte(virtual_mem, PC + 3)
-            next_instruction = b0 | (b1 << 8) | (b2 << 16) | (b3 << 24)
-
-        # Compute Asynchronous Data Load target (will commit to register on next clk)
-        next_load_result = 0
-        if not is_store and not mem_misaligned and not mem_oob:
-            if is_byte:
-                val = get_byte(virtual_mem, addr)
-                if not is_unsigned and (val & 0x80):
-                    next_load_result = val | 0xFFFFFF00
-                else:
-                    next_load_result = val
-            elif is_half:
-                val = get_byte(virtual_mem, addr) | (get_byte(virtual_mem, addr + 1) << 8)
-                if not is_unsigned and (val & 0x8000):
-                    next_load_result = val | 0xFFFF0000
-                else:
-                    next_load_result = val
-            else: # Word
-                b0 = get_byte(virtual_mem, addr)
-                b1 = get_byte(virtual_mem, addr + 1)
-                b2 = get_byte(virtual_mem, addr + 2)
-                b3 = get_byte(virtual_mem, addr + 3)
-                next_load_result = b0 | (b1 << 8) | (b2 << 16) | (b3 << 24)
-
-        # --- PIPELINE SHIFT ---
-        # The outputs visible right now are the results of the pipeline_ registers
-        # from the PREVIOUS cycle's reads.
-        exp_instruction = pipeline_instruction
-        exp_load_result = pipeline_load_result
-
-        # Update the pipeline state registers with the newly addressed data
-        # for the next cycle.
-        pipeline_instruction = next_instruction
-        pipeline_load_result = next_load_result
-
-        # 4. Pack vector
-        # Packing layout:
-        # is_byte[196] | is_half[195] | is_unsigned[194] | is_store[193] |
-        # PC[192:161] | addr[160:129] | store_data[128:97] |
-        # exp_instruction[96:65] | exp_load_result[64:33] |
-        # exp_mem_err[32] | exp_inst_err[31] | exp_oob_err[30]
         vector_int = (is_byte << 196) | (is_half << 195) | (is_unsigned << 194) | (is_store << 193) | \
                      (PC << 161) | (addr << 129) | (store_data << 97) | \
                      (exp_instruction << 65) | (exp_load_result << 33) | \
-                     (exp_mem_error << 32) | (exp_inst_error << 31) | (exp_oob_error << 30)
-
-        # 200 bits fits into exactly 50 hex characters
+                     (exp_mem_misaligned << 32) | (exp_inst_misaligned << 31) | \
+                     (exp_mem_oob << 30) | (exp_inst_oob << 29)
+        
+        # Fit in 197 bits (50 hex chars = 200 bits, we use 197)
         vectors.append(f"{vector_int:050x}")
-
-        # 5. Simulate store state updates on POSITIVE CLOCK EDGE (for the next cycle)
-        if is_store and not mem_misaligned and not mem_oob:
-            if is_byte:
-                set_byte(virtual_mem, addr, store_data)
-            elif is_half:
-                set_byte(virtual_mem, addr, store_data)
-                set_byte(virtual_mem, addr + 1, store_data >> 8)
-            else: # Word
-                set_byte(virtual_mem, addr, store_data)
-                set_byte(virtual_mem, addr + 1, store_data >> 8)
-                set_byte(virtual_mem, addr + 2, store_data >> 16)
-                set_byte(virtual_mem, addr + 3, store_data >> 24)
 
     return vectors
 
 def get_testbench_code(num_iterations, tv_file):
-    """Returns the dynamically generated SV testbench string with pipeline synchronization."""
+    """Returns the dynamically generated SV testbench for single-cycle architecture."""
     return f"""`default_nettype none
 `timescale 1ns/1ps
 
@@ -166,7 +245,7 @@ module {MODULE_NAME}_tb;
 
     // --- Verification Variables ---
     logic [31:0] expected_instruction, expected_load_result;
-    logic expected_mem_error, expected_inst_error, expected_oob_error;
+    logic expected_mem_misaligned, expected_inst_misaligned, expected_mem_oob, expected_inst_oob;
     
     // 200 bits wide vector
     logic [199:0] test_vectors [0:{num_iterations - 1}];
@@ -191,13 +270,12 @@ module {MODULE_NAME}_tb;
         
         // --- POWER-ON SEQUENCE ---
         // Allow initial blocks in the RTL to initialize memory to 0
-        // before verification checks start.
         #15; 
 
         $display("\\nStarting Verification of {MODULE_NAME}...");
 
         for (i = 0; i < {num_iterations}; i++) begin
-            // 1. Apply inputs for the CURRENT cycle
+            // 1. Extract test vector
             is_byte = test_vectors[i][196];
             is_half = test_vectors[i][195];
             is_unsigned = test_vectors[i][194];
@@ -208,43 +286,42 @@ module {MODULE_NAME}_tb;
             
             expected_instruction = test_vectors[i][96:65];
             expected_load_result = test_vectors[i][64:33];
-            expected_mem_error = test_vectors[i][32];
-            expected_inst_error = test_vectors[i][31];
-            expected_oob_error = test_vectors[i][30];
+            expected_mem_misaligned = test_vectors[i][32];
+            expected_inst_misaligned = test_vectors[i][31];
+            expected_mem_oob = test_vectors[i][30];
+            expected_inst_oob = test_vectors[i][29];
 
-            // 2. Setup Time: Wait 1ns for inputs to stabilize on the pins before the clock rises
+            // 2. Setup Time: Wait 1ns for inputs to stabilize
             #1; 
 
-            // 3. Strobe the clock edge high, then low
-            // This propagates our newly applied addresses into the registers uut.system_ram.RD1/RD2
+            // 3. Clock pulse
             clk = 1;
             #5; 
             clk = 0;
-            #4; // Complete the remainder of the 10ns clock cycle
+            #4;
 
-            // 4. Verify outputs against expected values right now (which represent the latency shifted cycle)
-            // Note: Since we are in a 1-cycle latency pipeline, we ignore verifying read data on Cycle 0
-            // as its output depends on uninitialized pre-execution memory addresses.
+            // 4. Verify outputs (skip first cycle as outputs are undefined)
             if (i > 0) begin
                 if (instruction !== expected_instruction || 
-                    (!is_store && load_result !== expected_load_result) || 
-                    MEMORY_MISALIGNED_ERROR !== expected_mem_error || 
-                    INSTRUCTION_MISALIGNED_ERROR !== expected_inst_error || 
-                    MEMORY_OUT_OF_BOUNDS_ERROR !== expected_oob_error) begin
+                    load_result !== expected_load_result || 
+                    MEMORY_MISALIGNED_ERROR !== expected_mem_misaligned || 
+                    INSTRUCTION_MISALIGNED_ERROR !== expected_inst_misaligned || 
+                    MEMORY_OUT_OF_BOUNDS_ERROR !== expected_mem_oob) begin
                     
                     $display("ERROR [Cycle %0d] - PC:%08x addr:%08x op:%s (b:%b h:%b u:%b)", 
-                             i, PC, addr, is_store ? "STORE" : "LOAD", is_byte, is_half, is_unsigned);
+                             i, PC, addr, is_store ? "STORE" : "LOAD", 
+                             is_byte, is_half, is_unsigned);
                              
                     if (instruction !== expected_instruction)
                         $display("ERROR        -> INSTR EXPECTED: %08x | GOT: %08x", expected_instruction, instruction);
-                    if (!is_store && load_result !== expected_load_result)
+                    if (load_result !== expected_load_result)
                         $display("ERROR        -> LOAD  EXPECTED: %08x | GOT: %08x", expected_load_result, load_result);
-                    if (MEMORY_MISALIGNED_ERROR !== expected_mem_error)
-                        $display("ERROR        -> MEM_ALIGN EXPECTED: %b | GOT: %b", expected_mem_error, MEMORY_MISALIGNED_ERROR);
-                    if (INSTRUCTION_MISALIGNED_ERROR !== expected_inst_error)
-                        $display("ERROR        -> INST_ALIGN EXPECTED: %b | GOT: %b", expected_inst_error, INSTRUCTION_MISALIGNED_ERROR);
-                    if (MEMORY_OUT_OF_BOUNDS_ERROR !== expected_oob_error)
-                        $display("ERROR        -> OOB EXPECTED: %b | GOT: %b", expected_oob_error, MEMORY_OUT_OF_BOUNDS_ERROR);
+                    if (MEMORY_MISALIGNED_ERROR !== expected_mem_misaligned)
+                        $display("ERROR        -> MEM_ALIGN EXPECTED: %b | GOT: %b", expected_mem_misaligned, MEMORY_MISALIGNED_ERROR);
+                    if (INSTRUCTION_MISALIGNED_ERROR !== expected_inst_misaligned)
+                        $display("ERROR        -> INST_ALIGN EXPECTED: %b | GOT: %b", expected_inst_misaligned, INSTRUCTION_MISALIGNED_ERROR);
+                    if (MEMORY_OUT_OF_BOUNDS_ERROR !== expected_mem_oob)
+                        $display("ERROR        -> OOB EXPECTED: %b | GOT: %b", expected_mem_oob, MEMORY_OUT_OF_BOUNDS_ERROR);
                     
                     error_count++;
                 end
