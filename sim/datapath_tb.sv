@@ -15,14 +15,14 @@ module datapath_tb;
         clk = 0;
         reset = 1;
 
-        // Release reset after 2 clock cycles
-        #20;
+        // Release reset after 3 clock cycles
+        #3;
         reset = 0;
 
         // Run for 1000 clock cycles
-        repeat(1000) begin
-            #5 clk = 1;
-            #5 clk = 0;
+        repeat(10000) begin
+            #1 clk = 1;
+            #1 clk = 0;
         end
 
         // After 1000 cycles, check the value of x3 (gp)

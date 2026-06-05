@@ -2,10 +2,10 @@ module instruction_rom(
     input  logic[31:0] PC,
     output logic[31:0] instruction
 );
-    logic[31:0] rom [256];  // Simple instruction memory
+    logic[31:0] rom [2048];  // Simple instruction memory
 
     initial begin
-        $readmemh("instructions.hex", rom);
+        $readmemh("firmware.hex", rom);
     end
 
     // Combinational read (ROM is asynchronous)
