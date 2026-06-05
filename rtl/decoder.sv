@@ -71,7 +71,7 @@ module decoder(input  logic[31:0] instruction,
 
                 default: begin INVALID_INSTRUCTION = 1; PC_increment = 0; end //Invalid instruction halts the processor
             endcase
-            
+
         end
     end
 endmodule

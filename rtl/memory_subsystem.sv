@@ -3,6 +3,7 @@
 
 module memory_subsystem(input  logic[31:0] PC, addr, store_data,
                         input  logic       is_half, is_byte, is_unsigned, is_store,
+                        input  logic       clk, reset,
                         output logic[31:0] load_result, instruction,
                         output logic       MEMORY_MISALIGNED_ERROR, INSTRUCTION_MISALIGNED_ERROR,
                                            MEMORY_OUT_OF_BOUNDS_ERROR
