@@ -1,7 +1,7 @@
 `default_nettype none
 
 module decoder(input  logic[31:0] instruction,
-                                   MEMORY_MISALIGNED_ERROR,
+               input  logic        MEMORY_MISALIGNED_ERROR,
                                    INSTRUCTION_MISALIGNED_ERROR,
                                    MEMORY_OUT_OF_BOUNDS_ERROR,
                 output logic I, S, B, U, J, is_byte, is_half, is_unsigned, is_store,

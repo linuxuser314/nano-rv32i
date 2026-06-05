@@ -5,7 +5,7 @@ module instruction_rom(
     logic[31:0] rom [256];  // Simple instruction memory
 
     initial begin
-        //$readmemh("instructions.hex", rom);
+        $readmemh("instructions.hex", rom);
     end
 
     // Combinational read (ROM is asynchronous)

@@ -20,9 +20,9 @@ module datapath(input logic clk, reset);
         .PC_select(PC_select),
         .PC_increment(PC_increment),
         .result_select(result_select),
-        .MEMORY_MISALIGNED_ERROR(MEMORY_MISALIGNED_ERROR),
-        .INSTRUCTION_MISALIGNED_ERROR(INSTRUCTION_MISALIGNED_ERROR),
-        .MEMORY_OUT_OF_BOUNDS_ERROR(MEMORY_OUT_OF_BOUNDS_ERROR),
+        .MEMORY_MISALIGNED_ERROR(1'b0),
+        .INSTRUCTION_MISALIGNED_ERROR(1'b0),
+        .MEMORY_OUT_OF_BOUNDS_ERROR(1'b0),
         .instruction(instruction)
     );
 
