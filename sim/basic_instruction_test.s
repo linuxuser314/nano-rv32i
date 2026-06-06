@@ -2,90 +2,75 @@
 .globl _start
 
 _start:
-    # -------------------------------------------------------------------------
-    # PART 1: Hardware State Setup (Restricted to x1 - x14)
-    # -------------------------------------------------------------------------
-    addi x1, x0, 0          # Constant 0
-    addi x2, x0, 1          # Smallest positive integer
-    addi x3, x0, -1         # All-ones mask (0xFFFFFFFF)
-    
-    # Load 0x80000000 (Minimum Signed Integer)
-    lui x4, 0x80000        
-    
-    # Load 0x7FFFFFFF (Maximum Signed Integer)
-    lui x5, 0x7FFFF        
-    ori x5, x5, 0x7FF       
-    addi x5, x5, 1024       
-    addi x5, x5, 1024       
-
-    # Baseline progress tracker initialization
-    addi x15, x0, 0         
+    # Initialize track registers
+    addi x15, x0, 0
+    addi x1, x0, 0
+    addi x2, x0, 0
 
     # -------------------------------------------------------------------------
-    # EDGE CASE 1: Equal/Not-Equal Boundary (Zero vs Negative Maxima)
+    # TEST 1: JAL (Jump and Link) Relative Verification
     # -------------------------------------------------------------------------
     addi x15, x0, 1         # Test ID 1
-    beq x4, x1, fail        # 0x80000000 == 0 -> FALSE. Must NOT jump.
     
-    bne x4, x1, 1f          # 0x80000000 != 0 -> TRUE. MUST jump.
-    jal x0, fail
-1:
+    # jal sitting at address PC_A. It should jump forward to label 'jal_target'
+    # and it MUST write (PC_A + 4) into register x1.
+jal_anchor:
+    jal x1, jal_target      
+    jal x0, fail            # Trapped if jal didn't jump!
+
+jal_target:
+    # Verify that x1 holds exactly the address of 'jal_anchor' + 4.
+    # We use a relative PC calculation trick: '.' is our current PC.
+    # The distance from 'jal_anchor' to the instruction below is exactly 8 bytes.
+    # Therefore, (Current PC - 8) equals the address of 'jal_anchor'.
+    # Since x1 should hold (jal_anchor + 4), then: x1 + 4 should EQUAL current PC!
+    
+    # Let's perform the verification math safely:
+    addi x3, x1, 4          # x3 = x1 + 4 -> Should equal the PC of the next line
+current_pc_1:
+    auipc x4, 0             # x4 gets the exact value of 'current_pc_1'
+    bne x3, x4, fail        # If the link register value is wrong, fail!
 
     # -------------------------------------------------------------------------
-    # EDGE CASE 2: Signed "Less Than" Flipping (Positive vs Max Negative)
+    # TEST 2: AUIPC (Add Upper Immediate to PC) Absolute Building
     # -------------------------------------------------------------------------
     addi x15, x0, 2         # Test ID 2
-    blt x2, x4, fail        # Is 1 < 0x80000000 (Signed)? 
-                            # 1 < -2147483648 is FALSE. Must NOT jump.
+
+    # We want to build an absolute address to a far-away target using auipc + addi.
+    # auipc moves an immediate left 12 bits and adds it to the current PC.
+auipc_anchor:
+    auipc x5, 0x00000       # x5 = address of 'auipc_anchor'
     
-    blt x4, x2, 1f          # Is -2147483648 < 1 (Signed)? TRUE. MUST jump.
-    jal x0, fail
-1:
+    # Calculate the exact byte offset from 'auipc_anchor' to 'jalr_target' below.
+    # Count: auipc (4), addi (4), jalr (4), addi (4), jal (4), target is 20 bytes away.
+    addi x5, x5, 20         # x5 now holds the absolute memory address of 'jalr_target'
 
     # -------------------------------------------------------------------------
-    # EDGE CASE 3: Signed "Greater or Equal" Saturation Limits
+    # TEST 3: JALR (Jump and Link Register) Absolute Verification
     # -------------------------------------------------------------------------
     addi x15, x0, 3         # Test ID 3
-    bge x4, x5, fail        # Is Min Signed >= Max Signed? 
-                            # -2147483648 >= 2147483647 is FALSE. Must NOT jump.
-    
-    bge x5, x4, 1f          # Is Max Signed >= Min Signed? TRUE. MUST jump.
-    jal x0, fail
-1:
+
+    # jalr jumps to the absolute address stored inside x5.
+    # It must also write the return address (PC_B + 4) into register x2.
+jalr_anchor:
+    jalr x2, x5, 0          # Jump to address in x5 + offset 0
+    jal x0, fail            # Trapped if jalr didn't jump!
 
     # -------------------------------------------------------------------------
-    # EDGE CASE 4: Unsigned "Less Than" Deep Inversion (0xFFFFFFFF vs 1)
+    # TEST 4: LUI (Load Upper Immediate) Data Independence Integration
     # -------------------------------------------------------------------------
-    # This is a classic breakpoint. Signed, -1 < 1. Unsigned, 4.29B > 1.
-    addi x15, x0, 4         # Test ID 4
-    bltu x3, x2, fail       # Is 0xFFFFFFFF < 1 (Unsigned)? FALSE. Must NOT jump.
-    
-    bltu x2, x3, 1f         # Is 1 < 0xFFFFFFFF (Unsigned)? TRUE. MUST jump.
-    jal x0, fail
-1:
+    # We place a dummy block here. If jalr works, it will leap completely OVER this.
+    lui x10, 0xABCDE
+    jal x0, fail            # If jalr targeted wrong, it might slip here.
 
-    # -------------------------------------------------------------------------
-    # EDGE CASE 5: Unsigned "Greater or Equal" with 0x80000000
-    # -------------------------------------------------------------------------
-    # Unsigned, 0x80000000 (2,147,483,648) is greater than 0.
-    addi x15, x0, 5         # Test ID 5
-    bgeu x1, x4, fail       # Is 0 >= 2147483648 (Unsigned)? FALSE. Must NOT jump.
-    
-    bgeu x4, x1, 1f         # Is 2147483648 >= 0 (Unsigned)? TRUE. MUST jump.
-    jal x0, fail
-1:
-
-    # -------------------------------------------------------------------------
-    # EDGE CASE 6: Strict Self-Comparison Identity Checks
-    # -------------------------------------------------------------------------
-    addi x15, x0, 6         # Test ID 6
-    bne x3, x3, fail        # Is -1 != -1? FALSE. Must NOT jump.
-    blt x3, x3, fail        # Is -1 < -1? FALSE. Must NOT jump.
-    bltu x3, x3, fail       # Is -1 < -1 (Unsigned)? FALSE. Must NOT jump.
-    
-    beq x3, x3, 1f          # Is -1 == -1? TRUE. MUST jump.
-    jal x0, fail
-1:
+jalr_target:
+    # Verify that x2 holds exactly the address of 'jalr_anchor' + 4.
+    # The distance from 'jalr_anchor' to this exact line is 12 bytes.
+    # Therefore, (x2 + 8) should equal our current PC.
+    addi x3, x2, 8
+current_pc_2:
+    auipc x4, 0             # x4 gets the exact value of 'current_pc_2'
+    bne x3, x4, fail        # If jalr link address was corrupt, fail!
 
     # -------------------------------------------------------------------------
     # SUCCESS ANCHOR
@@ -95,12 +80,10 @@ pass:
     jal x0, end
 
 fail:
-    # If any branch fails, execution lands here. 
-    # Check register x15 in Surfer to see the exact Test ID that tripped.
-    addi x14, x0, 0x600
-    addi x14, x0, 0x500     # Diagnostic flag
-    addi x14, x0, 0x0AD     # Diagnostic flag
+    addi x14, x0, 0x0AD     # Visible flag for Surfer trace view
+    addi x14, x14, 0x500
+    addi x14, x14, 0x600
     jal x0, end
 
 end:
-    jal x0, end             # Infinite loop park
+    jal x0, end             # Infinite loop stall
