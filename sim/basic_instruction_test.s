@@ -1,129 +1,102 @@
-# 1. DIRECTIVES (Telling the assembler how to organize the file)
 .text
 .globl _start
 
-# 2. LABELS (Naming memory addresses)
 _start:
+    # -------------------------------------------------------------------------
+    # PART 1: Extreme Immediate Boundaries
+    # -------------------------------------------------------------------------
+    # x1: Test absolute maximum positive 12-bit immediate (2047)
+    addi x1, x0, 2047       
 
-    #Necessary because of my current reload issue (TODO: FIX RESET SKIPPING FIRST INSTRUCTION)
-    #nop
+    # x2: Test absolute maximum negative 12-bit immediate (-2048 / 12'h800)
+    # This checks for strict sign-extension edge cases.
+    addi x2, x0, -2048      
 
-    ## x1: Normal load upper immediate
-    lui x1, 0x12345        
-
-    # x2: Edge case load upper immediate (max boundary 20-bit value)
-    lui x2, 0xFFFFF        
+    # x3: Add the two boundary intermediates together
+    # Expected: 2047 + (-2048) = -1 (0xFFFFFFFF)
+    add x3, x1, x2          
 
     # -------------------------------------------------------------------------
-    # PART 2: I-Type ALU Tests (Immediates)
+    # PART 2: Unsigned vs Signed Operator Anomalies
     # -------------------------------------------------------------------------
-    # x3: addi normal positive addition
-    addi x3, x0, 150       
+    # x4: Setup a negative register value via sign extension
+    addi x4, x0, -1         # x4 = 0xFFFFFFFF
 
-    # x4: addi negative number handling (12-bit immediate is sign-extended)
-    addi x4, x0, -50       
+    # x5: slti (Signed) -> Is -1 < 1? True!
+    slti x5, x4, 1          
 
-    # x5: addi max positive boundary calculation (12-bit max = 2047)
-    addi x5, x0, 2047      
+    # x6: sltiu (Unsigned) -> Is 0xFFFFFFFF < 1? False!
+    sltiu x6, x4, 1         
 
-    # x6: slti (Set Less Than Immediate - Signed) -> True case (-50 < 150)
-    slti x6, x4, 150       
-
-    # x7: slti (Set Less Than Immediate - Signed) -> False case (150 < -50)
-    slti x7, x3, -50       
-
-    # x8: sltiu (Set Less Than Immediate Unsigned) -> Edge case
-    # x4 is -50 (0xFFFFFFCE unsigned). 0xFFFFFFCE is NOT < 150 unsigned.
-    sltiu x8, x4, 150      
-
-    # x9: xori bitwise inversion edge case
-    # 150 XOR -1 (Immediate 12'hFFF is sign-extended to 32'hFFFFFFFF)
-    xori x9, x3, -1        
-
-    # x10: ori bitwise manipulation
-    ori x10, x0, 0x555     
-
-    # x11: andi bitwise masking
-    # 150 (0x96) AND 15 (0xF)
-    andi x11, x3, 15       
-
-    # x12: slli (Shift Left Logical Immediate)
-    # 6 << 4
-    slli x12, x11, 4       
-
-    # x13: srli (Shift Right Logical Immediate)
-    # 0xFFFFF000 shifted right logically by 12 bits drops 0s on the left
-    srli x13, x2, 12       
-
-    # x14: srai (Shift Right Arithmetic Immediate)
-    # 0xFFFFF000 shifted right arithmetically copies the negative sign bit (1s)
-    srai x14, x2, 12       
+    # x7: sltiu boundary -> Is 0 < 0xFFFFFFFF (unsigned -1)? True!
+    sltiu x7, x0, -1        
 
     # -------------------------------------------------------------------------
-    # PART 3: R-Type ALU Tests (Register to Register)
+    # PART 3: Shift Value Truncation (The Shamt & 31 Rule)
     # -------------------------------------------------------------------------
-    # Setup fresh, distinct constants into temporary tracking registers
-    addi x29, x0, 1000     # Input A (Positive)
-    addi x30, x0, 2000     # Input B (Positive)
-    addi x31, x0, -500     # Input C (Negative)
+    # Setup temporary registers with extreme values
+    addi x28, x0, 1         # Target register to shift
+    addi x29, x0, 36        # Shift amount = 36 (Binary: 0010_0100)
+                            # The lower 5 bits [4:0] are cleanly 4.
+    
+    # x8: sll register shift left by 36. Core MUST truncate 36 to 4!
+    # Expected: 1 << 4 = 16 (0x10)
+    sll x8, x28, x29        
 
-    # x15: add normal operation
-    add x15, x29, x30      
+    # x9: srl register shift right logical by a saturated mask register
+    # If x4 is 0xFFFFFFFF, its lower 5 bits are 31.
+    # Expected: 0xFFFFFFFF >> 31 = 1
+    srl x9, x4, x4          
 
-    # x16: add overflow/wrap edge case
-    # -1 (from x14) + 1 (from x13)
-    add x16, x14, x13      
+    # -------------------------------------------------------------------------
+    # PART 4: Advanced Arithmetic Shifting & Two's Complement Limits
+    # -------------------------------------------------------------------------
+    # Load 0x80000000 (Min Signed Int) into x30 using LUI
+    lui x30, 0x80000        # x30 = 0x80000000
+    
+    # Load 0x7FFFFFFF (Max Signed Int) into x31 via LUI and ADDI
+    lui x31, 0x7FFFF        
+    addi x31, x31, 2000     # x31 = 0x7FFFFFFF
+    addi x31, x31, 2000
+    addi x31, x31, 95
 
-    # x17: sub normal operation
-    sub x17, x30, x29      
+    # x10: srai (Arithmetic Shift Immediate) on Min Signed Int
+    # Shifting 0x80000000 right arithmetically by 1 bit MUST sign-fill with a 1.
+    # Expected: 0xC0000000
+    srai x10, x30, 1        
 
-    # x18: sub underflow/wrap edge case
-    # 0 - 1 (from x13)
-    sub x18, x0, x13       
+    # x11: sra (Arithmetic Shift Register) on Min Signed Int by a truncated shift
+    # Shift right arithmetically by 33 bits -> Core truncates 33 to 1.
+    # Expected: 0xC0000000
+    addi x27, x0, 33        
+    sra x11, x30, x27       
 
-    # x19: sll register-driven shift left
-    # Shift value 1 left by 5 bits (amount driven by register x28)
-    addi x19, x0, 1
-    addi x28, x0, 5        
-    sll x19, x19, x28      
+    # x12: sub boundary handling
+    # Subtracting a negative number from a positive boundary: Max Pos - Min Neg
+    # 0x7FFFFFFF - 0x80000000 = 0xFFFFFFFF (-1 due to two's complement rollover)
+    sub x12, x31, x30       
 
-    # x20: slt signed register check -> True case (-500 < 1000)
-    slt x20, x31, x29      
+    # x13: sub boundary underflow handling
+    # Min Neg - 1
+    # 0x80000000 - 1 = 0x7FFFFFFF (Should wrap around straight to Max Positive Int)
+    addi x26, x0, 1
+    sub x13, x30, x26       
 
-    # x21: slt signed register check -> False case (1000 < -500)
-    slt x21, x29, x31      
+    # -------------------------------------------------------------------------
+    # PART 5: Logical Truth Masking Limits
+    # -------------------------------------------------------------------------
+    # x14: xori check with extreme sign extension boundary
+    # Inverting an all-1s mask register with an all-1s sign-extended immediate (-1)
+    # 0xFFFFFFFF XOR 0xFFFFFFFF = 0x00000000
+    xori x14, x4, -1        
 
-    # x22: sltu unsigned register check -> Edge case
-    # Unsigned -500 (0xFFFFFE0C) is NOT < 1000 (0x3E8)
-    sltu x22, x31, x29     
-
-    # x23: xor register matching clear check
-    xor x23, x29, x29      
-
-    # x24: srl register shift right logical edge case
-    # Shift 0xFFFFF000 right logically by 31 bits
-    addi x28, x0, 31
-    srl x24, x2, x28       
-
-    # x25: sra register shift right arithmetic edge case
-    # Shift 0xFFFFF000 right arithmetically by 31 bits
-    sra x25, x2, x28       
-
-    # Clean logical inputs setup for or/and checks
-    addi x29, x0, 0x555    
-    addi x30, x0, 0x222    
-
-    # x26: or register operation (0x555 | 0x222)
-    or x26, x29, x30       
-
-    # x27: and register operation (0x555 & 0x222)
-    and x27, x29, x30      
+    # x15: andi check with extreme mask bounds
+    # 0x7FFFFFFF ANDed with immediate -1 (sign extended to 0xFFFFFFFF)
+    # Expected: 0x7FFFFFFF
+    andi x15, x31, -1       
 
     # -------------------------------------------------------------------------
     # Terminal Freeze Point
     # -------------------------------------------------------------------------
-    # This is the single, isolated jump in the entire file. It creates an 
-    # infinite loop at the very bottom to cleanly park your simulation clock 
-    # so you can audit the final state of the register file.
 loop:
     jal x0, loop
