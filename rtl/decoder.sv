@@ -51,12 +51,12 @@ module decoder(input  logic[31:0] instruction,
                 17'b0010011_111_???????: begin RF_write_enable = 1; I = 1; result_select = 1; mask_ctrl = 0; end//andi
 
                 //Branches
-                17'b1100011_000_???????: begin B = 1; PC_select = 3; sub = 1; eq = 1; end//beq
-                17'b1100011_001_???????: begin B = 1; PC_select = 3; sub = 1; eq = 1; negate = 1; end//bne
-                17'b1100011_100_???????: begin B = 1; PC_select = 3; sub = 1; lt = 1; end//blt
-                17'b1100011_101_???????: begin B = 1; PC_select = 3; sub = 1; lt = 1; negate = 1; end//bge
-                17'b1100011_110_???????: begin B = 1; PC_select = 3; sub = 1; ltu = 1; end //bltu
-                17'b1100011_111_???????: begin B = 1; PC_select = 3; sub = 1; ltu = 1; negate = 1; end//bgeu
+                17'b1100011_000_???????: begin B = 1; ALU_src = 1; PC_select = 3; sub = 1; eq = 1; end//beq
+                17'b1100011_001_???????: begin B = 1; ALU_src = 1; PC_select = 3; sub = 1; eq = 1; negate = 1; end//bne
+                17'b1100011_100_???????: begin B = 1; ALU_src = 1; PC_select = 3; sub = 1; lt = 1; end//blt
+                17'b1100011_101_???????: begin B = 1; ALU_src = 1; PC_select = 3; sub = 1; lt = 1; negate = 1; end//bge
+                17'b1100011_110_???????: begin B = 1; ALU_src = 1; PC_select = 3; sub = 1; ltu = 1; end //bltu
+                17'b1100011_111_???????: begin B = 1; ALU_src = 1; PC_select = 3; sub = 1; ltu = 1; negate = 1; end//bgeu
 
                 //Oddball U and J-type instructions
                 17'b0010111_???_???????: begin RF_write_enable = 1; U = 1; result_select = 7; end//auipc

@@ -20,8 +20,8 @@ module ALU_comparator(input  logic[31:0] a, b,
     assign N = ALU_result[31];
     assign V = ~(a[31] ^ (b[31] ^ sub)) & (a[31] ^ ALU_result[31]);
     assign comparison_flag = negate ^ (
-                                     eq  & (Z) |
-                                     lt  & (N ^ V) |
-                                     ltu & (~C)
+                                     (eq  & (Z)) |
+                                     (lt  & (N ^ V)) |
+                                     (ltu & (~C))
                                         );
 endmodule
