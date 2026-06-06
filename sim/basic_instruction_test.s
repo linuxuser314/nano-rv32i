@@ -5,6 +5,9 @@
 # 2. LABELS (Naming memory addresses)
 _start:
 
+    #Necessary because of my current reload issue (TODO: FIX RESET SKIPPING FIRST INSTRUCTION)
+    #nop
+
     ## x1: Normal load upper immediate
     lui x1, 0x12345        
 

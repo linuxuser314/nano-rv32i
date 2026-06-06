@@ -18,6 +18,7 @@ module datapath_tb;
         // Release reset after 3 clock cycles
         #3;
         reset = 0;
+        #2;
 
         // Run for 1000 clock cycles
         repeat(10000) begin
