@@ -5,11 +5,12 @@ It is targeted for the Sipeed Tang Nano 20K.
 It is single-cycle except for loads (which are two-cycle).
 
 THIS PROCESSOR IS NOT YET TESTED! I HAVE CODED IT BUT I HAVE NOT RUN TESTBENCHES AND IT CONTAINS KNOWN AND UNKNOWN ERRORS.
+I believe that I and R-type math instructions (opcodes 19 and 51), branches (op 99), and lui (op 55) are all working. I encountered some issues with jal and jalr and auipc are untested. Loads and stores are not fully implemented yet and will throw an error.
 
-I hope to have it up and running by the end of the week. I will complete the readme then.
+I hope to have it up and running by the end of the week (failed: I now hope to have it by the end of next week (the 13th)). I will complete the readme then.
 
 Thank you for your patience.
-I have been developing this processor offline on a road trip and I need to do some googling and use some AI to get it working.
+
 # TODO:
 Short Term:
     Compile, simulate, and testbench all small components
