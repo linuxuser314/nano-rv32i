@@ -20,7 +20,6 @@ module decoder(input  logic[31:0] instruction,
             PC_increment = 1;//Set to 1 to progress to the next instruction!
             is_right_shift = 0; is_arithmetic_shift = 0; ALU_src = 0; mask_ctrl = 0; PC_select = 0;
             result_select = 0;  RF_write_enable = 0;
-            
             UNDEFINED_SYSTEM_INSTRUCTION = 0; INVALID_INSTRUCTION = 0;
         if(MEMORY_MISALIGNED_ERROR |
            INSTRUCTION_MISALIGNED_ERROR | MEMORY_OUT_OF_BOUNDS_ERROR) begin
