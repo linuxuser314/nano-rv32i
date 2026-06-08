@@ -31,9 +31,9 @@ module datapath(input logic clk, reset);
 
     memory_subsystem main_memory_system(
         .clk(clk),
-        .load_result(load_result),// .instruction(instruction),
+        .load_result(load_result), .instruction(instruction),
         .is_half(is_half), .is_byte(is_byte), .is_unsigned(is_unsigned), .is_store(is_store), .is_load(is_load),
-        .PC(prev_PC), .addr(ALU_result), .store_data(RF_rd2),
+        .PC(PC_result), .addr(ALU_result), .store_data(RF_rd2),
         .MEMORY_MISALIGNED_ERROR(MEMORY_MISALIGNED_ERROR),
         .INSTRUCTION_MISALIGNED_ERROR(INSTRUCTION_MISALIGNED_ERROR),
         .MEMORY_OUT_OF_BOUNDS_ERROR(MEMORY_OUT_OF_BOUNDS_ERROR)
@@ -45,9 +45,9 @@ module datapath(input logic clk, reset);
     //Because main_instruction_memory is synchronous, it outputs the next instruction on the next clock cycle.
     //The PC_tracking_register holds this PC so the PC_subsystem can calculate the next PC.
     //NOTE THAT THIS PROCESSOR DOES NOT HAVE A FETCH STAGE: IT USES THE LATCHING FEATURE OF SYNCRHONOUS ROM TO HOLD ONTO THE INSTRUCTION.
-    instruction_rom main_instruction_memory(
-        .PC(PC_result), .instruction(instruction), .clk(clk)
-    );
+    //instruction_rom main_instruction_memory(
+    //    .PC(PC_result), .instruction(instruction), .clk(clk)
+    //);
     PC_subsystem PC_calculation_subsystem(
         .new_PC(PC_result), .prev_PC(prev_PC),
         .PC_plus_4(PC_plus_4), .PC_plus_imm(PC_plus_imm),

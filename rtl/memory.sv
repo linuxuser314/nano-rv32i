@@ -1,5 +1,5 @@
-//This is a dummy module for memory since I don't know how to instantiate BRAM
-//Yosys may or may not be smart enough to turn this into double-ported BRAM.
+//This is the memory module. It's a dual-ported memory for simultaneous instruction fetching and load/stores.
+//It is currently read-first, which I will need to change (or add external forwarding logic) to support back-to-back store load.
 
 module memory(input  logic[31:0] A1, A2, WD2,
               input  logic clk,
