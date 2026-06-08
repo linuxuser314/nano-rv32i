@@ -15,9 +15,9 @@ module memory(input  logic[31:0] A1, A2, WD2,
 
     always_ff @(posedge clk) begin
         if(write_enable[0]) ram[A2[31:2]][7:0]   <= WD2[7:0];
-        if(write_enable[1]) ram[A2[31:2]][8:15]  <= WD2[8:15];
-        if(write_enable[2]) ram[A2[31:2]][16:23] <= WD2[16:23];
-        if(write_enable[3]) ram[A2[31:2]][24:31] <= WD2[24:31];
+        if(write_enable[1]) ram[A2[31:2]][15:8]  <= WD2[15:8];
+        if(write_enable[2]) ram[A2[31:2]][23:16] <= WD2[23:16];
+        if(write_enable[3]) ram[A2[31:2]][31:24] <= WD2[31:24];
         RD1 <= ram[A1[31:2]];
         RD2 <= ram[A2[31:2]];
 
