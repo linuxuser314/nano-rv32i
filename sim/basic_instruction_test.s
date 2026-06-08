@@ -2,8 +2,9 @@
 .global _start
 
 _start:
-  li x1, 0x12300293
-  sw x1, 12(x0)
-  nop
-end:
-    j end
+ li x1, 0
+ j loop
+loop:
+ addi x1, x0, 1
+ j loop
+ 
