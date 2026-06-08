@@ -31,7 +31,7 @@ module datapath(input logic clk, reset);
 
     memory_subsystem main_memory_system(
         .clk(clk),
-        .load_result(load_result), .instruction(instruction),
+        .load_result(load_result),// .instruction(instruction),
         .is_half(is_half), .is_byte(is_byte), .is_unsigned(is_unsigned), .is_store(is_store), .is_load(is_load),
         .PC(prev_PC), .addr(ALU_result), .store_data(RF_rd2),
         .MEMORY_MISALIGNED_ERROR(MEMORY_MISALIGNED_ERROR),
@@ -39,9 +39,9 @@ module datapath(input logic clk, reset);
         .MEMORY_OUT_OF_BOUNDS_ERROR(MEMORY_OUT_OF_BOUNDS_ERROR)
     );
     //TEMPORARY: A harvard-style ROM for instructions
-    //instruction_rom main_instruction_memory(
-    //    .PC(prev_PC)//, .instruction(instruction)
-    //);
+    instruction_rom main_instruction_memory(
+        .PC(prev_PC), .instruction(instruction)
+    );
     PC_subsystem PC_calculation_subsystem(
         .new_PC(PC_result), .prev_PC(prev_PC), .PC_plus_4(PC_plus_4), .PC_plus_imm(PC_plus_imm),
         .imm(decoded_immediate), .ALU_result(ALU_result),
