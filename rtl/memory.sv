@@ -12,15 +12,14 @@ module memory(input  logic[31:0] A1, A2, WD2,
         $readmemh("/workspaces/nano-rv32i/software/firmware.hex", ram);
     end
 
-    // Safe address decoding to protect against the startup 'x' loop
-    logic [29:0] safe_a1, safe_a2;
-    assign safe_a1 = ($isunknown(A1[31:2])) ? 30'd0 : A1[31:2];
-    assign safe_a2 = ($isunknown(A2[31:2])) ? 30'd0 : A2[31:2];
 
     always_ff @(posedge clk) begin
-        if(write_enable) ram[safe_a2] <= WD2;//NEEDS TO BE FIXED!
-        RD1 <= ram[safe_a1];
-        RD2 <= ram[safe_a2];
+        if(write_enable[0]) ram[A2[31:2]][7:0]   <= WD2[7:0];
+        if(write_enable[1]) ram[A2[31:2]][8:15]  <= WD2[8:15];
+        if(write_enable[2]) ram[A2[31:2]][16:23] <= WD2[16:23];
+        if(write_enable[3]) ram[A2[31:2]][24:31] <= WD2[24:31];
+        RD1 <= ram[A1[31:2]];
+        RD2 <= ram[A2[31:2]];
 
     end
     //assign MEMORY_OUT_OF_BOUNDS_ERROR = (A1[31:2] >= 30'd576) || (A2[31:2] >= 30'd576);

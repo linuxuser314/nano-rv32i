@@ -64,6 +64,11 @@ module decoder(input  logic[31:0] instruction,
                 17'b1100111_000_???????: begin RF_write_enable = 1; I = 1; result_select = 6; PC_select = 2; end//jalr
                 17'b1101111_???_???????: begin RF_write_enable = 1; J = 1; result_select = 6; PC_select = 1; end//jal
 
+                //Store instructions
+                17'b0100011_010_???????: begin S = 1; is_store = 1; end//sw
+                17'b0100011_010_???????: begin S = 1; is_store = 1; is_half = 1; end//sh
+                17'b0100011_010_???????: begin S = 1; is_store = 1; is_byte = 1; end//sb
+
                 //System instructions
                 17'b0001111_001_0000000: begin end //fence.i
                 17'b1110011_000_???????: begin UNDEFINED_SYSTEM_INSTRUCTION = 1; PC_increment = 0; end //ecall and ebreak
