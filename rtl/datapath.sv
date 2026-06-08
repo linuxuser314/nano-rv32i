@@ -15,7 +15,7 @@ module datapath(input logic clk, reset);
         .I(I), .S(S), .B(B), .U(U), .J(J),
         .ALU_src(ALU_src),
         .is_right_shift(is_right_shift), .is_arithmetic_shift(is_arithmetic_shift),
-        .is_half(is_half), .is_byte(is_byte),//This is what was missing
+        .is_half(is_half), .is_byte(is_byte), .is_store(is_store), .is_unsigned(is_unsigned),//This is what was missing
         .mask_ctrl(mask_ctrl),
         .eq(eq), .lt(lt), .ltu(ltu), .sub(sub), .negate(negate),
         .PC_select(PC_select),
