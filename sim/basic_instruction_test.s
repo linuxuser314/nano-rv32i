@@ -5,6 +5,6 @@ _start:
  li x1, 0
  j loop
 loop:
- addi x1, x0, 1
+ addi x1, x1, 1
  j loop
  
