@@ -1,5 +1,5 @@
 //The PC subsystem manages PC incrementation, stalling, jumping, and branching.
-//The PC_increment gets set to true for stalls to prevent the PC from increasing.
+//The PC_increment gets set to false for stalls to prevent the PC from increasing.
 //The PC_select is determined by the type of instruction.
 //0 is normal instruction, 1 is for JAL, 2 is for JALR, and 3 is for branches.
 //PC_plus_4 is the same as prev_PC when PC_increment is false.

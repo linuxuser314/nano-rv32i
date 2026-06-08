@@ -4,7 +4,8 @@ module decoder(input  logic[31:0] instruction,
                input  logic        MEMORY_MISALIGNED_ERROR,
                                    INSTRUCTION_MISALIGNED_ERROR,
                                    MEMORY_OUT_OF_BOUNDS_ERROR,
-                output logic I, S, B, U, J, is_byte, is_half, is_unsigned, is_store,
+                output logic I, S, B, U, J,
+                             is_byte, is_half, is_unsigned, is_store, is_load,
                              eq, lt, ltu, negate, sub, PC_increment, RF_write_enable,
                              is_right_shift, is_arithmetic_shift, ALU_src,
                 output logic[1:0] mask_ctrl, PC_select,
@@ -20,6 +21,7 @@ module decoder(input  logic[31:0] instruction,
             PC_increment = 1;//Set to 1 to progress to the next instruction!
             is_right_shift = 0; is_arithmetic_shift = 0; ALU_src = 0; mask_ctrl = 0; PC_select = 0;
             result_select = 0;  RF_write_enable = 0;
+            is_store = 0;
             UNDEFINED_SYSTEM_INSTRUCTION = 0; INVALID_INSTRUCTION = 0;
         if(MEMORY_MISALIGNED_ERROR |
            INSTRUCTION_MISALIGNED_ERROR | MEMORY_OUT_OF_BOUNDS_ERROR) begin
@@ -66,8 +68,8 @@ module decoder(input  logic[31:0] instruction,
 
                 //Store instructions
                 17'b0100011_010_???????: begin S = 1; is_store = 1; end//sw
-                17'b0100011_010_???????: begin S = 1; is_store = 1; is_half = 1; end//sh
-                17'b0100011_010_???????: begin S = 1; is_store = 1; is_byte = 1; end//sb
+                17'b0100011_001_???????: begin S = 1; is_store = 1; is_half = 1; end//sh
+                17'b0100011_000_???????: begin S = 1; is_store = 1; is_byte = 1; end//sb
 
                 //System instructions
                 17'b0001111_001_0000000: begin end //fence.i

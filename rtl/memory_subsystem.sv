@@ -2,21 +2,24 @@
 `default_nettype none
 
 module memory_subsystem(input  logic[31:0] PC, addr, store_data,
-                        input  logic       is_half, is_byte, is_unsigned, is_store,
+                        input  logic       is_half, is_byte, is_unsigned, is_store, is_load,
                         input  logic       clk,
                         output logic[31:0] load_result, instruction,
                         output logic       MEMORY_MISALIGNED_ERROR, INSTRUCTION_MISALIGNED_ERROR,
                                            MEMORY_OUT_OF_BOUNDS_ERROR
 );
+    logic memory_address_misalignment;
     //Check PC and load/store address for alignment. PC is checked with is_byte and is_half false.
     address_check address_error_checker(
         .addr_end(addr[1:0]), .is_byte(is_byte), .is_half(is_half),
-        .ADDRESS_MISALIGNED_ERROR(MEMORY_MISALIGNED_ERROR)
+        .ADDRESS_MISALIGNED_ERROR(memory_address_misalignment)
     );
     address_check instruction_error_checker(
         .addr_end(PC[1:0]), .is_byte(1'b0), .is_half(1'b0),
         .ADDRESS_MISALIGNED_ERROR(INSTRUCTION_MISALIGNED_ERROR)
     );
+
+    assign MEMORY_MISALIGNED_ERROR = (is_store | is_load) & memory_address_misalignment;
 
     //Wire up the memory unit!
     logic[31:0] RD2, WD2;

@@ -2,7 +2,8 @@
 
 module datapath(input logic clk, reset);
     logic RF_write_enable, ALU_src, is_right_shift, is_arithmetic_shift,
-          eq, lt, ltu, sub, negate, PC_increment, comparison_flag, is_half, is_byte, is_unsigned, is_store;
+          eq, lt, ltu, sub, negate, PC_increment, comparison_flag,
+          is_half, is_byte, is_unsigned, is_store, is_load;
     logic[1 :0] PC_select, mask_ctrl;
     logic[31:0] instruction, result_mux_out, RF_rd1, RF_rd2, decoded_immediate, ALU_src_val,
     shift_result, mask_result, ALU_result, load_result, PC_result, prevPC, PC_plus_4, PC_plus_imm,
@@ -15,7 +16,8 @@ module datapath(input logic clk, reset);
         .I(I), .S(S), .B(B), .U(U), .J(J),
         .ALU_src(ALU_src),
         .is_right_shift(is_right_shift), .is_arithmetic_shift(is_arithmetic_shift),
-        .is_half(is_half), .is_byte(is_byte), .is_store(is_store), .is_unsigned(is_unsigned),//This is what was missing
+        .is_half(is_half), .is_byte(is_byte),
+        .is_store(is_store), .is_load(is_load), .is_unsigned(is_unsigned),//This is what was missing
         .mask_ctrl(mask_ctrl),
         .eq(eq), .lt(lt), .ltu(ltu), .sub(sub), .negate(negate),
         .PC_select(PC_select),
@@ -30,16 +32,16 @@ module datapath(input logic clk, reset);
     memory_subsystem main_memory_system(
         .clk(clk),
         .load_result(load_result), .instruction(instruction),
-        .is_half(is_half), .is_byte(is_byte), .is_unsigned(is_unsigned), .is_store(is_store),
+        .is_half(is_half), .is_byte(is_byte), .is_unsigned(is_unsigned), .is_store(is_store), .is_load(is_load),
         .PC(prev_PC), .addr(ALU_result), .store_data(RF_rd2),
         .MEMORY_MISALIGNED_ERROR(MEMORY_MISALIGNED_ERROR),
         .INSTRUCTION_MISALIGNED_ERROR(INSTRUCTION_MISALIGNED_ERROR),
         .MEMORY_OUT_OF_BOUNDS_ERROR(MEMORY_OUT_OF_BOUNDS_ERROR)
     );
     //TEMPORARY: A harvard-style ROM for instructions
-    instruction_rom main_instruction_memory(
-        .PC(prev_PC)//, .instruction(instruction)
-    );
+    //instruction_rom main_instruction_memory(
+    //    .PC(prev_PC)//, .instruction(instruction)
+    //);
     PC_subsystem PC_calculation_subsystem(
         .new_PC(PC_result), .prev_PC(prev_PC), .PC_plus_4(PC_plus_4), .PC_plus_imm(PC_plus_imm),
         .imm(decoded_immediate), .ALU_result(ALU_result),
