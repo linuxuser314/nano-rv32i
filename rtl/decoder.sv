@@ -4,8 +4,10 @@ module decoder(input  logic[31:0] instruction,
                input  logic        MEMORY_MISALIGNED_ERROR,
                                    INSTRUCTION_MISALIGNED_ERROR,
                                    MEMORY_OUT_OF_BOUNDS_ERROR,
+                                   current_cycle_is_end_of_load,
                 output logic I, S, B, U, J,
                              is_byte, is_half, is_unsigned, is_store, is_load,
+                             previous_cycle_was_start_of_load,
                              eq, lt, ltu, negate, sub, PC_increment, RF_write_enable,
                              is_right_shift, is_arithmetic_shift, ALU_src,
                 output logic[1:0] mask_ctrl, PC_select,
@@ -14,15 +16,22 @@ module decoder(input  logic[31:0] instruction,
 
     logic[16:0] instruction_data;
     logic UNDEFINED_SYSTEM_INSTRUCTION, INVALID_INSTRUCTION;
+
+    //To keep iverilog from complaining about constant selects in always statements
+    logic load_sign_bit, load_size_bit_1, load_size_bit_0;
+    assign load_sign_bit = instruction[14];
+    assign load_size_bit_1 = instruction[13];
+    assign load_size_bit_0 = instruction[12];
+
     assign instruction_data = {instruction[6:0], instruction[14:12], instruction[31:25]};
     always_comb begin
-        I = 0; S = 0; B = 0; U = 0; J = 0; is_byte = 0; is_half = 0; is_unsigned = 0; is_store = 0;
-            eq = 0; lt = 0; ltu = 0; negate = 0; sub = 0;
-            PC_increment = 1;//Set to 1 to progress to the next instruction!
-            is_right_shift = 0; is_arithmetic_shift = 0; ALU_src = 0; mask_ctrl = 0; PC_select = 0;
-            result_select = 0;  RF_write_enable = 0;
-            is_store = 0;
-            UNDEFINED_SYSTEM_INSTRUCTION = 0; INVALID_INSTRUCTION = 0;
+        I = 0; S = 0; B = 0; U = 0; J = 0; is_byte = 0; is_half = 0; is_unsigned = 0;
+        is_load = 0; is_store = 0; previous_cycle_was_start_of_load = 0;
+        eq = 0; lt = 0; ltu = 0; negate = 0; sub = 0;
+        PC_increment = 1;//Set to 1 to progress to the next instruction!
+        is_right_shift = 0; is_arithmetic_shift = 0; ALU_src = 0; mask_ctrl = 0; PC_select = 0;
+        result_select = 0;  RF_write_enable = 0;
+        UNDEFINED_SYSTEM_INSTRUCTION = 0; INVALID_INSTRUCTION = 0;
         if(MEMORY_MISALIGNED_ERROR |
            INSTRUCTION_MISALIGNED_ERROR | MEMORY_OUT_OF_BOUNDS_ERROR) begin
                 PC_increment = 0;
@@ -70,6 +79,8 @@ module decoder(input  logic[31:0] instruction,
                 17'b0100011_010_???????: begin S = 1; is_store = 1; end//sw
                 17'b0100011_001_???????: begin S = 1; is_store = 1; is_half = 1; end//sh
                 17'b0100011_000_???????: begin S = 1; is_store = 1; is_byte = 1; end//sb
+                //Load instructions
+                17'b0000011_???_???????: begin is_load = 1; end
 
                 //System instructions
                 17'b0001111_001_0000000: begin end //fence.i
@@ -77,7 +88,21 @@ module decoder(input  logic[31:0] instruction,
 
                 default: begin INVALID_INSTRUCTION = 1; PC_increment = 0; end //Invalid instruction halts the processor
             endcase
+            if(is_load) begin
+                if(~current_cycle_is_end_of_load) begin
+                    PC_increment = 0; //Freeze the PC
+                    previous_cycle_was_start_of_load = 1;//Triggers the output that goes to the register in the datapath
+                    I = 1;//I-type immediate decoding
 
+                end
+                else begin
+                    RF_write_enable = 1;
+                    result_select = 5;
+                    is_unsigned = load_sign_bit;//The start of funct3 is a sign flag
+                    is_half = load_size_bit_0;//The last bit signals a half
+                    is_byte = load_size_bit_0 ~| load_size_bit_1; //If neitheir of the last two bits are 1 then it's a byte load
+                end
+            end
         end
     end
 endmodule

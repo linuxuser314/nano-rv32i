@@ -2,10 +2,10 @@
 .global _start
 
 _start:
- li x1, 0x12300113 #addi x2, x0, 0x123
- sw x1, 16(x0) #store the instruction where the second nop is currently
- nop
- nop
+ lw x1, 0(x0)
+ lw x2, 4(x0)
+ lw x3, 8(x0)
+ lw x4, 12(x0)
  j loop
 loop:
  j loop
