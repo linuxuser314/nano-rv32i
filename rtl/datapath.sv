@@ -39,11 +39,18 @@ module datapath(input logic clk, reset);
         .MEMORY_OUT_OF_BOUNDS_ERROR(MEMORY_OUT_OF_BOUNDS_ERROR)
     );
     //TEMPORARY: A harvard-style ROM for instructions
+
+    //These next three modules are very important.
+    //They pull calculate the next PC, feed it into the main_instruction_memory.
+    //Because main_instruction_memory is synchronous, it outputs the next instruction on the next clock cycle.
+    //The PC_tracking_register holds this PC so the PC_subsystem can calculate the next PC.
+    //NOTE THAT THIS PROCESSOR DOES NOT HAVE A FETCH STAGE: IT USES THE LATCHING FEATURE OF SYNCRHONOUS ROM TO HOLD ONTO THE INSTRUCTION.
     instruction_rom main_instruction_memory(
-        .PC(prev_PC), .instruction(instruction)
+        .PC(PC_result), .instruction(instruction), .clk(clk)
     );
     PC_subsystem PC_calculation_subsystem(
-        .new_PC(PC_result), .prev_PC(prev_PC), .PC_plus_4(PC_plus_4), .PC_plus_imm(PC_plus_imm),
+        .new_PC(PC_result), .prev_PC(prev_PC),
+        .PC_plus_4(PC_plus_4), .PC_plus_imm(PC_plus_imm),
         .imm(decoded_immediate), .ALU_result(ALU_result),
         .PC_increment(PC_increment), .PC_select(PC_select), .branch_flag(comparison_flag)
     );
