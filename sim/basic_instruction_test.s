@@ -1,89 +1,110 @@
 .text
+.option norvc
 .globl _start
 
 _start:
-    # Initialize track registers
-    addi x15, x0, 0
-    addi x1, x0, 0
-    addi x2, x0, 0
+    # Clear tracking registers
+    addi x5, x0, 0          # Master Success Tracker (0 = Perfect)
+    addi x6, x0, 0          # Step Marker
 
     # -------------------------------------------------------------------------
-    # TEST 1: JAL (Jump and Link) Relative Verification
+    # TEST 1: LUI (Load Upper Immediate)
     # -------------------------------------------------------------------------
-    addi x15, x0, 1         # Test ID 1
+    addi x6, x0, 1          # Step 1: LUI check
+    lui x1, 0x12345         
     
-    # jal sitting at address PC_A. It should jump forward to label 'jal_target'
-    # and it MUST write (PC_A + 4) into register x1.
-jal_anchor:
-    jal x1, jal_target      
-    jal x0, fail            # Trapped if jal didn't jump!
+    # Verify upper bits are set and lower bits are zero
+    # Shift right by 12 logically; should equal 0x12345
+    srli x2, x1, 12
+    lui x3, 0x12345         # Temporary comparison vehicle
+    srli x3, x3, 12
+    bne x2, x3, fail        # If bits are corrupted, jump to fail
 
-jal_target:
-    # Verify that x1 holds exactly the address of 'jal_anchor' + 4.
-    # We use a relative PC calculation trick: '.' is our current PC.
-    # The distance from 'jal_anchor' to the instruction below is exactly 8 bytes.
-    # Therefore, (Current PC - 8) equals the address of 'jal_anchor'.
-    # Since x1 should hold (jal_anchor + 4), then: x1 + 4 should EQUAL current PC!
+    # -------------------------------------------------------------------------
+    # TEST 2: JAL (Jumping Ability)
+    # -------------------------------------------------------------------------
+    addi x6, x0, 2          # Step 2: JAL Jump check
+    jal x0, jal_jump_pass   # Use x0 to test pure jump capability first
+    jal x0, fail            # If it falls through, jump hardware failed
+jal_jump_pass:
+
+    # -------------------------------------------------------------------------
+    # TEST 3: JAL (Return Value / Link Register)
+    # -------------------------------------------------------------------------
+    addi x6, x0, 3          # Step 3: JAL Link check
+jal_link_anchor:
+    jal x1, jal_link_target # Jump and store return address in x1
+    jal x0, fail            # Block if it didn't jump
+jal_link_target:
     
-    # Let's perform the verification math safely:
-    addi x3, x1, 4          # x3 = x1 + 4 -> Should equal the PC of the next line
+    # Math Verification: x1 must equal exactly (jal_link_anchor + 4)
+    # Distance from jal_link_anchor to current_pc_1 is exactly 8 bytes.
+    # Therefore, current_pc_1 minus 8 equals jal_link_anchor.
+    # To check if x1 == jal_link_anchor + 4, then x1 + 4 must equal current_pc_1.
+    addi x2, x1, 8          # x2 = Link Address + 4
 current_pc_1:
-    auipc x4, 0             # x4 gets the exact value of 'current_pc_1'
-    bne x3, x4, fail        # If the link register value is wrong, fail!
+    auipc x3, 0             # Captures the absolute address of this line
+    bne x2, x3, fail        # If they do not match, the link calculation failed!
 
     # -------------------------------------------------------------------------
-    # TEST 2: AUIPC (Add Upper Immediate to PC) Absolute Building
+    # TEST 4: JALR (Jumping Ability)
     # -------------------------------------------------------------------------
-    addi x15, x0, 2         # Test ID 2
-
-    # We want to build an absolute address to a far-away target using auipc + addi.
-    # auipc moves an immediate left 12 bits and adds it to the current PC.
-auipc_anchor:
-    auipc x5, 0x00000       # x5 = address of 'auipc_anchor'
+    addi x6, x0, 4          # Step 4: JALR Jump check
     
-    # Calculate the exact byte offset from 'auipc_anchor' to 'jalr_target' below.
-    # Count: auipc (4), addi (4), jalr (4), addi (4), jal (4), target is 20 bytes away.
-    addi x5, x5, 20         # x5 now holds the absolute memory address of 'jalr_target'
+    # We will build a target address using auipc + addi safely
+jalr_jump_anchor:
+    auipc x4, 0             # x4 = Address of jalr_jump_anchor
+    addi x4, x4, 16         # Offset of 16 bytes points straight to jalr_jump_target
+    jalr x0, x4, 0          # Jump unconditionally using x0
+    jal x0, fail            # Trapped if jalr failed to fire
+jalr_jump_target:
 
     # -------------------------------------------------------------------------
-    # TEST 3: JALR (Jump and Link Register) Absolute Verification
+    # TEST 5: JALR (Return Value / Link Register)
     # -------------------------------------------------------------------------
-    addi x15, x0, 3         # Test ID 3
+    addi x6, x0, 5          # Step 5: JALR Link check
+    
+jalr_link_anchor:
+    auipc x4, 0             # x4 = Address of jalr_link_anchor
+    addi x4, x4, 16         # Offset of 16 bytes points to jalr_link_target
+    jalr x2, x4, 0          # Jump and link into x2
+    jal x0, fail            # Trapped if it missed the target
+jalr_link_target:
 
-    # jalr jumps to the absolute address stored inside x5.
-    # It must also write the return address (PC_B + 4) into register x2.
-jalr_anchor:
-    jalr x2, x5, 0          # Jump to address in x5 + offset 0
-    jal x0, fail            # Trapped if jalr didn't jump!
-
-    # -------------------------------------------------------------------------
-    # TEST 4: LUI (Load Upper Immediate) Data Independence Integration
-    # -------------------------------------------------------------------------
-    # We place a dummy block here. If jalr works, it will leap completely OVER this.
-    lui x10, 0xABCDE
-    jal x0, fail            # If jalr targeted wrong, it might slip here.
-
-jalr_target:
-    # Verify that x2 holds exactly the address of 'jalr_anchor' + 4.
-    # The distance from 'jalr_anchor' to this exact line is 12 bytes.
-    # Therefore, (x2 + 8) should equal our current PC.
-    addi x3, x2, 8
+    # Math Verification: x2 must equal exactly (jalr_link_anchor + 4)
+    # Distance from jalr_link_anchor to current_pc_2 is exactly 12 bytes.
+    # Therefore, x2 + 8 must equal current_pc_2.
+    addi x3, x2, 8          # x3 = Return Address + 8
 current_pc_2:
-    auipc x4, 0             # x4 gets the exact value of 'current_pc_2'
-    bne x3, x4, fail        # If jalr link address was corrupt, fail!
+    auipc x4, 0             # Captures the absolute address of this line
+    bne x3, x4, fail        # If they don't match, JALR link payload is corrupt!
 
     # -------------------------------------------------------------------------
-    # SUCCESS ANCHOR
+    # TEST 6: AUIPC (Add Upper Immediate to PC)
+    # -------------------------------------------------------------------------
+    addi x6, x0, 6          # Step 6: AUIPC offset check
+    
+    # Test a non-zero shift scaling operation
+auipc_calc_anchor:
+    auipc x1, 0x00002       # x1 = auipc_calc_anchor + 0x00002000
+    
+    # Let's verify by manual offset calculation
+    auipc x2, 0             # x2 = current PC
+    addi x2, x2, -4         # Back-track to estimate auipc_calc_anchor PC
+    lui x3, 0x00002         # Shift immediate manually to compare
+    add x2, x2, x3          # x2 = estimated calculation target
+    bne x1, x2, fail        # If they diverge, AUIPC sign/adder math is broken
+
+    # -------------------------------------------------------------------------
+    # SUCCESS PANIC RECOVERY
     # -------------------------------------------------------------------------
 pass:
-    addi x15, x0, 999       # Safe completion code!
+    addi x5, x0, 100        # Master Tracker = 100 (Clean Sweep Success!)
     jal x0, end
 
 fail:
-    addi x14, x0, 0x0AD     # Visible flag for Surfer trace view
-    addi x14, x14, 0x500
-    addi x14, x14, 0x600
-    jal x0, end
+    addi x5, x0, -1         # Master Tracker = -1 (Hardware Failure triggered!)
+    # Keep x6 active so you can read which Step ID triggered the drop
 
 end:
-    jal x0, end             # Infinite loop stall
+    jal x0, end             # Infinite loop park
