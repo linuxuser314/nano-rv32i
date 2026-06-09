@@ -1,6 +1,5 @@
 //This module shifts and extends a memory word for lw, lh, lb, lhu, lbu commands in RISC-V.
-//Estimated LUT usage: 70 (2 for shift calculations + 64 for shifter + 4 for fill_bit calculation)
-//Estimated propogation delay: 5-LUTs (3 for fill_bit calculation and 2 for shifting).
+//I had to do some workarounds to prevent pesky iverilog errors
 `default_nettype none;
 module load(input  logic[31:0] data,
             input  logic is_byte, is_half, is_unsigned,
@@ -8,27 +7,43 @@ module load(input  logic[31:0] data,
             output logic[31:0] result);
     logic shift1, shift2, fill_bit;
     logic[31:0] stage;
+    logic[15:0] selected_half, top_half, bottom_half;
+    logic[7:0] selected_byte, byte_31to24, byte_23to16, byte_15to8, byte_7to0;
+    logic addr0, addr1, top_bit_of_byte, top_bit_of_half;
 
-    //This determines the shift ammount for the result from memory (which is word-aligned)
-    //By looking at the last two bits of the address and whether or not it is a byte or a half-load.
-    assign shift2 = (is_half & ~addr_end[1]) | (is_byte & ~addr_end[1]);
-    assign shift1 = is_byte & addr_end[0];
+    assign addr0 = addr_end[0];
+    assign addr1 = addr_end[1];
+    assign byte_31to24 = data[31:24];
+    assign byte_23to16 = data[23:16];
+    assign byte_15to8 = data[15:8];
+    assign byte_7to0 = data[7:0];
 
-    //This chunk of logic selects the fill bit for the shifter. It's slightly complex and should probably be refactored for readability.
-    //It's pure logic-gate combinational logic but that may be obscuring the purpose.
-    //It's a 9-input boolean function, which I am going to guess maps to 4 LUTs with a 3-LUT delay (conservative guess)
-    //If it's unsigned, the sign bit is 0. Otherwise:
-    assign fill_bit = is_unsigned ? 0 :
-                      //First line pulls out the sign bit of Byte 1 if it's fetching Byte 1, second line does the same for Byte 3.
-                      (data[7]  & is_byte & ~addr_end[0] & ~addr_end[1]) |
-                      (data[23] & is_byte & addr_end[0] & ~addr_end[1]) |
-                      //First line pulls out the sign bit of Byte 2 if it's loading the lower half or Byte 2. Second line does the same for upper half and Byte 5.
-                      (data[15] & (is_half & addr_end[1] | is_byte & addr_end[1] & ~addr_end[0])) |
-                      (data[31] & (is_half & addr_end[0] | is_byte & ~addr_end[0] & ~addr_end[0]));
+    assign top_half = data[31:16];
+    assign bottom_half = data[15:0];
 
-    byte_shift_right byte_shift_right(
-        .shift1(shift1), .shift2(shift2), .fill_bit(fill_bit), .data(data), .result(result)
-    );
 
+    always_comb begin
+        case(addr_end)
+            3: selected_byte = byte_31to24;
+            2: selected_byte = byte_23to16;
+            1: selected_byte = byte_15to8;
+            0: selected_byte = byte_7to0;
+            default: selected_byte = 8'b0;
+        endcase
+        selected_half = addr1 ? top_half : bottom_half;
+    end
+
+    assign top_bit_of_byte = selected_byte[7];
+    assign top_bit_of_half = selected_half[15];
+
+    always_comb begin
+        if(is_byte) begin
+            result = {{24{is_unsigned ? 1'b0 : top_bit_of_byte}}, selected_byte};
+        end else if(is_half) begin
+            result = {{16{is_unsigned ? 1'b0 : top_bit_of_half}}, selected_half};
+        end else begin
+            result = data;
+        end
+    end
 
 endmodule

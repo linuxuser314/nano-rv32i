@@ -20,7 +20,7 @@ module datapath_tb;
         reset = 0;
         #2;
 
-        // Run for 1000 clock cycles
+        // Run for 10000 clock cycles
         repeat(10000) begin
             #1 clk = 1;
             #1 clk = 0;
@@ -28,11 +28,11 @@ module datapath_tb;
 
         // After 1000 cycles, check the value of x3 (gp)
         #1;
-        $display("\n=== Simulation Complete ===");
-        $display("x3 (gp) value: 0x%08h", dut.system_register_file.rf[3]);
-        $display("PC value: 0x%08h", dut.PC_tracking_register.result);
-        $display("Instruction: 0x%08h", dut.instruction);
-        $finish;
+        //$display("\n=== Simulation Complete ===");
+        //$display("x3 (gp) value: 0x%08h", dut.system_register_file.rf[3]);
+        //$display("PC value: 0x%08h", dut.PC_tracking_register.result);
+        //$display("Instruction: 0x%08h", dut.instruction);
+        //$finish;
     end
 
     // Optional: dump waveforms for debugging

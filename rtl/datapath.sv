@@ -10,6 +10,7 @@ module datapath(input logic clk, reset);
     new_PC, prev_PC;
     logic I, S, B, U, J;
     logic MEMORY_MISALIGNED_ERROR, INSTRUCTION_MISALIGNED_ERROR, MEMORY_OUT_OF_BOUNDS_ERROR;
+    logic current_cycle_is_end_of_load, previous_cycle_was_start_of_load;
     logic[2:0] result_select;
     decoder main_decoder(
         .RF_write_enable(RF_write_enable),
@@ -18,6 +19,8 @@ module datapath(input logic clk, reset);
         .is_right_shift(is_right_shift), .is_arithmetic_shift(is_arithmetic_shift),
         .is_half(is_half), .is_byte(is_byte),
         .is_store(is_store), .is_load(is_load), .is_unsigned(is_unsigned),//This is what was missing
+        .previous_cycle_was_start_of_load(previous_cycle_was_start_of_load),
+        .current_cycle_is_end_of_load(current_cycle_is_end_of_load),
         .mask_ctrl(mask_ctrl),
         .eq(eq), .lt(lt), .ltu(ltu), .sub(sub), .negate(negate),
         .PC_select(PC_select),
@@ -28,12 +31,18 @@ module datapath(input logic clk, reset);
         .MEMORY_OUT_OF_BOUNDS_ERROR(1'b0),
         .instruction(instruction)
     );
+    register1 load_stall_flag_register(
+        .clk(clk), .reset(reset),
+        .data(previous_cycle_was_start_of_load),
+        .result(current_cycle_is_end_of_load)
+    );
 
     memory_subsystem main_memory_system(
         .clk(clk),
-        .load_result(load_result),// .instruction(instruction),
-        .is_half(is_half), .is_byte(is_byte), .is_unsigned(is_unsigned), .is_store(is_store), .is_load(is_load),
-        .PC(prev_PC), .addr(ALU_result), .store_data(RF_rd2),
+        .load_result(load_result), .instruction(instruction),
+        .is_half(is_half), .is_byte(is_byte), .is_unsigned(is_unsigned),
+        .is_store(is_store), .is_load(is_load),
+        .PC(PC_result), .addr(ALU_result), .store_data(RF_rd2),
         .MEMORY_MISALIGNED_ERROR(MEMORY_MISALIGNED_ERROR),
         .INSTRUCTION_MISALIGNED_ERROR(INSTRUCTION_MISALIGNED_ERROR),
         .MEMORY_OUT_OF_BOUNDS_ERROR(MEMORY_OUT_OF_BOUNDS_ERROR)
@@ -45,9 +54,9 @@ module datapath(input logic clk, reset);
     //Because main_instruction_memory is synchronous, it outputs the next instruction on the next clock cycle.
     //The PC_tracking_register holds this PC so the PC_subsystem can calculate the next PC.
     //NOTE THAT THIS PROCESSOR DOES NOT HAVE A FETCH STAGE: IT USES THE LATCHING FEATURE OF SYNCRHONOUS ROM TO HOLD ONTO THE INSTRUCTION.
-    instruction_rom main_instruction_memory(
-        .PC(PC_result), .instruction(instruction), .clk(clk)
-    );
+    //instruction_rom main_instruction_memory(
+    //    .PC(PC_result), .instruction(instruction), .clk(clk)
+    //);
     PC_subsystem PC_calculation_subsystem(
         .new_PC(PC_result), .prev_PC(prev_PC),
         .PC_plus_4(PC_plus_4), .PC_plus_imm(PC_plus_imm),

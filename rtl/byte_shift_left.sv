@@ -6,7 +6,7 @@ module byte_shift_left(input logic[31:0] data,
                         );
 
     logic[31:0] stage;
-    //Shift the result to the right as appropriate and padd with fill_bits as appropriate.
-    assign stage  = shift2 ? {data [31:16], {16{fill_bit}}} : data [31:0];
-    assign result = shift1 ? {stage[31: 8], {8 {fill_bit}}} : stage[31:0];
+    //Shift the result to the left as appropriate and padd with 0s as appropriate.
+    assign stage  = shift2 ? {data [15:0], 16'b0}: data [31:0];
+    assign result = shift1 ? {stage[23: 0], 8'b0} : stage[31:0];
 endmodule
