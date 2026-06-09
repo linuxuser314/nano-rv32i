@@ -12,29 +12,29 @@ Thank you for your patience.
 
 # TODO:
 Short Term:
-    - [x]Compile, simulate, and testbench all small components
-    - [x]Compile, simulate, and testbench all major components
-    - [x]Finish anything I forgot on the datapath module
-    - [x]Build the decoder module (one giant casez statement)
-    - [x]Make memory use Gowin BRAM natively
-    - [x]Add code to import memory
-    - [ ]Add error handling module that flashes an LED
-    - [ ]Add MMIO for program output and for debugging
-    - [ ]Run riscv-tests to make sure it's all working properly
-    - [ ]Clean up and refactor code for readability and maintainability
-    - [ ]Do a deep-dive performance analysis to tune it for improved performance
-Long Term:
-    - [ ]Turn it into a pipelined processor
-    - [ ]Add B extension
-    - [ ]Add C extension
-    - [ ]Add M extension
-    - [ ]Add a bootloader
-    - [ ]Add an exception handler that uses UART for debugging
-    - [ ]Make the exception handler handle misaligned memory loads/stores or implement it in hardware
-    - [ ]Create a full MMIO 
-    - [ ]Link to DRAM
-    - [ ]Create a HAL
-    - [ ]Create an RTOS
+    - [x]Compile, simulate, and testbench all small components  
+    - [x]Compile, simulate, and testbench all major components  
+    - [x]Finish anything I forgot on the datapath module  
+    - [x]Build the decoder module (one giant casez statement)  
+    - [x]Make memory use Gowin BRAM natively  
+    - [x]Add code to import memory  
+    - [ ]Add error handling module that flashes an LED  
+    - [ ]Add MMIO for program output and for debugging  
+    - [ ]Run riscv-tests to make sure it's all working properly  
+    - [ ]Clean up and refactor code for readability and maintainability  
+    - [ ]Do a deep-dive performance analysis to tune it for improved performance  
+Long Term:  
+    - [ ]Turn it into a pipelined processor  
+    - [ ]Add B extension  
+    - [ ]Add C extension  
+    - [ ]Add M extension  
+    - [ ]Add a bootloader  
+    - [ ]Add an exception handler that uses UART for debugging  
+    - [ ]Make the exception handler handle misaligned memory loads/stores or implement it in hardware  
+    - [ ]Create a full MMIO  
+    - [ ]Link to DRAM  
+    - [ ]Create a HAL  
+    - [ ]Create an RTOS  
 Ultra long-term:
-    - [ ]Add asymetric superscalarism
-    - [ ]Add scoreboarded light OoO
+    - [ ]Add asymetric superscalarism  
+    - [ ]Add scoreboarded light OoO  
