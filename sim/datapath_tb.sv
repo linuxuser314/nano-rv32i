@@ -20,7 +20,7 @@ module datapath_tb;
         reset = 0;
         #2;
 
-        // Run for 1000 clock cycles
+        // Run for 10000 clock cycles
         repeat(10000) begin
             #1 clk = 1;
             #1 clk = 0;
