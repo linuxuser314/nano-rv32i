@@ -75,7 +75,7 @@ module memory(input  logic[31:0] A1, A2, WD2,
             if(write_enable[1]) ram[A2[31:2]][15:8]  <= WD2[15:8];
             if(write_enable[2]) ram[A2[31:2]][23:16] <= WD2[23:16];
             if(write_enable[3]) ram[A2[31:2]][31:24] <= WD2[31:24];
-            
+
             // Normal RAM Read
             RD2 <= ram[A2[31:2]];
         end 
@@ -83,9 +83,9 @@ module memory(input  logic[31:0] A1, A2, WD2,
             // MMIO: Write to tohost
             // If any write_enable bit is high, capture the data
             if (|write_enable) tohost <= WD2;
-            
+
             RD2 <= 32'b0; // Reading MMIO returns 0 for now
-        end 
+        end
         else begin
             RD2 <= 32'b0;
         end
@@ -96,7 +96,7 @@ module memory(input  logic[31:0] A1, A2, WD2,
     // ==========================================
     // This evaluates instantly, telling the decoder to freeze the PC immediately.
     // It ignores A2 if A2 is targeting the 0x40000000 MMIO address.
-    assign MEMORY_OUT_OF_BOUNDS_ERROR = (A1[31:2] >= 30'd576) | 
+    assign MEMORY_OUT_OF_BOUNDS_ERROR = (A1[31:2] >= 30'd576) |
                                        ((A2[31:2] >= 30'd576) & (A2 != 32'h40000000));
 
 endmodule
