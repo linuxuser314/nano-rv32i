@@ -6,7 +6,7 @@ It is single-cycle except for loads (which are two-cycle).
 
 I believe all instructions are functional under light testing, but some things (like error handling) are not functional and the core will require further testing to be functional.
 
-I hope to have it up and running by the end of the week (failed: I now hope to have it by the end of next week (the 13th)). I will complete the readme then.
+I hope to have it passing tests and fully synthesizeable in the next few weeks.
 
 Thank you for your patience.
 
