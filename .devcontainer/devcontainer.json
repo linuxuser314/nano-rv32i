@@ -14,7 +14,9 @@
                 "wavetrace.wavetrace",
                 "surfer-project.surfer",
                 "chipsalliance.verible",
-                "mshr-h.VerilogHDL"
+                "mshr-h.VerilogHDL",
+                "yzhang.markdown-all-in-one",
+                "shd101wyy.markdown-preview-enhanced"
             ]
         }
     }
