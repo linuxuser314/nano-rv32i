@@ -3,21 +3,24 @@
 set -e
 
 IS_RISCV_TEST=0
+DO_DUMP=0
 ASM_FILE=""
 
 # Parse arguments
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         -test) IS_RISCV_TEST=1 ;;
+        -dump) DO_DUMP=1 ;;
         *) ASM_FILE=$1 ;;
     esac
     shift
 done
 
 if [ -z "$ASM_FILE" ]; then
-    echo "Usage: ./tools/build-sim.sh [-test] <input_asm.s>"
+    echo "Usage: ./tools/build-sim.sh [-test] [-dump] <input_asm.s>"
     echo "Example (Normal): ./tools/build-sim.sh sim/basic_instruction_test.s"
     echo "Example (Test)  : ./tools/build-sim.sh -test sim/rv32i-p/simple.S"
+    echo "Example (Dump)  : ./tools/build-sim.sh -test -dump sim/rv32i-p/simple.S"
     exit 1
 fi
 
@@ -48,6 +51,16 @@ else
     ${TOOLCHAIN_PREFIX}gcc -march=rv32i -mabi=ilp32 -nostdlib -nostartfiles -Wl,-Ttext=0x0 -o temp.elf "$ASM_FILE"
 fi
 
+# -------------------------------------------------------------------------
+# Intercept: Optional Objdump Generation
+# -------------------------------------------------------------------------
+if [ $DO_DUMP -eq 1 ]; then
+    echo "==> [DUMP] Generating machine code disassembly..."
+    DUMP_FILE="/workspaces/nano-rv32i/sim/dump.txt"
+    ${TOOLCHAIN_PREFIX}objdump -D temp.elf > "$DUMP_FILE"
+    echo "    Saved disassembly to: $DUMP_FILE"
+fi
+
 echo "==> 2. Converting to 32-bit Verilog Hex format..."
 ${TOOLCHAIN_PREFIX}objcopy -O verilog --verilog-data-width=4 temp.elf temp.hex
 
@@ -56,7 +69,7 @@ mkdir -p /workspaces/nano-rv32i/software/
 cp temp.hex /workspaces/nano-rv32i/software/firmware.hex
 
 # -------------------------------------------------------------------------
-# 3. Compilation and Simulation
+# Compilation and Simulation
 # -------------------------------------------------------------------------
 echo "==> 4. Compiling RTL and Testbench using iverilog..."
 # Hardwired output structure to compile the testbench cleanly
@@ -66,7 +79,7 @@ echo "==> 5. Running simulation..."
 vvp sim.vvp -fst
 
 # -------------------------------------------------------------------------
-# 4. Waveform Extraction
+# Waveform Extraction
 # -------------------------------------------------------------------------
 echo "==> 6. Processing waveform file..."
 

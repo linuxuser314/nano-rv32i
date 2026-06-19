@@ -1,20 +1,18 @@
-/* sim/custom_env/link.ld */
+/* /workspaces/nano-rv32i/sim/custom_env/link.ld */
 OUTPUT_ARCH("riscv")
 ENTRY(_start)
 
 SECTIONS
 {
-  /* Force the text section to start at 0x0 for our BRAM */
   . = 0x00000000;
   
   .text : { 
-    *(.text.init) /* The _start vector must go first */
+    *(.text.init)
     *(.text) 
-  }
+  } =0x13000000   /* <-- THE AUIPC FIX: Fill all gaps in the text section with NOPs! (Notice the endiannes is reversed)*/
   
   .data : { *(.data) }
   .bss : { *(.bss) }
   
-  /* Discard standard library bloat */
   /DISCARD/ : { *(.note.GNU-stack) *(.gnu_debuglink) *(.gnu.lto_*) }
 }
