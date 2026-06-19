@@ -16,13 +16,13 @@ This is a basic starter RV32I core. It is my first large hardware design project
  - **Toolchain:** I use **SystemVerilog**, **Icarus Verilog**, **Yosys**, and **NextPNR/Gowin** (**Project Apicula**).
  - **Architecture:** Uses the **RV32I Base Unprivileged Architecture**
  - **Microarchitecture:** Uses a **Single-Cycle** architecture except for `load` instructions (see below).
- - **Memory:** Uses synchronous **Dual-Ported BRAM** for a seamless **Von Neumann** architecture.
+ - **Memory:** Uses synchronous **Dual-Ported BRAM** for a seamless **Von Neumann** experience while maintaining Harvard simplicity in the hardware.
  - **Fetching:** Calculates the next PC *combinationally* before feeding it into the synchronous BRAM. This eliminates the need for a dedicated fetch cycle while working with FPGA primatives.
- - **Loads & Stores:** Because memory is synchronous, loads and stores present a challenge. Stores calculate the address and present the data on the memory port. It is committed on the rising edge of the clock. Loads calculate the address and present it to the memory address port. On the next cycle the result is read from the data port, it is shifted/masked (if necessary), and is written back to the register file.
+ - **Loads & Stores:** Because memory is synchronous, loads and stores present a challenge. Stores calculate the address and present the data on the memory port. It is committed on the rising edge of the clock. Loads calculate the address and present it to the memory address port. On the next cycle the result is read from the data port, it is shifted/masked (if necessary), and is written back to the register file. The load delay is managed by a FSM in the decoder (the decoder is combinational with an external 1-bit register for a load flag).
  - **Tested:** All operations pass the official `riscv-tests` suite (except for ma_data, see below).
 
 ## Limitations
-  - **Read-After-Write (RAW) Memory Hazards:** Currently the design uses read-before-write BRAM, which means that a store to a specific address immediately followed by a load from that address will read the **old** memory value. I believe this will resolve itself after pipelining.
+  - **Read-After-Write (RAW) Memory Hazards:** Currently the design uses read-before-write BRAM, which means that a store to a specific address immediately followed by a load from that address will read the **old** memory value. Since this is a rare case and I will have to modify it during pipelining anyway I will leave this for now.
   - **Misaligned Memory Accesses:** Currently, the core does not support misaligned memory accesses (`addr % 4 != 0` for words, `addr % 2 != 0` for halfwords). Since I am implementing an **Unprivileged Architecture**, I cannot currently add a **Trap Handler** to handle misaligned accesses.
 
 ---
@@ -38,6 +38,7 @@ This is a basic starter RV32I core. It is my first large hardware design project
 - [x] Run riscv-tests to make sure it's all working properly  
 - [ ] Clean up testfiles in my repository
 - [ ] Update devcontainer.json for full automatic setup
+- [ ] Add makefile for easier startup (currently requires complex manual scripting, let me know if you have questions. Sorry).
 - [ ] Create automatic riscv-tests testing script and deploy with GitHub Actions
 - [ ] Synthesize it to my FPGA
 - [ ] Add error handling module that flashes an LED  
@@ -58,7 +59,7 @@ This is a basic starter RV32I core. It is my first large hardware design project
 ### Ultra long-term
 - [ ] Build a simple operating system
 - [ ] Add micro-POSIX features using Newlib and syscalls
-- [ ] Connect to a DRAM controller and memory bus
+- [ ] Connect a system bus and DRAM controller.
 - [ ] Integrate MMIO and caches into memory bus
 - [ ] Add multicore processing
 - [ ] Add a lightweight fully customized  MMU and integrate it into my RTOS
