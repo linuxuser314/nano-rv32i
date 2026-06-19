@@ -2,6 +2,8 @@
 #ifndef _ENV_PHYSICAL_SINGLE_CORE_H
 #define _ENV_PHYSICAL_SINGLE_CORE_H
 
+#define TESTNUM gp
+
 #define rvtest_rv32u                                    \
   .section .text.init;                                  \
   .globl _start;                                        \
