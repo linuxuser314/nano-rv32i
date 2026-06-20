@@ -13,7 +13,8 @@
                 "chipsalliance.verible",
                 "mshr-h.VerilogHDL",
                 "yzhang.markdown-all-in-one",
-                "shd101wyy.markdown-preview-enhanced"
+                "shd101wyy.markdown-preview-enhanced",
+                "zhwu95.riscv"
             ]
         }
     }
