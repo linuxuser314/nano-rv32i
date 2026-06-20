@@ -2,16 +2,13 @@
     "name": "RISC-V Hardware Dev Environment",
     "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
     "features": {
-        "ghcr.io/devcontainers/features/common-utils:1": {}
+        "ghcr.io/devcontainers/features/common-utils:2.5.9": {}
     },
-    "postCreateCommand": "sudo apt-get update && sudo apt-get install -y yosys verilator iverilog gtkwave python3-pip",
+    "postCreateCommand": "sudo apt-get update && sudo apt-get install -y yosys verilator iverilog python3-pip python-is-python3 gcc-riscv64-unknown-elf build-essentials openfpgaloader",
     "customizations": {
         "vscode": {
             "extensions": [
-                "mcu-debug.rtos-views",
-                "leafle.gcode",
                 "ethan-barry.systemverilog-lang",
-                "wavetrace.wavetrace",
                 "surfer-project.surfer",
                 "chipsalliance.verible",
                 "mshr-h.VerilogHDL",
