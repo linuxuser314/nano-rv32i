@@ -36,22 +36,21 @@ This is a basic starter RV32I core. It is my first large hardware design project
 - [x] Make memory use Gowin BRAM natively  
 - [x] Add code to import memory  
 - [x] Run riscv-tests to make sure it's all working properly  
-- [ ] Clean up testfiles in my repository
-- [ ] Update devcontainer.json for full automatic setup
+- [x] Clean up testfiles in my repository
+- [x] Update devcontainer.json for full automatic setup
 - [ ] Add makefile for easier startup (currently requires complex manual scripting, let me know if you have questions. Sorry).
-- [ ] Create automatic riscv-tests testing script and deploy with GitHub Actions
-- [ ] Synthesize it to my FPGA
-- [ ] Add error handling module that flashes an LED  
-- [ ] Add MMIO for program output and for debugging  
-- [ ] Clean up and refactor code for readability and maintainability  
+- [ ] Create automatic riscv-tests testing script and deploy with GitHub Actions.
+- [ ] Synthesize it to my FPGA.
+- [ ] Add MMIO for program output and for debugging  .
+- [ ] Clean up and refactor code for readability and maintainability.
 - [ ] Write a program in assembly that mimics the functionality of my `Baremetal-Blinker` repository.
-- [ ] Do a deep-dive performance analysis to tune it for improved performance  
 ### Long Term  
-- [ ] Add Zicsr extension
 - [ ] Turn it into a pipelined processor  
+- [ ] Add Zicsr extension
 - [ ] Add B extension  
 - [ ] Add C extension  
 - [ ] Add M extension  
+- [ ] Do a deep-dive performance analysis to tune it for improved performance  
 - [ ] Add a bootloader  
 - [ ] Add an exception handler that uses UART for debugging  
 - [ ] Make the exception handler handle misaligned memory loads/stores or implement it in hardware  
@@ -76,3 +75,4 @@ This is a basic starter RV32I core. It is my first large hardware design project
 
 I learned about RISC-V using Sarah and David Harris's *Digital Design and Computer Architecture, RISC-V Edition* (2022). I used their SystemVerilog references, schematics, and appendices to design this core, expanding where they missed instructions and optimizing for synchronous memory.
 
+Throughout this process I have used Google Gemini AI and GitHub Copilot for brainstorming, debugging, rubber-ducking, improvment suggestion, testbenches, and toolchain management (build scripts, linker scripts, quick assembly tests). 95% of the RTL is my own, but I could not have done it without AI as a tutor.

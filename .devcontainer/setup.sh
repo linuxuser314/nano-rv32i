@@ -28,4 +28,7 @@ sudo tar -xzf /tmp/oss-cad-suite.tgz -C /opt/
 # Clean up the downloaded archive
 rm /tmp/oss-cad-suite.tgz
 
+# Add OSS CAD Suite to the path for all users
+echo 'export PATH="/opt/oss-cad-suite/bin:$PATH"' | sudo tee -a /etc/bash.bashrc
+
 echo "=== Environment Setup Complete! ==="
