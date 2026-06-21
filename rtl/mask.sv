@@ -2,7 +2,7 @@
 // a ctrl line of 0 is and, 1 is or, 2 is xor, and anything else outputs 0.
 //This module should have a propogation delay of 1 LUT and use 32 LUTs total.
 
-`default_nettype none;
+`default_nettype none
 module mask(input logic[31:0] a, b,
             input logic[1:0] ctrl,
             output logic[31:0] result);

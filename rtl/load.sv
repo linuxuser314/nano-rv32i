@@ -1,6 +1,6 @@
 //This module shifts and extends a memory word for lw, lh, lb, lhu, lbu commands in RISC-V.
 //I had to do some workarounds to prevent pesky iverilog errors
-`default_nettype none;
+`default_nettype none
 module load(input  logic[31:0] data,
             input  logic is_byte, is_half, is_unsigned,
             input  logic[1:0] addr_end,
