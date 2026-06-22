@@ -17,7 +17,7 @@ module register_file(input  logic clk, reset, write_enable,
                     );
     logic[31:0] rf[32];
 
-    always_ff @(posedge clk, posedge reset) begin
+    always_ff @(posedge clk) begin
         if (/*reset*/ 1'b0) begin
             // We use a local loop integer to clear each element individually
             for (int i = 0; i < 32; i = i + 1) begin
