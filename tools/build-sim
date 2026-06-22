@@ -3,21 +3,43 @@
 # Exit immediately if any command fails
 set -e
 
+# --- 1. ARGUMENT PARSING ---
+if [ -z "$1" ]; then
+    echo "Usage: build-sim <path/to/firmware.hex>"
+    exit 1
+fi
+
+# Capture the absolute path of the input hex file before we change directories
+SRC_HEX=$(realpath "$1")
+
+# Define our absolute workspace root
+WORKSPACE_DIR="/workspaces/nano-rv32i"
+TARGET_HEX="$WORKSPACE_DIR/sim/firmware.hex"
+VVP_OUT="$WORKSPACE_DIR/sim.vvp"
+
 echo "🚀 Starting Simulation Build..."
 
-# 2. Compile RTL and Testbench
+# --- 2. ENVIRONMENT SETUP ---
+# Jump into the workspace root so Icarus Verilog outputs the waveform here 
+# and $readmemh("sim/firmware.hex") resolves correctly, no matter where we ran this from.
+cd "$WORKSPACE_DIR"
+
+# Copy the target hex into the sim folder where the testbench expects it
+echo "📄 Injecting $SRC_HEX into simulation..."
+cp "$SRC_HEX" "$TARGET_HEX"
+
+# Clean up old waveforms to avoid stale data
+rm -f waveform.fst dump.fst
+
+# --- 3. BUILD & RUN ---
 echo "🛠️  Compiling with Icarus Verilog..."
-# Flags explained:
-# -g2012 : Strictly required to enable SystemVerilog features (like logic, always_ff, etc.)
-# -s datapath_tb : Explicitly tells the compiler which module is the absolute top-level
-# -o sim.vvp : The compiled output executable
-iverilog -g2012 -s datapath_tb -o sim.vvp /workspaces/nano-rv32i/rtl/*.sv /workspaces/nano-rv32i/sim/datapath_tb.sv
+iverilog -g2012 -s datapath_tb -o "$VVP_OUT" rtl/*.sv sim/datapath_tb.sv
 
-# 3. Run the Simulation
 echo "🏃 Running VVP Simulation..."
-# -fst flag tells the engine to output the modern, compressed Fast Signal Trace format
-vvp sim.vvp -fst
+vvp "$VVP_OUT" -fst
 
-rm sim.vvp
+# --- 4. CLEANUP ---
+echo "🧹 Cleaning up intermediate simulation files..."
+rm -f "$VVP_OUT" "$TARGET_HEX"
 
-echo "✅ Simulation Complete! Waveform generated."
+echo "✅ Simulation Complete! Waveform generated at $WORKSPACE_DIR/waveform.fst"
