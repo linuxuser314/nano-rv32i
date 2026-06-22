@@ -78,7 +78,7 @@ module memory(input  logic[31:0] A1, A2, WD2,
 
             // Normal RAM Read
             RD2 <= ram[A2[31:2]];
-        end 
+        end
         else if (A2 == 32'h40000000) begin
             // MMIO: Write to tohost
             // If any write_enable bit is high, capture the data

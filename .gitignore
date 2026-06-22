@@ -24,3 +24,6 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# Temporary log files
+yosysdump.txt

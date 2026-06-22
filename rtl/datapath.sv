@@ -1,6 +1,6 @@
 `default_nettype none
 
-module datapath(input logic clk, reset);
+module datapath(input logic clk, reset, output logic[31:0] tohost);
     logic RF_write_enable, ALU_src, is_right_shift, is_arithmetic_shift,
           eq, lt, ltu, sub, negate, PC_increment, comparison_flag,
           is_half, is_byte, is_unsigned, is_store, is_load;
@@ -45,7 +45,8 @@ module datapath(input logic clk, reset);
         .PC(PC_result), .addr(ALU_result), .store_data(RF_rd2),
         .MEMORY_MISALIGNED_ERROR(MEMORY_MISALIGNED_ERROR),
         .INSTRUCTION_MISALIGNED_ERROR(INSTRUCTION_MISALIGNED_ERROR),
-        .MEMORY_OUT_OF_BOUNDS_ERROR(MEMORY_OUT_OF_BOUNDS_ERROR)
+        .MEMORY_OUT_OF_BOUNDS_ERROR(MEMORY_OUT_OF_BOUNDS_ERROR),
+        .tohost_wire(tohost)
     );
     //TEMPORARY: A harvard-style ROM for instructions
 
