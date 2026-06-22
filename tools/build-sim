@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Exit immediately if any command fails
+set -e
+
+echo "🚀 Starting Simulation Build..."
+
+# 2. Compile RTL and Testbench
+echo "🛠️  Compiling with Icarus Verilog..."
+# Flags explained:
+# -g2012 : Strictly required to enable SystemVerilog features (like logic, always_ff, etc.)
+# -s datapath_tb : Explicitly tells the compiler which module is the absolute top-level
+# -o sim.vvp : The compiled output executable
+iverilog -g2012 -s datapath_tb -o sim.vvp /workspaces/nano-rv32i/rtl/*.sv /workspaces/nano-rv32i/sim/datapath_tb.sv
+
+# 3. Run the Simulation
+echo "🏃 Running VVP Simulation..."
+# -fst flag tells the engine to output the modern, compressed Fast Signal Trace format
+vvp sim.vvp -fst
+
+rm sim.vvp
+
+echo "✅ Simulation Complete! Waveform generated."

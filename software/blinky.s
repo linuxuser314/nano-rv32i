@@ -19,7 +19,7 @@ main_loop:
     # The CPU runs at 58,000,000 ticks per second.
     # This loop takes about 3 instructions per iteration.
     # 5,000,000 iterations * 3 = 15,000,000 cycles (roughly 1/4th of a second).
-    li x11, 5000000        
+    li x11, 5000000       
 delay_loop:
     addi x11, x11, -1      # Subtract 1 from x11
     bne x11, x0, delay_loop # If x11 is not 0, jump back up

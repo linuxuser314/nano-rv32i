@@ -12,7 +12,6 @@ module datapath(input logic clk, reset, output logic[5:0] led);
     logic MEMORY_MISALIGNED_ERROR, INSTRUCTION_MISALIGNED_ERROR, MEMORY_OUT_OF_BOUNDS_ERROR;
     logic current_cycle_is_end_of_load, previous_cycle_was_start_of_load;
     logic[2:0] result_select;
-    logic[5:0] led;
     logic[31:0] tohost;
     assign led = tohost[5:0];
     decoder main_decoder(

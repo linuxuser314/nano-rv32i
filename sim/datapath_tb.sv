@@ -3,11 +3,13 @@
 
 module datapath_tb;
     logic clk, reset;
+    logic[5:0] led;
 
     // Instantiate the datapath
     datapath dut(
         .clk(clk),
-        .reset(reset)
+        .reset(reset),
+        .led(led)
     );
 
     initial begin
@@ -37,7 +39,7 @@ module datapath_tb;
 
     // Optional: dump waveforms for debugging
     initial begin
-        $dumpfile("simulation.fst");
+        $dumpfile("/workspaces/nano-rv32i/sim/auto-simulation.fst");
         $dumpvars(0, datapath_tb);
     end 
 endmodule
