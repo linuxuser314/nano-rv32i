@@ -15,7 +15,8 @@ module datapath(input logic clk, reset_active_low, output logic[5:0] led);
     logic[31:0] tohost;
     logic reset;
     assign reset = ~reset_active_low;
-    assign led = ~tohost[5:0];//Negation for active-low LEDs.
+    //assign led = ~tohost[5:0];//Negation for active-low LEDs.
+    assign led = 6'b100111;
     decoder main_decoder(
         .RF_write_enable(RF_write_enable),
         .I(I), .S(S), .B(B), .U(U), .J(J),
