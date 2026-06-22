@@ -1,6 +1,6 @@
 `default_nettype none
 
-module datapath(input logic clk, reset, output logic[31:0] tohost);
+module datapath(input logic clk, reset, output logic[5:0] led);
     logic RF_write_enable, ALU_src, is_right_shift, is_arithmetic_shift,
           eq, lt, ltu, sub, negate, PC_increment, comparison_flag,
           is_half, is_byte, is_unsigned, is_store, is_load;
@@ -12,6 +12,9 @@ module datapath(input logic clk, reset, output logic[31:0] tohost);
     logic MEMORY_MISALIGNED_ERROR, INSTRUCTION_MISALIGNED_ERROR, MEMORY_OUT_OF_BOUNDS_ERROR;
     logic current_cycle_is_end_of_load, previous_cycle_was_start_of_load;
     logic[2:0] result_select;
+    logic[5:0] led;
+    logic[31:0] tohost;
+    assign led = tohost[5:0];
     decoder main_decoder(
         .RF_write_enable(RF_write_enable),
         .I(I), .S(S), .B(B), .U(U), .J(J),
