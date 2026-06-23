@@ -1,45 +1,104 @@
 #!/bin/bash
-
-# Exit immediately if any command fails
+# Stop script execution if any command fails
 set -e
 
-# --- 1. ARGUMENT PARSING ---
-if [ -z "$1" ]; then
-    echo "Usage: build-sim <path/to/firmware.hex>"
+IS_RISCV_TEST=0
+DO_DUMP=0
+ASM_FILE=""
+
+# Parse arguments
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        -test) IS_RISCV_TEST=1 ;;
+        -dump) DO_DUMP=1 ;;
+        *) ASM_FILE=$1 ;;
+    esac
+    shift
+done
+
+if [ -z "$ASM_FILE" ]; then
+    echo "Usage: ./tools/build-sim.sh [-test] [-dump] <input_asm.s>"
+    echo "Example (Normal): ./tools/build-sim.sh sim/basic_instruction_test.s"
+    echo "Example (Test)  : ./tools/build-sim.sh -test sim/rv32i-p/simple.S"
+    echo "Example (Dump)  : ./tools/build-sim.sh -test -dump sim/rv32i-p/simple.S"
     exit 1
 fi
 
-# Capture the absolute path of the input hex file before we change directories
-SRC_HEX=$(realpath "$1")
+# Toolchain prefix
+TOOLCHAIN_PREFIX="riscv64-unknown-elf-"
 
-# Define our absolute workspace root
-WORKSPACE_DIR="/workspaces/nano-rv32i"
-TARGET_HEX="$WORKSPACE_DIR/sim/firmware.hex"
-VVP_OUT="$WORKSPACE_DIR/sim.vvp"
+# Define absolute path to your custom environment configuration
+ENV_DIR="/workspaces/nano-rv32i/sim/custom_env"
 
-echo "🚀 Starting Simulation Build..."
+echo "==> 1. Assembling $ASM_FILE..."
+if [ $IS_RISCV_TEST -eq 1 ]; then
+    echo "    (Using absolute paths for riscv-tests macros and linker)"
+    
+    # Verify the absolute directory path exists before compiling
+    if [ ! -d "$ENV_DIR" ]; then
+        echo "[ERROR] Custom environment directory not found at: $ENV_DIR"
+        echo "Please make sure your link.ld and riscv_test.h are in that folder."
+        exit 1
+    fi
 
-# --- 2. ENVIRONMENT SETUP ---
-# Jump into the workspace root so Icarus Verilog outputs the waveform here 
-# and $readmemh("sim/firmware.hex") resolves correctly, no matter where we ran this from.
-cd "$WORKSPACE_DIR"
+    # Using absolute directory tracking for include search paths (-I) and linker maps (-T)
+    ${TOOLCHAIN_PREFIX}gcc -march=rv32i -mabi=ilp32 -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles \
+        -I "$ENV_DIR/" \
+        -T "$ENV_DIR/link.ld" \
+        -o temp.elf "$ASM_FILE"
+else
+    echo "    (Using standard bare-metal build)"
+    ${TOOLCHAIN_PREFIX}gcc -march=rv32i -mabi=ilp32 -nostdlib -nostartfiles -Wl,-Ttext=0x0 -o temp.elf "$ASM_FILE"
+fi
 
-# Copy the target hex into the sim folder where the testbench expects it
-echo "📄 Injecting $SRC_HEX into simulation..."
-cp "$SRC_HEX" "$TARGET_HEX"
+# -------------------------------------------------------------------------
+# Intercept: Optional Objdump Generation
+# -------------------------------------------------------------------------
+if [ $DO_DUMP -eq 1 ]; then
+    echo "==> [DUMP] Generating machine code disassembly..."
+    DUMP_FILE="/workspaces/nano-rv32i/sim/dump.txt"
+    ${TOOLCHAIN_PREFIX}objdump -D temp.elf > "$DUMP_FILE"
+    echo "    Saved disassembly to: $DUMP_FILE"
+fi
 
-# Clean up old waveforms to avoid stale data
-rm -f waveform.fst dump.fst
+echo "==> 2. Converting to 32-bit Verilog Hex format..."
+${TOOLCHAIN_PREFIX}objcopy -O verilog --verilog-data-width=4 temp.elf temp.hex
 
-# --- 3. BUILD & RUN ---
-echo "🛠️  Compiling with Icarus Verilog..."
-iverilog -g2012 -s datapath_tb -o "$VVP_OUT" rtl/*.sv sim/datapath_tb.sv
+echo "==> 3. Loading Hex file into Instruction ROM path..."
+mkdir -p /workspaces/nano-rv32i/software/
+cp temp.hex /workspaces/nano-rv32i/software/firmware.hex
 
-echo "🏃 Running VVP Simulation..."
-vvp "$VVP_OUT" -fst
+# -------------------------------------------------------------------------
+# Compilation and Simulation
+# -------------------------------------------------------------------------
+echo "==> 4. Compiling RTL and Testbench using iverilog..."
+# Hardwired output structure to compile the testbench cleanly
+iverilog -g2012 -s datapath_tb -o sim.vvp /workspaces/nano-rv32i/sim/datapath_tb.sv /workspaces/nano-rv32i/rtl/*.sv
 
-# --- 4. CLEANUP ---
-echo "🧹 Cleaning up intermediate simulation files..."
-rm -f "$VVP_OUT" "$TARGET_HEX"
+echo "==> 5. Running simulation..."
+vvp sim.vvp -fst
 
-echo "✅ Simulation Complete! Waveform generated at $WORKSPACE_DIR/waveform.fst"
+# -------------------------------------------------------------------------
+# Waveform Extraction
+# -------------------------------------------------------------------------
+echo "==> 6. Processing waveform file..."
+
+TARGET_WAVEFORM="/workspaces/nano-rv32i/sim/simulation.fst"
+
+# Intercept the local file and move it to the absolute path for Surfer auto-refresh
+if [ -f "simulation.fst" ]; then
+    mkdir -p "$(dirname "$TARGET_WAVEFORM")"
+    mv simulation.fst "$TARGET_WAVEFORM"
+fi
+
+if [ -f "$TARGET_WAVEFORM" ]; then
+    echo "-------------------------------------------------------"
+    echo "SUCCESS! Waveform safely saved to: $TARGET_WAVEFORM"
+    echo "Refresh Surfer to view the new waveform!"
+    echo "-------------------------------------------------------"
+else
+    echo "WARNING: 'simulation.fst' was not found!"
+fi
+
+# Clean up temporary compilation artifacts
+rm -f temp.elf temp.hex sim.vvp

@@ -1,5 +1,33 @@
 `default_nettype none
 
+module datapath(
+    input  logic       clk,
+    input  logic       reset_active_low,
+    output logic [5:0] led
+);
+
+    // 28-bit counter (Bit 27 toggles every ~5 seconds at 27 MHz)
+    logic [27:0] counter;
+
+    // Guarantee a clean power-on state in the bitstream
+    initial counter = 28'b0;
+
+    // Synchronous counting logic
+    always_ff @(posedge clk) begin
+        if (~reset_active_low)
+            counter <= 28'b0;
+        else
+            counter <= counter + 1;
+    end
+
+    // Route the highest bits to the LEDs to make the counting visible
+    // (Inverted because the Tang Nano 20K LEDs turn ON when driven low)
+    assign led = ~counter[27:22];
+
+endmodule
+
+/*`default_nettype none
+
 module datapath(input logic clk, reset_active_low, output logic[5:0] led);
     logic RF_write_enable, ALU_src, is_right_shift, is_arithmetic_shift,
           eq, lt, ltu, sub, negate, PC_increment, comparison_flag,
@@ -15,8 +43,8 @@ module datapath(input logic clk, reset_active_low, output logic[5:0] led);
     logic[31:0] tohost;
     logic reset;
     assign reset = ~reset_active_low;
-    //assign led = ~tohost[5:0];//Negation for active-low LEDs.
-    assign led = 6'b100111;
+    assign led = ~tohost[5:0];//Negation for active-low LEDs.
+    //assign led = 6'b100111;
     decoder main_decoder(
         .RF_write_enable(RF_write_enable),
         .I(I), .S(S), .B(B), .U(U), .J(J),
@@ -113,3 +141,4 @@ module datapath(input logic clk, reset_active_low, output logic[5:0] led);
         .select(result_select)
     );
 endmodule
+*/

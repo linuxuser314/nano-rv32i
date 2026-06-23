@@ -1,5 +1,5 @@
 
-./blinky.elf:     file format elf32-littleriscv
+software/blinky.elf:     file format elf32-littleriscv
 
 
 Disassembly of section .text:

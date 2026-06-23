@@ -1,5 +1,5 @@
 IO_LOC "clk" 4;
-IO_LOC "reset" 88;
+IO_LOC "reset_active_low" 88;
 IO_LOC "led[5]" 20;
 IO_LOC "led[4]" 19;
 IO_LOC "led[3]" 18;

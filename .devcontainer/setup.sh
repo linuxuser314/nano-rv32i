@@ -31,4 +31,9 @@ rm /tmp/oss-cad-suite.tgz
 # Add OSS CAD Suite to the path for all users
 echo 'export PATH="/opt/oss-cad-suite/bin:$PATH"' | sudo tee -a /etc/bash.bashrc
 
+#Add tools directory to the path.
+echo 'export PATH="/workspaces/nano-rv32i/tools:$PATH"' >> ~/.bashrc
+# Add NANO_ROOT environment variable
+echo 'export NANO_ROOT="/workspaces/nano-rv32i"' >> ~/.bashrc
+
 echo "=== Environment Setup Complete! ==="

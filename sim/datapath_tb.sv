@@ -2,24 +2,25 @@
 `timescale 1ns/1ps
 
 module datapath_tb;
-    logic clk, reset;
+    logic clk, reset_active_low;
     logic[5:0] led;
 
     // Instantiate the datapath
     datapath dut(
         .clk(clk),
-        .reset(reset),
+        .reset_active_low(reset_active_low),
         .led(led)
     );
 
     initial begin
         // Initialize
         clk = 0;
-        reset = 1;
+        reset_active_low = 0;
 
         // Release reset after 3 clock cycles
+        //remember reset signal is active low
         #3;
-        reset = 0;
+        reset_active_low = 1;
         #2;
 
         // Run for 10000 clock cycles
