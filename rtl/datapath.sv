@@ -14,9 +14,6 @@ module datapath(
 
     // Synchronous counting logic
     always_ff @(posedge clk) begin
-        if (~reset_active_low)
-            counter <= 28'b0;
-        else
             counter <= counter + 1;
     end
 
