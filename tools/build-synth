@@ -28,4 +28,4 @@ rm core.json
 rm routed.json
 
 echo -e "\n\nAll Done!" >> $NANO_ROOT/synth-log.txt
-echo "\n\nAll done!"
+echo "All done!"
