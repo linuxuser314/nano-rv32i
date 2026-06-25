@@ -27,3 +27,9 @@ __pycache__/
 
 # Temporary log files
 yosysdump.txt
+synth-log.txt
+
+# Intermediate synthesis files
+routed.json
+core.json
+firmware.fs

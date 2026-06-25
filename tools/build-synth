@@ -19,7 +19,7 @@ nextpnr-himbaechel --json $NANO_ROOT/core.json \
 echo -e "\n\n\n=======PROJECT APICULA BITSTREAM GENERATION======\n\n\n" >> $NANO_ROOT/synth-log.txt
 echo -e "\n\n\n=======PROJECT APICULA BITSTREAM GENERATION======\n\n\n"
 
-gowin_pack -d GW2A-18C -o $NANO_ROOT/firmware.fs $NANO_ROOT/routed.json &>> $NANO_ROOT/synth-log.txt
+gowin_pack -d GW2A-18C -c -o $NANO_ROOT/firmware.fs $NANO_ROOT/routed.json &>> $NANO_ROOT/synth-log.txt
 
 echo -e "\n\nAll Done!" >> $NANO_ROOT/synth-log.txt
 echo -e "\n\nAll done!"

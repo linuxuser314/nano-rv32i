@@ -325,7 +325,7 @@ Removed 0 redundant assignments.
 Promoted 2 assignments to connections.
 
 23.4.4. Executing PROC_INIT pass (extract init attributes).
-Found init rule in `\datapath.$proc$/workspaces/nano-rv32i/rtl/datapath.sv:13$36'.
+Found init rule in `\datapath.$proc$/workspaces/nano-rv32i/rtl/datapath.sv:13$37'.
   Set init value: \counter = 28'0000000000000000000000000000
 
 23.4.5. Executing PROC_ARST pass (detect async resets in processes).
@@ -334,19 +334,19 @@ Found init rule in `\datapath.$proc$/workspaces/nano-rv32i/rtl/datapath.sv:13$36
 Converted 0 switches.
 
 23.4.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
-Creating decoders for process `\datapath.$proc$/workspaces/nano-rv32i/rtl/datapath.sv:13$36'.
+Creating decoders for process `\datapath.$proc$/workspaces/nano-rv32i/rtl/datapath.sv:13$37'.
 Creating decoders for process `\datapath.$proc$/workspaces/nano-rv32i/rtl/datapath.sv:16$33'.
 
 23.4.8. Executing PROC_DLATCH pass (convert process syncs to latches).
 
 23.4.9. Executing PROC_DFF pass (convert process syncs to FFs).
 Creating register for signal `\datapath.\counter' using process `\datapath.$proc$/workspaces/nano-rv32i/rtl/datapath.sv:16$33'.
-  created $dff cell `$procdff$8437' with positive edge clock.
+  created $dff cell `$procdff$8438' with positive edge clock.
 
 23.4.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
 
 23.4.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
-Removing empty process `datapath.$proc$/workspaces/nano-rv32i/rtl/datapath.sv:13$36'.
+Removing empty process `datapath.$proc$/workspaces/nano-rv32i/rtl/datapath.sv:13$37'.
 Removing empty process `datapath.$proc$/workspaces/nano-rv32i/rtl/datapath.sv:16$33'.
 Cleaned up 0 empty switches.
 
@@ -368,7 +368,7 @@ Optimizing module datapath.
 
 23.10. Executing OPT_CLEAN pass (remove unused cells and wires).
 Finding unused cells or wires in module \datapath..
-Removed 0 unused cells and 2 unused wires.
+Removed 0 unused cells and 3 unused wires.
 <suppressed ~1 debug messages>
 
 23.11. Executing CHECK pass (checking for obvious problems).
@@ -382,7 +382,7 @@ Optimizing module datapath.
 
 23.12.2. Executing OPT_MERGE pass (detect identical cells).
 Finding identical cells in module `\datapath'.
-Computing hashes of 3 cells of `\datapath'.
+Computing hashes of 4 cells of `\datapath'.
 Finding duplicate cells in `\datapath'.
 Removed a total of 0 cells.
 
@@ -398,7 +398,7 @@ Performed a total of 0 changes.
 
 23.12.5. Executing OPT_MERGE pass (detect identical cells).
 Finding identical cells in module `\datapath'.
-Computing hashes of 3 cells of `\datapath'.
+Computing hashes of 4 cells of `\datapath'.
 Finding duplicate cells in `\datapath'.
 Removed a total of 0 cells.
 
@@ -438,7 +438,7 @@ Optimizing module datapath.
 
 23.14.2. Executing OPT_MERGE pass (detect identical cells).
 Finding identical cells in module `\datapath'.
-Computing hashes of 3 cells of `\datapath'.
+Computing hashes of 4 cells of `\datapath'.
 Finding duplicate cells in `\datapath'.
 Removed a total of 0 cells.
 
@@ -454,7 +454,7 @@ Performed a total of 0 changes.
 
 23.14.5. Executing OPT_MERGE pass (detect identical cells).
 Finding identical cells in module `\datapath'.
-Computing hashes of 3 cells of `\datapath'.
+Computing hashes of 4 cells of `\datapath'.
 Finding duplicate cells in `\datapath'.
 Removed a total of 0 cells.
 
@@ -546,7 +546,7 @@ No more expansions possible.
 Extracting $alu and $macc cells in module datapath:
   creating $macc model for $add$/workspaces/nano-rv32i/rtl/datapath.sv:17$34 ($add).
   creating $alu model for $macc $add$/workspaces/nano-rv32i/rtl/datapath.sv:17$34.
-  creating $alu cell for $add$/workspaces/nano-rv32i/rtl/datapath.sv:17$34: $auto$alumacc.cc:512:replace_alu$8438
+  creating $alu cell for $add$/workspaces/nano-rv32i/rtl/datapath.sv:17$34: $auto$alumacc.cc:512:replace_alu$8439
   created 1 $alu and 0 $macc cells.
 
 23.25. Executing OPT pass (performing simple optimizations).
@@ -556,7 +556,7 @@ Optimizing module datapath.
 
 23.25.2. Executing OPT_MERGE pass (detect identical cells).
 Finding identical cells in module `\datapath'.
-Computing hashes of 3 cells of `\datapath'.
+Computing hashes of 4 cells of `\datapath'.
 Finding duplicate cells in `\datapath'.
 Removed a total of 0 cells.
 
@@ -572,7 +572,7 @@ Performed a total of 0 changes.
 
 23.25.5. Executing OPT_MERGE pass (detect identical cells).
 Finding identical cells in module `\datapath'.
-Computing hashes of 3 cells of `\datapath'.
+Computing hashes of 4 cells of `\datapath'.
 Finding duplicate cells in `\datapath'.
 Removed a total of 0 cells.
 
@@ -643,7 +643,7 @@ Optimizing module datapath.
 
 23.30.2. Executing OPT_MERGE pass (detect identical cells).
 Finding identical cells in module `\datapath'.
-Computing hashes of 3 cells of `\datapath'.
+Computing hashes of 4 cells of `\datapath'.
 Finding duplicate cells in `\datapath'.
 Removed a total of 0 cells.
 
@@ -663,7 +663,7 @@ Optimizing module datapath.
 
 23.32.2. Executing OPT_MERGE pass (detect identical cells).
 Finding identical cells in module `\datapath'.
-Computing hashes of 3 cells of `\datapath'.
+Computing hashes of 4 cells of `\datapath'.
 Finding duplicate cells in `\datapath'.
 Removed a total of 0 cells.
 
@@ -679,7 +679,7 @@ Performed a total of 0 changes.
 
 23.32.5. Executing OPT_MERGE pass (detect identical cells).
 Finding identical cells in module `\datapath'.
-Computing hashes of 3 cells of `\datapath'.
+Computing hashes of 4 cells of `\datapath'.
 Finding duplicate cells in `\datapath'.
 Removed a total of 0 cells.
 
@@ -736,7 +736,7 @@ Using extmapper simplemap for cells of type $dff.
 Using extmapper simplemap for cells of type $pos.
 Using extmapper simplemap for cells of type $xor.
 No more expansions possible.
-<suppressed ~131 debug messages>
+<suppressed ~132 debug messages>
 
 23.34. Executing OPT pass (performing simple optimizations).
 
@@ -841,7 +841,7 @@ Successfully finished Verilog frontend.
 23.44.3. Executing PROC pass (convert processes to netlists).
 
 23.44.3.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
-Found and cleaned up 1 empty switch in `$paramod\ALU\ALU_MODE=s32'00000000000000000000000000000010.$proc$/opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1064$8901'.
+Found and cleaned up 1 empty switch in `$paramod\ALU\ALU_MODE=s32'00000000000000000000000000000010.$proc$/opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1064$8902'.
 Cleaned up 1 empty switch.
 
 23.44.3.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
@@ -859,18 +859,18 @@ Promoted 4 assignments to connections.
 Converted 0 switches.
 
 23.44.3.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
-Creating decoders for process `$paramod\ALU\ALU_MODE=s32'00000000000000000000000000000010.$proc$/opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1064$8901'.
+Creating decoders for process `$paramod\ALU\ALU_MODE=s32'00000000000000000000000000000010.$proc$/opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1064$8902'.
 
 23.44.3.8. Executing PROC_DLATCH pass (convert process syncs to latches).
-No latch inferred for signal `$paramod\ALU\ALU_MODE=s32'00000000000000000000000000000010.\C' from process `$paramod\ALU\ALU_MODE=s32'00000000000000000000000000000010.$proc$/opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1064$8901'.
-No latch inferred for signal `$paramod\ALU\ALU_MODE=s32'00000000000000000000000000000010.\S' from process `$paramod\ALU\ALU_MODE=s32'00000000000000000000000000000010.$proc$/opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1064$8901'.
+No latch inferred for signal `$paramod\ALU\ALU_MODE=s32'00000000000000000000000000000010.\C' from process `$paramod\ALU\ALU_MODE=s32'00000000000000000000000000000010.$proc$/opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1064$8902'.
+No latch inferred for signal `$paramod\ALU\ALU_MODE=s32'00000000000000000000000000000010.\S' from process `$paramod\ALU\ALU_MODE=s32'00000000000000000000000000000010.$proc$/opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1064$8902'.
 
 23.44.3.9. Executing PROC_DFF pass (convert process syncs to FFs).
 
 23.44.3.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
 
 23.44.3.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
-Removing empty process `$paramod\ALU\ALU_MODE=s32'00000000000000000000000000000010.$proc$/opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1064$8901'.
+Removing empty process `$paramod\ALU\ALU_MODE=s32'00000000000000000000000000000010.$proc$/opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1064$8902'.
 Cleaned up 0 empty switches.
 
 23.44.4. Executing SCC pass (detecting logic loops).
@@ -1097,7 +1097,7 @@ Module datapath: replaced 0 cells with 0 new cells, skipped 98 cells.
 
 23.44.16.3. Executing XAIGER backend.
 <suppressed ~39 debug messages>
-Extracted 0 AND gates and 129 wires from module `datapath' to a netlist network with 37 inputs and 41 outputs.
+Extracted 0 AND gates and 130 wires from module `datapath' to a netlist network with 38 inputs and 41 outputs.
 
 23.44.16.4. Executing ABC9_EXE pass (technology mapping using ABC9).
 
@@ -1108,15 +1108,15 @@ ABC: + read_lut <abc-temp-dir>/input.lut
 ABC: + read_box <abc-temp-dir>/input.box 
 ABC: + &read <abc-temp-dir>/input.xaig 
 ABC: + &ps 
-ABC: <abc-temp-dir>/input : i/o =     37/     41  and =       0  lev =    0 (0.00)  mem = 0.01 MB  box = 56  bb = 28
+ABC: <abc-temp-dir>/input : i/o =     38/     41  and =       0  lev =    0 (0.00)  mem = 0.01 MB  box = 56  bb = 28
 ABC: + &scorr 
 ABC: Warning: The network is combinational.
 ABC: + &sweep 
 ABC: + &dc2 
 ABC: + &dch -f -r 
 ABC: + &ps 
-ABC: <abc-temp-dir>/input : i/o =     37/     41  and =       0  lev =    0 (0.00)  mem = 0.01 MB  ch =    0  box = 56  bb = 28
-ABC: cst =       0  cls =      0  lit =       0  unused =     121  proof =     0
+ABC: <abc-temp-dir>/input : i/o =     38/     41  and =       0  lev =    0 (0.00)  mem = 0.01 MB  ch =    0  box = 56  bb = 28
+ABC: cst =       0  cls =      0  lit =       0  unused =     122  proof =     0
 ABC: + &if -W 500 -v 
 ABC: K = 8. Memory (bytes): Truth =    0. Cut =   80. Obj =  160. Set =  816. CutMin = no
 ABC: Node =       0.  Ch =     0.  Total mem =    0.05 MB. Peak cut mem =    0.00 MB.
@@ -1131,23 +1131,23 @@ ABC: + &write -n <abc-temp-dir>/output.aig
 ABC: + &mfs 
 ABC: The network is not changed by "&mfs".
 ABC: + &ps -l 
-ABC: <abc-temp-dir>/input : i/o =     37/     41  and =       0  lev =    0 (0.00)  mem = 0.01 MB  box = 56  bb = 28
+ABC: <abc-temp-dir>/input : i/o =     38/     41  and =       0  lev =    0 (0.00)  mem = 0.01 MB  box = 56  bb = 28
 ABC: Mapping (K=0)  :  lut =      0  edge =       0  lev =    0 (0.00)  levB =   29  mem = 0.00 MB
 ABC: LUT = 0 : Ave = 0.00
 ABC: + &write -n <abc-temp-dir>/output.aig 
 ABC: + &verify 
-ABC: Networks are equivalent.  Time =     0.05 sec
+ABC: Networks are equivalent.  Time =     0.01 sec
 ABC: + time 
-ABC: elapse: 0.20 seconds, total: 0.20 seconds
+ABC: elapse: 0.02 seconds, total: 0.02 seconds
 
 23.44.16.6. Executing AIGER frontend.
-<suppressed ~167 debug messages>
-Removed 0 unused cells and 309 unused wires.
+<suppressed ~169 debug messages>
+Removed 0 unused cells and 310 unused wires.
 
 23.44.16.7. Executing ABC_OPS_REINTEGRATE pass (reintegrate ABC mapped design into module).
 ABC RESULTS:              $lut cells:        7
 ABC RESULTS:   $paramod\ALU\ALU_MODE=s32'00000000000000000000000000000010 cells:       28
-ABC RESULTS:           input signals:        3
+ABC RESULTS:           input signals:        4
 ABC RESULTS:          output signals:       31
 Removing temp directory.
 
@@ -1163,7 +1163,7 @@ Successfully finished Verilog frontend.
 Using template $paramod\ALU\ALU_MODE=s32'00000000000000000000000000000010 for cells of type $paramod\ALU\ALU_MODE=s32'00000000000000000000000000000010.
 No more expansions possible.
 <suppressed ~34 debug messages>
-Removed 0 unused cells and 381 unused wires.
+Removed 0 unused cells and 382 unused wires.
 
 23.45. Executing TECHMAP pass (map to technology primitives).
 
@@ -1272,7 +1272,7 @@ Found and reported 0 problems.
 
 23.52. Executing JSON backend.
 
-End of script. Logfile hash: 8c6a0da019, time: 3.48s, user: 1.24s, system: 0.42s, MEM: 67.48 MB peak
+End of script. Logfile hash: 54416d9a3b, time: 1.78s, user: 1.23s, system: 0.43s, MEM: 66.61 MB peak
 Yosys 0.66+115 (git sha1 5d7486115, Release, Clang /usr/bin/clang++ 18.1.8)
 Time spent: 63% 47x read_verilog (1 sec), 13% 1x synth_gowin (0 sec), ...
 
@@ -1369,7 +1369,7 @@ Info: Pack EMCU and UserFlash cells...
 Info: Pack UserFlash cells...
 Info: Pack DQCE cells...
 Info: Pack DCS cells...
-Info: Checksum: 0xe9f45262
+Info: Checksum: 0x41a05530
 
 Info: Device utilisation:
 Info: 	                 VCC:       1/      1   100%
@@ -1407,296 +1407,301 @@ Info: 	             CLKDIV2:       0/     16     0%
 
 Info: Running custom HCLK placer...
 Info: Placed 0 cells based on constraints.
-Info: Creating initial analytic placement for 36 cells, random placement wirelen = 3510.
-Info:     at initial placer iter 0, wirelen = 272
-Info:     at initial placer iter 1, wirelen = 223
-Info:     at initial placer iter 2, wirelen = 223
-Info:     at initial placer iter 3, wirelen = 223
+Info: Creating initial analytic placement for 36 cells, random placement wirelen = 3561.
+Info:     at initial placer iter 0, wirelen = 345
+Info:     at initial placer iter 1, wirelen = 299
+Info:     at initial placer iter 2, wirelen = 296
+Info:     at initial placer iter 3, wirelen = 296
 Info: Running main analytical placer, max placement attempts per cell = 10000.
-Info:     at iteration #1, type ALL: wirelen solved = 223, spread = 213, legal = 306; time = 0.01s
-Info:     at iteration #2, type ALL: wirelen solved = 218, spread = 212, legal = 301; time = 0.00s
-Info:     at iteration #3, type ALL: wirelen solved = 202, spread = 212, legal = 304; time = 0.00s
-Info:     at iteration #4, type ALL: wirelen solved = 213, spread = 248, legal = 320; time = 0.00s
-Info:     at iteration #5, type ALL: wirelen solved = 203, spread = 228, legal = 280; time = 0.00s
-Info:     at iteration #6, type ALL: wirelen solved = 203, spread = 232, legal = 323; time = 0.00s
-Info:     at iteration #7, type ALL: wirelen solved = 183, spread = 200, legal = 267; time = 0.00s
-Info:     at iteration #8, type ALL: wirelen solved = 190, spread = 252, legal = 314; time = 0.00s
-Info:     at iteration #9, type ALL: wirelen solved = 219, spread = 245, legal = 318; time = 0.00s
-Info:     at iteration #10, type ALL: wirelen solved = 198, spread = 228, legal = 318; time = 0.00s
-Info:     at iteration #11, type ALL: wirelen solved = 203, spread = 233, legal = 324; time = 0.00s
-Info:     at iteration #12, type ALL: wirelen solved = 216, spread = 232, legal = 311; time = 0.00s
+Info:     at iteration #1, type ALL: wirelen solved = 296, spread = 282, legal = 374; time = 0.01s
+Info:     at iteration #2, type ALL: wirelen solved = 294, spread = 301, legal = 369; time = 0.00s
+Info:     at iteration #3, type ALL: wirelen solved = 274, spread = 303, legal = 377; time = 0.00s
+Info:     at iteration #4, type ALL: wirelen solved = 274, spread = 303, legal = 369; time = 0.00s
+Info:     at iteration #5, type ALL: wirelen solved = 274, spread = 303, legal = 392; time = 0.00s
+Info:     at iteration #6, type ALL: wirelen solved = 268, spread = 268, legal = 340; time = 0.00s
+Info:     at iteration #7, type ALL: wirelen solved = 253, spread = 287, legal = 345; time = 0.00s
+Info:     at iteration #8, type ALL: wirelen solved = 258, spread = 280, legal = 363; time = 0.00s
+Info:     at iteration #9, type ALL: wirelen solved = 259, spread = 297, legal = 370; time = 0.00s
+Info:     at iteration #10, type ALL: wirelen solved = 265, spread = 299, legal = 369; time = 0.00s
+Info:     at iteration #11, type ALL: wirelen solved = 274, spread = 309, legal = 397; time = 0.00s
 Info: HeAP Placer Time: 0.10s
 Info:   of which solving equations: 0.01s
 Info:   of which spreading cells: 0.02s
 Info:   of which strict legalisation: 0.00s
 
 Info: Running simulated annealing placer for refinement.
-Info:   at iteration #1: temp = 0.000000, timing cost = 4, wirelen = 267
-Info:   at iteration #5: temp = 0.000000, timing cost = 2, wirelen = 206
-Info:   at iteration #10: temp = 0.000000, timing cost = 1, wirelen = 185
-Info:   at iteration #15: temp = 0.000000, timing cost = 1, wirelen = 172
-Info:   at iteration #18: temp = 0.000000, timing cost = 1, wirelen = 170 
-Info: SA placement time 0.01s
+Info:   at iteration #1: temp = 0.000000, timing cost = 3, wirelen = 340
+Info:   at iteration #5: temp = 0.000000, timing cost = 1, wirelen = 275
+Info:   at iteration #10: temp = 0.000000, timing cost = 1, wirelen = 265
+Info:   at iteration #14: temp = 0.000000, timing cost = 1, wirelen = 251 
+Info: SA placement time 0.02s
 
-Info: Max frequency for clock 'clk_IBUF_I_O': 414.25 MHz (PASS at 12.00 MHz)
+Info: Max frequency for clock 'clk_IBUF_I_O': 433.09 MHz (PASS at 12.00 MHz)
 
 Info: Slack histogram:
 Info:  legend: * represents 1 endpoint(s)
 Info:          + represents [1,1) endpoint(s)
-Info: [ 80919,  80965) |** 
-Info: [ 80965,  81011) |* 
-Info: [ 81011,  81057) |* 
-Info: [ 81057,  81103) |** 
-Info: [ 81103,  81149) |* 
-Info: [ 81149,  81195) |* 
-Info: [ 81195,  81241) |** 
-Info: [ 81241,  81287) |* 
-Info: [ 81287,  81333) |* 
-Info: [ 81333,  81379) |** 
-Info: [ 81379,  81425) |* 
-Info: [ 81425,  81471) |* 
-Info: [ 81471,  81517) |** 
-Info: [ 81517,  81563) |* 
-Info: [ 81563,  81609) |* 
-Info: [ 81609,  81655) |** 
-Info: [ 81655,  81701) |* 
-Info: [ 81701,  81747) |* 
-Info: [ 81747,  81793) |* 
-Info: [ 81793,  81839) |** 
-Info: Checksum: 0xf321b3c3
+Info: [ 81024,  81075) |* 
+Info: [ 81075,  81126) |* 
+Info: [ 81126,  81177) |** 
+Info: [ 81177,  81228) |* 
+Info: [ 81228,  81279) |* 
+Info: [ 81279,  81330) |** 
+Info: [ 81330,  81381) |* 
+Info: [ 81381,  81432) |* 
+Info: [ 81432,  81483) |** 
+Info: [ 81483,  81534) |** 
+Info: [ 81534,  81585) |** 
+Info: [ 81585,  81636) |* 
+Info: [ 81636,  81687) |** 
+Info: [ 81687,  81738) |* 
+Info: [ 81738,  81789) |* 
+Info: [ 81789,  81840) |* 
+Info: [ 81840,  81891) |* 
+Info: [ 81891,  81942) |* 
+Info: [ 81942,  81993) |* 
+Info: [ 81993,  82044) |** 
+Info: Checksum: 0x4a65d809
 Info: Routing globals...
 Info:     'clk_IBUF_I_O' net was routed.
 
 Info: Routing..
 Info: Setting up routing queue.
-Info: Routing 131 arcs.
+Info: Routing 133 arcs.
 Info:            |   (re-)routed arcs  |   delta    | remaining|       time spent     |
 Info:    IterCnt |  w/ripup   wo/ripup |  w/r  wo/r |      arcs| batch(sec) total(sec)|
-Info:        131 |        0        103 |    0   103 |         0|       0.02       0.02|
+Info:        133 |        0        105 |    0   105 |         0|       0.02       0.02|
 Info: Routing complete.
 Info: Router1 time 0.02s
-Info: Checksum: 0x1075cead
+Info: Checksum: 0x0af9de65
 
 Info: Critical path report for clock 'clk_IBUF_I_O' (posedge -> posedge):
 Info:       type curr  total name
 Info:   clk-to-q  0.23  0.23 Source counter_DFF_Q_27.Q
-Info:    routing  0.17  0.40 Net counter[0] (1,47) -> (1,46)
+Info:    routing  0.17  0.40 Net counter[0] (1,43) -> (1,44)
 Info:                          Sink counter_DFF_Q_26_D_ALU_SUM_CIN_ALU_COUT.I1
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:10.18-10.25
 Info:      logic  0.57  0.97 Source counter_DFF_Q_26_D_ALU_SUM_CIN_ALU_COUT.COUT
-Info:    routing  0.00  0.97 Net counter_DFF_Q_26_D_ALU_SUM_CIN (1,46) -> (1,46)
+Info:    routing  0.00  0.97 Net counter_DFF_Q_26_D_ALU_SUM_CIN (1,44) -> (1,44)
 Info:                          Sink counter_DFF_Q_26_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
 Info:      logic  0.04  1.00 Source counter_DFF_Q_26_D_ALU_SUM.COUT
-Info:    routing  0.00  1.00 Net counter_DFF_Q_26_D_ALU_SUM_COUT (1,46) -> (1,46)
+Info:    routing  0.00  1.00 Net counter_DFF_Q_26_D_ALU_SUM_COUT (1,44) -> (1,44)
 Info:                          Sink counter_DFF_Q_25_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
 Info:      logic  0.04  1.04 Source counter_DFF_Q_25_D_ALU_SUM.COUT
-Info:    routing  0.00  1.04 Net counter_DFF_Q_25_D_ALU_SUM_COUT (1,46) -> (1,46)
+Info:    routing  0.00  1.04 Net counter_DFF_Q_25_D_ALU_SUM_COUT (1,44) -> (1,44)
 Info:                          Sink counter_DFF_Q_24_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
 Info:      logic  0.04  1.07 Source counter_DFF_Q_24_D_ALU_SUM.COUT
-Info:    routing  0.00  1.07 Net counter_DFF_Q_24_D_ALU_SUM_COUT (1,46) -> (1,46)
+Info:    routing  0.00  1.07 Net counter_DFF_Q_24_D_ALU_SUM_COUT (1,44) -> (1,44)
 Info:                          Sink counter_DFF_Q_23_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
 Info:      logic  0.04  1.11 Source counter_DFF_Q_23_D_ALU_SUM.COUT
-Info:    routing  0.00  1.11 Net counter_DFF_Q_23_D_ALU_SUM_COUT (1,46) -> (2,46)
+Info:    routing  0.00  1.11 Net counter_DFF_Q_23_D_ALU_SUM_COUT (1,44) -> (2,44)
 Info:                          Sink counter_DFF_Q_22_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
 Info:      logic  0.04  1.14 Source counter_DFF_Q_22_D_ALU_SUM.COUT
-Info:    routing  0.00  1.14 Net counter_DFF_Q_22_D_ALU_SUM_COUT (2,46) -> (2,46)
+Info:    routing  0.00  1.14 Net counter_DFF_Q_22_D_ALU_SUM_COUT (2,44) -> (2,44)
 Info:                          Sink counter_DFF_Q_21_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
 Info:      logic  0.04  1.18 Source counter_DFF_Q_21_D_ALU_SUM.COUT
-Info:    routing  0.00  1.18 Net counter_DFF_Q_21_D_ALU_SUM_COUT (2,46) -> (2,46)
+Info:    routing  0.00  1.18 Net counter_DFF_Q_21_D_ALU_SUM_COUT (2,44) -> (2,44)
 Info:                          Sink counter_DFF_Q_20_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
 Info:      logic  0.04  1.21 Source counter_DFF_Q_20_D_ALU_SUM.COUT
-Info:    routing  0.00  1.21 Net counter_DFF_Q_20_D_ALU_SUM_COUT (2,46) -> (2,46)
+Info:    routing  0.00  1.21 Net counter_DFF_Q_20_D_ALU_SUM_COUT (2,44) -> (2,44)
 Info:                          Sink counter_DFF_Q_19_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
 Info:      logic  0.04  1.25 Source counter_DFF_Q_19_D_ALU_SUM.COUT
-Info:    routing  0.00  1.25 Net counter_DFF_Q_19_D_ALU_SUM_COUT (2,46) -> (2,46)
+Info:    routing  0.00  1.25 Net counter_DFF_Q_19_D_ALU_SUM_COUT (2,44) -> (2,44)
 Info:                          Sink counter_DFF_Q_18_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
 Info:      logic  0.04  1.28 Source counter_DFF_Q_18_D_ALU_SUM.COUT
-Info:    routing  0.00  1.28 Net counter_DFF_Q_18_D_ALU_SUM_COUT (2,46) -> (2,46)
+Info:    routing  0.00  1.28 Net counter_DFF_Q_18_D_ALU_SUM_COUT (2,44) -> (2,44)
 Info:                          Sink counter_DFF_Q_17_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
 Info:      logic  0.04  1.32 Source counter_DFF_Q_17_D_ALU_SUM.COUT
-Info:    routing  0.00  1.32 Net counter_DFF_Q_17_D_ALU_SUM_COUT (2,46) -> (3,46)
+Info:    routing  0.00  1.32 Net counter_DFF_Q_17_D_ALU_SUM_COUT (2,44) -> (3,44)
 Info:                          Sink counter_DFF_Q_16_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
 Info:      logic  0.04  1.35 Source counter_DFF_Q_16_D_ALU_SUM.COUT
-Info:    routing  0.00  1.35 Net counter_DFF_Q_16_D_ALU_SUM_COUT (3,46) -> (3,46)
+Info:    routing  0.00  1.35 Net counter_DFF_Q_16_D_ALU_SUM_COUT (3,44) -> (3,44)
 Info:                          Sink counter_DFF_Q_15_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
 Info:      logic  0.04  1.39 Source counter_DFF_Q_15_D_ALU_SUM.COUT
-Info:    routing  0.00  1.39 Net counter_DFF_Q_15_D_ALU_SUM_COUT (3,46) -> (3,46)
+Info:    routing  0.00  1.39 Net counter_DFF_Q_15_D_ALU_SUM_COUT (3,44) -> (3,44)
 Info:                          Sink counter_DFF_Q_14_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
 Info:      logic  0.04  1.42 Source counter_DFF_Q_14_D_ALU_SUM.COUT
-Info:    routing  0.00  1.42 Net counter_DFF_Q_14_D_ALU_SUM_COUT (3,46) -> (3,46)
+Info:    routing  0.00  1.42 Net counter_DFF_Q_14_D_ALU_SUM_COUT (3,44) -> (3,44)
 Info:                          Sink counter_DFF_Q_13_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
 Info:      logic  0.04  1.46 Source counter_DFF_Q_13_D_ALU_SUM.COUT
-Info:    routing  0.00  1.46 Net counter_DFF_Q_13_D_ALU_SUM_COUT (3,46) -> (3,46)
+Info:    routing  0.00  1.46 Net counter_DFF_Q_13_D_ALU_SUM_COUT (3,44) -> (3,44)
 Info:                          Sink counter_DFF_Q_12_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
 Info:      logic  0.04  1.49 Source counter_DFF_Q_12_D_ALU_SUM.COUT
-Info:    routing  0.00  1.49 Net counter_DFF_Q_12_D_ALU_SUM_COUT (3,46) -> (3,46)
+Info:    routing  0.00  1.49 Net counter_DFF_Q_12_D_ALU_SUM_COUT (3,44) -> (3,44)
 Info:                          Sink counter_DFF_Q_11_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
 Info:      logic  0.04  1.53 Source counter_DFF_Q_11_D_ALU_SUM.COUT
-Info:    routing  0.00  1.53 Net counter_DFF_Q_11_D_ALU_SUM_COUT (3,46) -> (4,46)
+Info:    routing  0.00  1.53 Net counter_DFF_Q_11_D_ALU_SUM_COUT (3,44) -> (4,44)
 Info:                          Sink counter_DFF_Q_10_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
 Info:      logic  0.04  1.56 Source counter_DFF_Q_10_D_ALU_SUM.COUT
-Info:    routing  0.00  1.56 Net counter_DFF_Q_10_D_ALU_SUM_COUT (4,46) -> (4,46)
+Info:    routing  0.00  1.56 Net counter_DFF_Q_10_D_ALU_SUM_COUT (4,44) -> (4,44)
 Info:                          Sink counter_DFF_Q_9_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
 Info:      logic  0.04  1.60 Source counter_DFF_Q_9_D_ALU_SUM.COUT
-Info:    routing  0.00  1.60 Net counter_DFF_Q_9_D_ALU_SUM_COUT (4,46) -> (4,46)
+Info:    routing  0.00  1.60 Net counter_DFF_Q_9_D_ALU_SUM_COUT (4,44) -> (4,44)
 Info:                          Sink counter_DFF_Q_8_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
 Info:      logic  0.04  1.63 Source counter_DFF_Q_8_D_ALU_SUM.COUT
-Info:    routing  0.00  1.63 Net counter_DFF_Q_8_D_ALU_SUM_COUT (4,46) -> (4,46)
+Info:    routing  0.00  1.63 Net counter_DFF_Q_8_D_ALU_SUM_COUT (4,44) -> (4,44)
 Info:                          Sink counter_DFF_Q_7_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
 Info:      logic  0.04  1.67 Source counter_DFF_Q_7_D_ALU_SUM.COUT
-Info:    routing  0.00  1.67 Net counter_DFF_Q_7_D_ALU_SUM_COUT (4,46) -> (4,46)
+Info:    routing  0.00  1.67 Net counter_DFF_Q_7_D_ALU_SUM_COUT (4,44) -> (4,44)
 Info:                          Sink counter_DFF_Q_6_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
 Info:      logic  0.04  1.70 Source counter_DFF_Q_6_D_ALU_SUM.COUT
-Info:    routing  0.00  1.70 Net counter_DFF_Q_6_D_ALU_SUM_COUT (4,46) -> (4,46)
+Info:    routing  0.00  1.70 Net counter_DFF_Q_6_D_ALU_SUM_COUT (4,44) -> (4,44)
 Info:                          Sink counter_DFF_Q_5_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
 Info:      logic  0.04  1.74 Source counter_DFF_Q_5_D_ALU_SUM.COUT
-Info:    routing  0.00  1.74 Net counter_DFF_Q_5_D_ALU_SUM_COUT (4,46) -> (5,46)
+Info:    routing  0.00  1.74 Net counter_DFF_Q_5_D_ALU_SUM_COUT (4,44) -> (5,44)
 Info:                          Sink counter_DFF_Q_4_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
 Info:      logic  0.04  1.77 Source counter_DFF_Q_4_D_ALU_SUM.COUT
-Info:    routing  0.00  1.77 Net counter_DFF_Q_4_D_ALU_SUM_COUT (5,46) -> (5,46)
+Info:    routing  0.00  1.77 Net counter_DFF_Q_4_D_ALU_SUM_COUT (5,44) -> (5,44)
 Info:                          Sink counter_DFF_Q_3_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
 Info:      logic  0.04  1.81 Source counter_DFF_Q_3_D_ALU_SUM.COUT
-Info:    routing  0.00  1.81 Net counter_DFF_Q_3_D_ALU_SUM_COUT (5,46) -> (5,46)
+Info:    routing  0.00  1.81 Net counter_DFF_Q_3_D_ALU_SUM_COUT (5,44) -> (5,44)
 Info:                          Sink counter_DFF_Q_2_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
 Info:      logic  0.04  1.84 Source counter_DFF_Q_2_D_ALU_SUM.COUT
-Info:    routing  0.00  1.84 Net counter_DFF_Q_2_D_ALU_SUM_COUT (5,46) -> (5,46)
+Info:    routing  0.00  1.84 Net counter_DFF_Q_2_D_ALU_SUM_COUT (5,44) -> (5,44)
 Info:                          Sink counter_DFF_Q_1_D_ALU_SUM.CIN
 Info:                          Defined in:
 Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
 Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
-Info:      logic  0.47  2.31 Source counter_DFF_Q_1_D_ALU_SUM.SUM
-Info:    routing  0.00  2.31 Net counter_DFF_Q_1_D (5,46) -> (5,46)
-Info:                          Sink counter_DFF_Q_1.D
-Info:      setup  0.04  2.35 Source counter_DFF_Q_1.D
-Info: 2.18 ns logic, 0.17 ns routing
+Info:      logic  0.04  1.88 Source counter_DFF_Q_1_D_ALU_SUM.COUT
+Info:    routing  0.00  1.88 Net counter_DFF_Q_1_D_ALU_SUM_COUT (5,44) -> (5,44)
+Info:                          Sink counter_DFF_Q_D_ALU_SUM.CIN
+Info:                          Defined in:
+Info:                               /workspaces/nano-rv32i/rtl/datapath.sv:17.24-17.35
+Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/arith_map.v:57.7-63.5
+Info:                               /opt/oss-cad-suite/lib/../share/yosys/gowin/cells_sim.v:1033.25-1033.29
+Info:      logic  0.47  2.35 Source counter_DFF_Q_D_ALU_SUM.SUM
+Info:    routing  0.00  2.35 Net counter_DFF_Q_D (5,44) -> (5,44)
+Info:                          Sink counter_DFF_Q.D
+Info:      setup  0.04  2.38 Source counter_DFF_Q.D
+Info: 2.21 ns logic, 0.17 ns routing
 
-Info: Max frequency for clock 'clk_IBUF_I_O': 426.26 MHz (PASS at 12.00 MHz)
+Info: Max frequency for clock 'clk_IBUF_I_O': 419.99 MHz (PASS at 12.00 MHz)
 
 Info: Slack histogram:
 Info:  legend: * represents 1 endpoint(s)
 Info:          + represents [1,1) endpoint(s)
-Info: [ 80987,  81031) |** 
-Info: [ 81031,  81075) |* 
-Info: [ 81075,  81119) |* 
-Info: [ 81119,  81163) |** 
-Info: [ 81163,  81207) |* 
-Info: [ 81207,  81251) |* 
-Info: [ 81251,  81295) |* 
-Info: [ 81295,  81339) |** 
-Info: [ 81339,  81383) | 
-Info: [ 81383,  81427) |* 
-Info: [ 81427,  81471) |* 
-Info: [ 81471,  81515) |** 
-Info: [ 81515,  81559) | 
-Info: [ 81559,  81603) |* 
-Info: [ 81603,  81647) |* 
-Info: [ 81647,  81691) |* 
-Info: [ 81691,  81735) |* 
-Info: [ 81735,  81779) |* 
-Info: [ 81779,  81823) |* 
-Info: [ 81823,  81867) |** 
+Info: [ 80952,  80998) |** 
+Info: [ 80998,  81044) |* 
+Info: [ 81044,  81090) | 
+Info: [ 81090,  81136) |** 
+Info: [ 81136,  81182) |* 
+Info: [ 81182,  81228) | 
+Info: [ 81228,  81274) |** 
+Info: [ 81274,  81320) |* 
+Info: [ 81320,  81366) |* 
+Info: [ 81366,  81412) |* 
+Info: [ 81412,  81458) |* 
+Info: [ 81458,  81504) |* 
+Info: [ 81504,  81550) |* 
+Info: [ 81550,  81596) |* 
+Info: [ 81596,  81642) | 
+Info: [ 81642,  81688) |** 
+Info: [ 81688,  81734) | 
+Info: [ 81734,  81780) |* 
+Info: [ 81780,  81826) |* 
+Info: [ 81826,  81872) |** 
 
 Info: Program finished normally.
 
