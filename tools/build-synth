@@ -3,12 +3,12 @@
 set -e
 
 echo -e "\n\n\n======YOSYS SYNTHESIS======\n\n\n" > $NANO_ROOT/synth-log.txt
-echo -e "\n\n\n======YOSYS SYNTHESIS======\n\n\n"
+echo "======YOSYS SYNTHESIS======"
 
 yosys -p "read_verilog -sv $NANO_ROOT/rtl/*.sv; synth_gowin -top datapath -json $NANO_ROOT/core.json" &>> $NANO_ROOT/synth-log.txt
 
 echo -e "\n\n\n======NEXTPNR PLACE-AND-ROUTE======\n\n\n" >> $NANO_ROOT/synth-log.txt
-echo -e "\n\n\n======NEXTPNR PLACE-AND-ROUTE======\n\n\n"
+echo "======NEXTPNR PLACE-AND-ROUTE======"
 
 nextpnr-himbaechel --json $NANO_ROOT/core.json \
                    --write $NANO_ROOT/routed.json \
@@ -17,9 +17,15 @@ nextpnr-himbaechel --json $NANO_ROOT/core.json \
                    --vopt cst=$NANO_ROOT/nano20k.cst &>> $NANO_ROOT/synth-log.txt
 
 echo -e "\n\n\n=======PROJECT APICULA BITSTREAM GENERATION======\n\n\n" >> $NANO_ROOT/synth-log.txt
-echo -e "\n\n\n=======PROJECT APICULA BITSTREAM GENERATION======\n\n\n"
+echo "=======PROJECT APICULA BITSTREAM GENERATION======"
 
 gowin_pack -d GW2A-18C -c -o $NANO_ROOT/firmware.fs $NANO_ROOT/routed.json &>> $NANO_ROOT/synth-log.txt
 
+echo -e "\n\nCleaning up...\n\n" >> $NANO_ROOT/synth-log.txt
+echo "Cleaning up..."
+
+rm core.json
+rm routed.json
+
 echo -e "\n\nAll Done!" >> $NANO_ROOT/synth-log.txt
-echo -e "\n\nAll done!"
+echo "\n\nAll done!"

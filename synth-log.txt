@@ -761,7 +761,7 @@ Removed 1 unused cells and 44 unused wires.
 
 23.35. Executing IOPADMAP pass (mapping inputs/outputs to IO-PAD cells).
 Mapping port datapath.led using OBUF.
-Mapping port datapath.reset_active_low using IBUF.
+Mapping port datapath.reset using IBUF.
 Mapping port datapath.clk using IBUF.
 
 23.36. Executing OPT_CLEAN pass (remove unused cells and wires).
@@ -1204,7 +1204,7 @@ Optimizing LUTs in datapath.
 Removed 0 unused cells and 14 unused wires.
 
 23.48. Executing AUTONAME pass.
-Renamed 135 objects in module datapath (20 iterations).
+Renamed 135 objects in module datapath (19 iterations).
 <suppressed ~135 debug messages>
 
 23.49. Executing HIERARCHY pass (managing design hierarchy).
@@ -1272,9 +1272,9 @@ Found and reported 0 problems.
 
 23.52. Executing JSON backend.
 
-End of script. Logfile hash: 54416d9a3b, time: 1.78s, user: 1.23s, system: 0.43s, MEM: 66.61 MB peak
+End of script. Logfile hash: da8460d520, time: 1.78s, user: 1.25s, system: 0.39s, MEM: 65.87 MB peak
 Yosys 0.66+115 (git sha1 5d7486115, Release, Clang /usr/bin/clang++ 18.1.8)
-Time spent: 63% 47x read_verilog (1 sec), 13% 1x synth_gowin (0 sec), ...
+Time spent: 64% 47x read_verilog (1 sec), 12% 1x synth_gowin (0 sec), ...
 
 
 
@@ -1369,7 +1369,7 @@ Info: Pack EMCU and UserFlash cells...
 Info: Pack UserFlash cells...
 Info: Pack DQCE cells...
 Info: Pack DCS cells...
-Info: Checksum: 0x41a05530
+Info: Checksum: 0xedffa674
 
 Info: Device utilisation:
 Info: 	                 VCC:       1/      1   100%
@@ -1426,7 +1426,7 @@ Info:     at iteration #10, type ALL: wirelen solved = 265, spread = 299, legal 
 Info:     at iteration #11, type ALL: wirelen solved = 274, spread = 309, legal = 397; time = 0.00s
 Info: HeAP Placer Time: 0.10s
 Info:   of which solving equations: 0.01s
-Info:   of which spreading cells: 0.02s
+Info:   of which spreading cells: 0.01s
 Info:   of which strict legalisation: 0.00s
 
 Info: Running simulated annealing placer for refinement.
@@ -1434,7 +1434,7 @@ Info:   at iteration #1: temp = 0.000000, timing cost = 3, wirelen = 340
 Info:   at iteration #5: temp = 0.000000, timing cost = 1, wirelen = 275
 Info:   at iteration #10: temp = 0.000000, timing cost = 1, wirelen = 265
 Info:   at iteration #14: temp = 0.000000, timing cost = 1, wirelen = 251 
-Info: SA placement time 0.02s
+Info: SA placement time 0.01s
 
 Info: Max frequency for clock 'clk_IBUF_I_O': 433.09 MHz (PASS at 12.00 MHz)
 
@@ -1461,7 +1461,7 @@ Info: [ 81840,  81891) |*
 Info: [ 81891,  81942) |* 
 Info: [ 81942,  81993) |* 
 Info: [ 81993,  82044) |** 
-Info: Checksum: 0x4a65d809
+Info: Checksum: 0x0c3afac9
 Info: Routing globals...
 Info:     'clk_IBUF_I_O' net was routed.
 
@@ -1473,7 +1473,7 @@ Info:    IterCnt |  w/ripup   wo/ripup |  w/r  wo/r |      arcs| batch(sec) tota
 Info:        133 |        0        105 |    0   105 |         0|       0.02       0.02|
 Info: Routing complete.
 Info: Router1 time 0.02s
-Info: Checksum: 0x0af9de65
+Info: Checksum: 0x60a4e07e
 
 Info: Critical path report for clock 'clk_IBUF_I_O' (posedge -> posedge):
 Info:       type curr  total name
@@ -1717,6 +1717,11 @@ Info: Program finished normally.
   warnings.warn("Msgspec is not available, performance will be degraded.")
 /opt/oss-cad-suite/lib/python3.11/site-packages/apycula/crc16.py:19: UserWarning: fastcrc is not available, performance will be degraded.
   warnings.warn("fastcrc is not available, performance will be degraded.")
+
+
+Cleaning up...
+
+
 
 
 All Done!

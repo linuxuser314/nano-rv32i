@@ -2,7 +2,7 @@
 
 module datapath(
     input  logic       clk,
-    input  logic       reset_active_low,
+    input  logic       reset,
     output logic [5:0] led
 );
 
@@ -20,7 +20,7 @@ module datapath(
     // Route the highest bits to the LEDs to make the counting visible
     // (Inverted because the Tang Nano 20K LEDs turn ON when driven low)
     assign led[0:4] = ~counter[27:23];
-    assign led[5]   = ~reset_active_low;
+    assign led[5]   = ~reset;
 
 endmodule
 
