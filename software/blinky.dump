@@ -5,16 +5,10 @@ software/blinky.elf:     file format elf32-littleriscv
 Disassembly of section .text:
 
 00000000 <_start>:
-   0:	00000513          	li	a0,0
-   4:	40000637          	lui	a2,0x40000
+   0:	00000093          	li	ra,0
+   4:	40000137          	lui	sp,0x40000
 
-00000008 <main_loop>:
-   8:	00150513          	addi	a0,a0,1
-   c:	00a62023          	sw	a0,0(a2) # 40000000 <__global_pointer$+0x3fffe7dc>
-  10:	004c55b7          	lui	a1,0x4c5
-  14:	b4058593          	addi	a1,a1,-1216 # 4c4b40 <__global_pointer$+0x4c331c>
-
-00000018 <delay_loop>:
-  18:	fff58593          	addi	a1,a1,-1
-  1c:	fe059ee3          	bnez	a1,18 <delay_loop>
-  20:	fe9ff06f          	j	8 <main_loop>
+00000008 <loop>:
+   8:	00108093          	addi	ra,ra,1
+   c:	00112023          	sw	ra,0(sp) # 40000000 <__global_pointer$+0x3fffe7ec>
+  10:	ff9ff06f          	j	8 <loop>

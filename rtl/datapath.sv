@@ -1,4 +1,4 @@
-`default_nettype none
+/*`default_nettype none
 
 module datapath(
     input  logic       clk,
@@ -25,7 +25,7 @@ module datapath(
 endmodule/**/
 
 //`default_nettype none
-/*
+
 module datapath(input logic clk, reset, output logic[5:0] led);
     logic RF_write_enable, ALU_src, is_right_shift, is_arithmetic_shift,
           eq, lt, ltu, sub, negate, PC_increment, comparison_flag,
@@ -39,7 +39,7 @@ module datapath(input logic clk, reset, output logic[5:0] led);
     logic current_cycle_is_end_of_load, previous_cycle_was_start_of_load;
     logic[2:0] result_select;
     logic[31:0] tohost;
-    assign led = ~tohost[5:0];//Negation for active-low LEDs.
+    assign led = ~tohost[27:22];//Negation for active-low LEDs.
     //assign led = 6'b100111;
     decoder main_decoder(
         .RF_write_enable(RF_write_enable),
