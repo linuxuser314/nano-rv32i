@@ -1,13 +1,21 @@
+`default_nettype none
+
 module instruction_rom(
     input  logic[31:0] PC,
     input  logic clk,
     output logic[31:0] instruction
 );
-    logic[31:0] rom [2048];  // Simple instruction memory
+    logic[31:0] rom [8];  // Simple instruction memory
 
     initial begin
-        for (int i = 0; i < 2048; i++) rom[i] = 32'b0;
-        $readmemh("/workspaces/nano-rv32i/software/firmware.hex", rom);
+        rom[0] = 32'h00000093;
+        rom[1] = 32'h40000137;
+        rom[2] = 32'h00108093;
+        rom[3] = 32'h00112023;
+        rom[4] = 32'hFF9FF06F;
+        rom[5] = 32'h00000000;
+        rom[6] = 32'h00000000;
+        rom[7] = 32'h00000000;
     end
 
     // Combinational read (ROM is asynchronous)
@@ -15,6 +23,6 @@ module instruction_rom(
 
     //Sequential read (for proper testing as if this were my actual memory module)
     always_ff @(posedge clk) begin
-        instruction <= rom[PC[31:2]];
+        instruction <= rom[PC[4:2]];
     end
 endmodule

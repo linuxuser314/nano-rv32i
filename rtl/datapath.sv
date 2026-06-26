@@ -40,7 +40,7 @@ module datapath(input logic clk, reset, output logic[5:0] led);
     logic current_cycle_is_end_of_load, previous_cycle_was_start_of_load;
     logic[2:0] result_select;
     logic[31:0] tohost;
-    //assign led = ~tohost[27:22];//Negation for active-low LEDs. This line never actually worked.
+    assign led = ~tohost[27:22];//Negation for active-low LEDs. This line never actually worked.
     //assign led = 6'b100111; //This one worked sucesfully.
     //assign led = ~instruction[6:1];//This is broken as well
    //assign led = {~main_decoder.INVALID_INSTRUCTION_ERROR, prev_PC[3:2], 3'b101}; //Trying this now.
@@ -71,7 +71,7 @@ module datapath(input logic clk, reset, output logic[5:0] led);
 
     memory_subsystem main_memory_system(
         .clk(clk),
-        .load_result(load_result), .instruction(instruction),
+        .load_result(load_result), //.instruction(instruction),
         .is_half(is_half), .is_byte(is_byte), .is_unsigned(is_unsigned),
         .is_store(is_store), .is_load(is_load),
         .PC(PC_result), .addr(ALU_result), .store_data(RF_rd2),
@@ -90,6 +90,11 @@ module datapath(input logic clk, reset, output logic[5:0] led);
     //instruction_rom main_instruction_memory(
     //    .PC(PC_result), .instruction(instruction), .clk(clk)
     //);
+
+    //TEMPORARY: Miniature instruction ROM
+    instruction_rom main_instruction_memory(
+        .PC(PC_result), .instruction(instruction), .clk(clk)
+    );
     PC_subsystem PC_calculation_subsystem(
         .new_PC(PC_result), .prev_PC(prev_PC),
         .PC_plus_4(PC_plus_4), .PC_plus_imm(PC_plus_imm),
