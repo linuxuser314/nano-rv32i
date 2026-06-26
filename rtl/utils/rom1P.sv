@@ -10,13 +10,16 @@ module rom1P #(
             (input  logic[31:0] address,
              input  logic       clk, read_enable,
              output logic[31:0] result);
-    logic[31:0] rom[SIZE];
+    logic[31:0] rom[(SIZE / 4)];
     initial begin
-        for (int i = 0; i < SIZE; i++) rom[i] = 32'b0;
+        for (int i = 0; i < (SIZE / 4); i++) rom[i] = 32'b0;
         $readmemh(FILE_PATH, rom);
     end
 
     always_ff @(posedge clk) begin
-        result <= rom[address[31:2]];
+        if(read_enable) begin
+            result <= rom[address[31:2]];
+        end
+        else result <= 32'b0;
     end
 endmodule
