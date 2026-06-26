@@ -52,7 +52,8 @@ module memory(input  logic[31:0] A1, A2, WD2,
 
     initial begin
         for (int i = 0; i < 576; i++) ram[i] = 32'b0;
-        $readmemh("/workspaces/nano-rv32i/software/firmware.hex", ram);
+        //$readmemh("/workspaces/nano-rv32i/software/firmware.hex", ram);
+        `include "firmware.vh"
         tohost = 32'b0; // Initialize tohost to 0
     end
 
