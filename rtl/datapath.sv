@@ -22,7 +22,7 @@ module datapath(
     assign led[0:4] = ~counter[27:23];
     assign led[5]   = ~reset;
 
-endmodule/**/
+endmodule*/
 
 //`default_nettype none
 

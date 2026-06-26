@@ -8,7 +8,7 @@ module memory_subsystem(input  logic[31:0] PC, addr, store_data,
                         output logic       MEMORY_MISALIGNED_ERROR, INSTRUCTION_MISALIGNED_ERROR,
                                            MEMORY_OUT_OF_BOUNDS_ERROR
 );
-    logic memory_address_misalignment;
+    logic memory_address_misalignment, memory_address_out_of_bounds;
     //Check PC and load/store address for alignment. PC is checked with is_byte and is_half false.
     address_check address_error_checker(
         .addr_end(addr[1:0]), .is_byte(is_byte), .is_half(is_half),
@@ -20,13 +20,14 @@ module memory_subsystem(input  logic[31:0] PC, addr, store_data,
     );
 
     assign MEMORY_MISALIGNED_ERROR = (is_store | is_load) & memory_address_misalignment;
+    assign MEMORY_OUT_OF_BOUNDS_ERROR = (is_store | is_load) & memory_address_out_of_bounds;
 
     //Wire up the memory unit!
     logic[31:0] RD2, WD2;
     logic[3:0] write_enable, write_enable_output;
     memory system_ram(
-        .A1(PC), .A2(addr), .RD1(instruction), .RD2(RD2), .WD2(WD2), .write_enable(write_enable),
-        .MEMORY_OUT_OF_BOUNDS_ERROR(MEMORY_OUT_OF_BOUNDS_ERROR), .clk(clk), .tohost(tohost_wire)
+        .A1(PC), .A2(addr), .RD1(instruction), .RD2((is_load | is_store) ? RD2 : 32'b0), .WD2(WD2), .write_enable(write_enable),
+        .MEMORY_OUT_OF_BOUNDS_ERROR(memory_address_out_of_bounds), .clk(clk), .tohost(tohost_wire)
     );
 
     //Connect load-store units to memory_subsystem inputs and outputs and to main memory module.
