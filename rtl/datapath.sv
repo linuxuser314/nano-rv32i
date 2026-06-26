@@ -1,5 +1,6 @@
 /*`default_nettype none
 
+//This dummy module worked perfeclty
 module datapath(
     input  logic       clk,
     input  logic       reset,
@@ -24,7 +25,7 @@ module datapath(
 
 endmodule*/
 
-//`default_nettype none
+`default_nettype none
 
 module datapath(input logic clk, reset, output logic[5:0] led);
     logic RF_write_enable, ALU_src, is_right_shift, is_arithmetic_shift,
@@ -39,8 +40,10 @@ module datapath(input logic clk, reset, output logic[5:0] led);
     logic current_cycle_is_end_of_load, previous_cycle_was_start_of_load;
     logic[2:0] result_select;
     logic[31:0] tohost;
-    assign led = ~tohost[27:22];//Negation for active-low LEDs.
-    //assign led = 6'b100111;
+    //assign led = ~tohost[27:22];//Negation for active-low LEDs. This line never actually worked.
+    //assign led = 6'b100111; //This one worked sucesfully.
+    //assign led = ~instruction[6:1];//This is broken as well
+   //assign led = {~main_decoder.INVALID_INSTRUCTION_ERROR, prev_PC[3:2], 3'b101}; //Trying this now.
     decoder main_decoder(
         .RF_write_enable(RF_write_enable),
         .I(I), .S(S), .B(B), .U(U), .J(J),
