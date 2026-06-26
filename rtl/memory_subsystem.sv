@@ -26,7 +26,7 @@ module memory_subsystem(input  logic[31:0] PC, addr, store_data,
     logic[31:0] RD2, WD2;
     logic[3:0] write_enable, write_enable_output;
     memory system_ram(
-        .A1(PC), .A2(addr), .RD1(instruction), .RD2((is_load | is_store) ? RD2 : 32'b0), .WD2(WD2), .write_enable(write_enable),
+        .A1(PC), .A2((is_load | is_store) ? addr : 32'b0), .RD1(instruction), .RD2(RD2), .WD2(WD2), .write_enable(write_enable),
         .MEMORY_OUT_OF_BOUNDS_ERROR(memory_address_out_of_bounds), .clk(clk), .tohost(tohost_wire)
     );
 
