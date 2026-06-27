@@ -33,3 +33,7 @@ synth-log.txt
 routed.json
 core.json
 firmware.fs
+
+# Compilation outputs
+*.dump
+*.hex
