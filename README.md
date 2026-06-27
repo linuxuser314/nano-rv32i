@@ -43,7 +43,10 @@ This is a basic starter RV32I core. It is my first large hardware design project
   - [ ] Refactor my code to have an internal core module and a top-level SoC module that links to memory, MMIO, etc.
   - [ ] Add a boot ROM and payload data for proper flashing while bypassing Project Apicula's limitations for data initialization in dual-ported BRAM
   - [ ] Go through each module and add proper comments, remove old commented-out code, etc.
-  - [ ] Restructure my `rtl` directory for my rapidly growing set of modules
+  - [x] Restructure my `rtl` directory for my rapidly growing set of modules
+  - [ ] Update build scripts to reflect updated directory structure
+  - [ ] Move memory components from datapath and rename datapath to rv32i_core to integrate it into the SoC design.
+  - [ ] Test SoC design
 - [ ] Add MMIO for program output and for debugging.
 - [ ] Write a program in assembly that mimics the functionality of my `Baremetal-Blinker` repository.
 - [ ] Add a functioning bootloader that loads a binary file from SPI flash and/or UART so I can flash my core without re-synthesizing it.
