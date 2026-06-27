@@ -23,15 +23,15 @@ module soc_top(input  logic      clk_27MHz, reset_button,
     logic MMIO_FAULT;
     logic core0_FETCH_FAULT, core0_DATA_FAULT;
 
-    rom_bus_if core0_fetch_bus(); //Master 0
+    ram_bus_if core0_fetch_bus(); //Master 0
     ram_bus_if core0_data_bus(); //Master 1
 
-    rom_bus_if boot_rom_bus(); //Slave 0
-    rom_bus_if payload_rom_bus(); // Slave 1
+    ram_bus_if boot_rom_bus(); //Slave 0
+    ram_bus_if payload_rom_bus(); // Slave 1
     ram_bus_if mmio_bus(); //Slave 2
 
     ram_bus_if system_ram0_bus_A(); // Slave 3
-    rom_bus_if system_ram0_bus_B(); // Slave 4 (ROM for fetching)
+    ram_bus_if system_ram0_bus_B(); // Slave 4 (ROM for fetching)
 
 
     //Master 0/1 (core0_fetch, core0_data)
@@ -39,11 +39,11 @@ module soc_top(input  logic      clk_27MHz, reset_button,
 
         //Instruction fetching
         .fetch_bus(core0_fetch_bus),
-        .data_bus(core0_data_bus),
+        .FETCH_FAULT(core0_FETCH_FAULT),
 
         //Data reading/writing
         .DATA_FAULT(core0_DATA_FAULT),
-        .FETCH_FAULT(core0_FETCH_FAULT),
+        .data_bus(core0_data_bus),
 
         .clk(sys_clk), .reset(sys_reset)
     );
@@ -70,12 +70,14 @@ module soc_top(input  logic      clk_27MHz, reset_button,
 
         //Slave 3 (system_ram0_A)
         .system_ram0_bus_A(system_ram0_bus_A),
+
+        //Slave 4 (system_ram0_B)
         .system_ram0_bus_B(system_ram0_bus_B)
 
     );
 
     //Slave 0 (boot_rom)
-    rom1P #(
+    ram_single_port #(
         .FILE_PATH("/workspaces/nano-rv32i/software/boot_rom.hex"),
         .SIZE(2304)
     ) boot_rom(
@@ -84,7 +86,7 @@ module soc_top(input  logic      clk_27MHz, reset_button,
     );
 
     //Slave 1 (payload_rom)
-    rom1P #(
+    ram_single_port #(
         .FILE_PATH("/workspaces/nano-rv32i/software/payload_rom.hex"),
         .SIZE(2304)
     ) payload_rom(
@@ -101,7 +103,7 @@ module soc_top(input  logic      clk_27MHz, reset_button,
     );
 
     //Slave 3/4 (system_ram0)
-    ram2P system_ram0(
+    ram_double_port system_ram0(
         .clk(sys_clk),
 
         //Slave3 (system_ram0_A)

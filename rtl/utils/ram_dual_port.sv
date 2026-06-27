@@ -17,9 +17,9 @@ module ram_dual_port #(
     //Port A
     always_ff @(posedge clk) begin
         if(bus_A.read_enable) begin
-            bus_A.result <= ram[bus_A.address[31:2]];
+            bus_A.read_data <= ram[bus_A.address[31:2]];
         end
-        else bus_A.result <= 32'b0;
+        else bus_A.read_data <= 32'b0;
 
         if(bus_A.write_enable) begin
             if(bus_A.write_enable_control[0]) ram[bus_A.address[31:2]][7:0]   <= bus_A.write_data[7:0];
@@ -31,9 +31,9 @@ module ram_dual_port #(
     //Port B
     always_ff @(posedge clk) begin
         if(bus_B.read_enable) begin
-            bus_B.result <= ram[bus_B.address[31:2]];
+            bus_B.read_data <= ram[bus_B.address[31:2]];
         end
-        else bus_B.result <= 32'b0;
+        else bus_B.read_data <= 32'b0;
 
         if(bus_B.write_enable) begin
             if(bus_B.write_enable_control[0]) ram[bus_B.address[31:2]][7:0]   <= bus_B.write_data[7:0];
