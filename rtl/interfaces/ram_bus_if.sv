@@ -24,8 +24,8 @@ interface ram_bus_if;
         input  read_enable,
         output read_data,
 
-        input write_enable,
-        input write_enable_control,
-        input write_data
+        input  write_enable,
+        input  write_enable_control,
+        input  write_data
     );
 endinterface
