@@ -9,11 +9,7 @@
 module register_file(input  logic clk, reset, write_enable,
                      input  logic[4 :0] a1, a2, a3,
                      input  logic[31:0] wd3,
-                     output logic[31:0] rd1, rd2,
-                     output logic[31:0] x0, x1, x2, x3, x4, x5, x6, x7, x8,
-                                        x9, x10, x11, x12, x13, x14, x15, x16,
-                                        x17, x18, x19, x20, x21, x22, x23, x24,
-                                        x25, x26, x27, x28, x29, x30, x31
+                     output logic[31:0] rd1, rd2
                     );
     logic[31:0] rf[32];
 
@@ -30,7 +26,11 @@ module register_file(input  logic clk, reset, write_enable,
 
     assign rd1 = (a1 == 0) ? 0 : rf[a1];
     assign rd2 = (a2 == 0) ? 0 : rf[a2];
-    //Register file outputs for debugging in GTKWave
+    //Register file outputs for debugging in Surfer
+    /*
+    logic[31:0] x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15,
+                x16, x17, x18, x19, x20, x21, x22, x23, x24,
+                x25, x26, x27, x28, x29, x30, x31;
     assign x0 = rf[0];
     assign x1 = rf[1];
     assign x2 = rf[2];
@@ -62,6 +62,6 @@ module register_file(input  logic clk, reset, write_enable,
     assign x28 = rf[28];
     assign x29 = rf[29];
     assign x30 = rf[30];
-    assign x31 = rf[31];
+    assign x31 = rf[31];*/
 
 endmodule

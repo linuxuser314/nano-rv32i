@@ -36,10 +36,17 @@ module rv32i_core(input logic clk, reset,
         .MEMORY_OUT_OF_BOUNDS_ERROR(1'b0),
         .instruction(instruction)
     );
-    register1 load_stall_flag_register(
+    /*register1 load_stall_flag_register(
         .clk(clk), .reset(reset),
         .data(previous_cycle_was_start_of_load),
         .result(current_cycle_is_end_of_load)
+    );*/
+    register #(
+        .SIZE(1)
+    ) load_stall_flag_register(
+        .clk(clk), .reset(reset), .en(1'b1),
+        .din(previous_cycle_was_start_of_load),
+        .dout(current_cycle_is_end_of_load)
     );
     fetch_unit main_fetch_unit(
         .PC(PC_result), .instruction(instruction),
@@ -63,10 +70,18 @@ module rv32i_core(input logic clk, reset,
         .imm(decoded_immediate), .ALU_result(ALU_result),
         .PC_increment(PC_increment), .PC_select(PC_select), .branch_flag(comparison_flag)
     );
+    /*
     register32 PC_tracking_register(
         .clk(clk), .reset(reset),
         .result(prev_PC), .data(PC_result)
+    );*/
+    register #(
+        .SIZE(32)
+    ) PC_tracking_register(
+        .clk(clk), .reset(reset), .en(1'b1),
+        .din(PC_result), .dout(prev_PC)
     );
+
     imm_dec_ext instruction_immediate_calculator(
         .I(I), .S(S), .B(B), .U(U), .J(J),
         .instruction(instruction[31:7]),
