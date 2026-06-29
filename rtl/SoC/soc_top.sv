@@ -30,8 +30,8 @@ module soc_top(input  logic      clk_27MHz, reset_button,
     ram_bus_if payload_rom_bus(); // Slave 1
     ram_bus_if mmio_bus(); //Slave 2
 
-    ram_bus_if system_ram0_bus_A(); // Slave 3
-    ram_bus_if system_ram0_bus_B(); // Slave 4 (ROM for fetching)
+    ram_bus_if system_ram0_bus_A(); // Slave 3 (FETCH)
+    ram_bus_if system_ram0_bus_B(); // Slave 4 (DATA)
 
 
     //Master 0/1 (core0_fetch, core0_data)

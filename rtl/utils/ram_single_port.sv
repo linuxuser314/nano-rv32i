@@ -6,7 +6,7 @@ module ram_single_port #(
              parameter int SIZE,
              parameter string FILE_PATH
             )
-            (input clk,
+            (input logic clk,
             ram_bus_if.slave bus);
     logic[31:0] ram[SIZE];
     initial begin

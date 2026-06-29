@@ -6,7 +6,7 @@ module ram_dual_port #(
              parameter int SIZE
              //parameter string FILE_PATH Commented out because loading default values to dual-ported BRAM is incredibly finnicky on Apicula
             )
-            (input clk,
+            (input logic clk,
             ram_bus_if.slave bus_A,
             ram_bus_if.slave bus_B);
     logic[31:0] ram[SIZE];
