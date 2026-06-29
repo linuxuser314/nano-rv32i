@@ -13,7 +13,7 @@ module load_store_unit(ram_bus_if.master bus,
     assign MISALIGNED = (is_word & (address[0] | address[1])) | (is_half & address[0]);
     assign bus.write_enable = is_store & ~MISALIGNED;
     assign bus.read_enable = is_load & ~MISALIGNED;
-    assign bus.address = {address[31:1], 2'b00};
+    assign bus.address = {address[31:2], 2'b00};
     store store_calculation_unit(
         .data(store_data), .result(bus.write_data),
         .addr_end(address[1:0]), .is_half(is_half), .is_byte(is_byte),

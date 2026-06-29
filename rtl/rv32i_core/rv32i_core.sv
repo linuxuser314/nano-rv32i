@@ -41,17 +41,6 @@ module rv32i_core(input logic clk, reset,
         .data(previous_cycle_was_start_of_load),
         .result(current_cycle_is_end_of_load)
     );
-
-    memory_subsystem main_memory_system(
-        .clk(clk),
-        .load_result(load_result), //.instruction(instruction),
-        .is_half(is_half), .is_byte(is_byte), .is_unsigned(is_unsigned),
-        .is_store(is_store), .is_load(is_load),
-        .PC(PC_result), .addr(ALU_result), .store_data(RF_rd2),
-        .MEMORY_MISALIGNED_ERROR(MEMORY_MISALIGNED_ERROR),
-        .INSTRUCTION_MISALIGNED_ERROR(INSTRUCTION_MISALIGNED_ERROR),
-        .tohost_wire(tohost),
-    );
     fetch_unit main_fetch_unit(
         .PC(PC_result), .instruction(instruction),
         .FETCH_MISALIGNED(FETCH_MISALIGNED)

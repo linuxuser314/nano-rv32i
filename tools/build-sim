@@ -71,17 +71,32 @@ cp temp.hex /workspaces/nano-rv32i/software/firmware.hex
 # -------------------------------------------------------------------------
 # Compilation and Simulation
 # -------------------------------------------------------------------------
-echo "==> 4. Compiling RTL and Testbench using iverilog..."
-# Hardwired output structure to compile the testbench cleanly
-iverilog -g2012 -s datapath_tb -o sim.vvp /workspaces/nano-rv32i/sim/datapath_tb.sv /workspaces/nano-rv32i/rtl/*.sv
+echo "==> 4. Gathering SystemVerilog files recursively..."
 
-echo "==> 5. Running simulation..."
+# Locate all interface files first (iverilog requires definitions before usage)
+INTERFACE_DIR="/workspaces/nano-rv32i/rtl/interfaces"
+INTERFACE_FILES=""
+if [ -d "$INTERFACE_DIR" ]; then
+    INTERFACE_FILES=$(find "$INTERFACE_DIR" -type f \( -name "*.sv" -o -name "*.v" \))
+fi
+
+# Locate all RTL files recursively across all subfolders
+RTL_FILES=$(find /workspaces/nano-rv32i/rtl -type f \( -name "*.sv" -o -name "*.v" \))
+
+echo "==> 5. Compiling RTL and Testbench using iverilog..."
+# Execute compilation with explicitly ordered file lists
+iverilog -g2012 -s datapath_tb -o sim.vvp \
+    /workspaces/nano-rv32i/sim/datapath_tb.sv \
+    $INTERFACE_FILES \
+    $RTL_FILES
+
+echo "==> 6. Running simulation..."
 vvp sim.vvp -fst
 
 # -------------------------------------------------------------------------
 # Waveform Extraction
 # -------------------------------------------------------------------------
-echo "==> 6. Processing waveform file..."
+echo "==> 7. Processing waveform file..."
 
 TARGET_WAVEFORM="/workspaces/nano-rv32i/sim/simulation.fst"
 

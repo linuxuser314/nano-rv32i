@@ -13,13 +13,14 @@ module mmio(
         end
         else if(bus.read_enable || bus.write_enable) begin
             case(bus.address)
-                32'h8000_0000:
+                32'h8000_0000: begin
                     if(bus.write_enable) begin
                         led_strip6 <= bus.write_data[27:22];
                     end
                     if(bus.read_enable) begin
                         bus.read_data <= 32'b0;
                     end
+                end
                 default: MMIO_FAULT <= 1;
             endcase
         end

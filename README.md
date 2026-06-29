@@ -40,7 +40,7 @@ This is a basic starter RV32I core. It is my first large hardware design project
 - [x] Update devcontainer.json for full automatic setup.
 - [x] Synthesize it to my FPGA.
 - [ ] Clean up and refactor code:
-  - [ ] Refactor my code to have an internal core module and a top-level SoC module that links to memory, MMIO, etc.
+  - [x] Refactor my code to have an internal core module and a top-level SoC module that links to memory, MMIO, etc.
   - [ ] Add a boot ROM and payload data for proper flashing while bypassing Project Apicula's limitations for data initialization in dual-ported BRAM
   - [ ] Go through each module and add proper comments, remove old commented-out code, etc.
   - [x] Restructure my `rtl` directory for my rapidly growing set of modules
