@@ -1,9 +1,7 @@
 `default_nettype none
 
 module decoder(input  logic[31:0] instruction,
-               input  logic        MEMORY_MISALIGNED_ERROR,
-                                   INSTRUCTION_MISALIGNED_ERROR,
-                                   MEMORY_OUT_OF_BOUNDS_ERROR,
+               input  logic        FAULT,
                                    current_cycle_is_end_of_load,
                 output logic I, S, B, U, J,
                              is_byte, is_half, is_unsigned, is_store, is_load,
@@ -15,7 +13,7 @@ module decoder(input  logic[31:0] instruction,
                 );
 
     logic[16:0] instruction_data;
-    logic UNDEFINED_SYSTEM_INSTRUCTION, INVALID_INSTRUCTION;
+    logic INVALID_INSTRUCTION;
 
     //To keep iverilog from complaining about constant selects in always statements
     logic load_sign_bit, load_size_bit_1, load_size_bit_0;
@@ -31,9 +29,8 @@ module decoder(input  logic[31:0] instruction,
         PC_increment = 1;//Set to 1 to progress to the next instruction!
         is_right_shift = 0; is_arithmetic_shift = 0; ALU_src = 0; mask_ctrl = 0; PC_select = 0;
         result_select = 0;  RF_write_enable = 0;
-        UNDEFINED_SYSTEM_INSTRUCTION = 0; INVALID_INSTRUCTION = 0;
-        if(MEMORY_MISALIGNED_ERROR |
-           INSTRUCTION_MISALIGNED_ERROR | MEMORY_OUT_OF_BOUNDS_ERROR) begin
+        INVALID_INSTRUCTION = 0;
+        if(FAULT) begin
                 PC_increment = 0;
             end
         else begin
@@ -83,9 +80,9 @@ module decoder(input  logic[31:0] instruction,
                 17'b0000011_???_???????: begin is_load = 1; end
 
                 //System instructions
-                17'b0001111_001_0000000: begin end //fence.i
+                /*17'b0001111_001_0000000: begin end //fence.i
                 17'b1110011_000_???????: begin UNDEFINED_SYSTEM_INSTRUCTION = 1; PC_increment = 0; end //ecall and ebreak
-
+                */
                 default: begin INVALID_INSTRUCTION = 1; PC_increment = 0; end //Invalid instruction halts the processor
             endcase
             if(is_load) begin

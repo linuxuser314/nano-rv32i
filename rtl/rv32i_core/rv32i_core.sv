@@ -1,4 +1,4 @@
-
+/* verilator lint_off UNOPTFLAT *///Just Verilator telling me I have a lot of combinational logic.
 `default_nettype none
 
 module rv32i_core(input logic clk, reset,
@@ -11,8 +11,7 @@ module rv32i_core(input logic clk, reset,
           is_half, is_byte, is_unsigned, is_store, is_load;
     logic[1 :0] PC_select, mask_ctrl;
     logic[31:0] instruction, result_mux_out, RF_rd1, RF_rd2, decoded_immediate, ALU_src_val,
-    shift_result, mask_result, ALU_result, load_result, PC_result, prevPC, PC_plus_4, PC_plus_imm,
-    new_PC, prev_PC;
+    shift_result, mask_result, ALU_result, load_result, PC_result, PC_plus_4, PC_plus_imm, prev_PC;
     logic I, S, B, U, J;
     logic STORE_FAULT, STORE_MISALIGNED, LOAD_FAULT, LOAD_MISALIGNED, FETCH_MISALIGNED;
     logic current_cycle_is_end_of_load, previous_cycle_was_start_of_load;
@@ -31,9 +30,8 @@ module rv32i_core(input logic clk, reset,
         .PC_select(PC_select),
         .PC_increment(PC_increment),
         .result_select(result_select),
-        .MEMORY_MISALIGNED_ERROR(1'b0),
-        .INSTRUCTION_MISALIGNED_ERROR(1'b0),
-        .MEMORY_OUT_OF_BOUNDS_ERROR(1'b0),
+        .FAULT(STORE_FAULT || STORE_MISALIGNED || LOAD_FAULT ||
+        LOAD_MISALIGNED || FETCH_FAULT || FETCH_MISALIGNED),
         .instruction(instruction)
     );
     /*register1 load_stall_flag_register(
@@ -89,7 +87,7 @@ module rv32i_core(input logic clk, reset,
     );
 
     register_file system_register_file(
-        .clk(clk), .reset(reset), .write_enable(RF_write_enable),
+        .clk(clk), .write_enable(RF_write_enable),
         .a1(instruction[19:15]), .a2(instruction[24:20]), .a3(instruction[11:7]),
         .rd1(RF_rd1), .rd2(RF_rd2), .wd3(result_mux_out)
     );

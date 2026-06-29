@@ -51,8 +51,6 @@ module soc_top(input  logic      clk_27MHz, reset_button,
     //Master-slave bus interconnect
     bus_interconnect master_bus(
 
-        .clk(sys_clk), .reset(sys_reset),
-
         //Master 0 (core0 fetch)
         .core0_fetch_bus(core0_fetch_bus),
         .FETCH_FAULT(core0_FETCH_FAULT),

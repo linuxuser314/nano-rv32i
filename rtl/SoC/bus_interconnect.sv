@@ -2,8 +2,6 @@
 
 
 module bus_interconnect(
-                        input logic clk, reset, //Currently unused, may need in future.
-
                         ram_bus_if.slave core0_fetch_bus,
                         output logic FETCH_FAULT,
 
@@ -79,7 +77,7 @@ module bus_interconnect(
             2: begin
                 //0x8000_0000 to 0x8000_07FF: MMIO (rw, volatile attribute in C/C++ mandatory)
 
-                if(core0_data_bus.address >= 32'h8000_0000 && core0_data_bus.address <=32'h8000_07FF) begin
+                if(core0_data_bus.address <=32'h8000_07FF) begin
                     if(core0_data_bus.read_enable) begin
                         data_select = 2'b10;
                     end
@@ -113,7 +111,7 @@ module bus_interconnect(
         case(core0_fetch_bus.address[31:30])
             0: begin
                 //0x0000_0000 to 0x0000_07FF: ROM (x)
-                if(core0_fetch_bus.address >= 32'h0000_0000 && core0_fetch_bus.address <= 32'h0000_07FF && core0_fetch_bus.read_enable) begin
+                if(core0_fetch_bus.address <= 32'h0000_07FF && core0_fetch_bus.read_enable) begin
                     fetch_select = 2'b01;
                 end
                 else FETCH_FAULT = 1;

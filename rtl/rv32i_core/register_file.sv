@@ -6,7 +6,7 @@
 //The reset signal has priority over writes, so resetting will clear the register file even if it is actively writing data.
 
 `default_nettype none
-module register_file(input  logic clk, reset, write_enable,
+module register_file(input  logic clk, write_enable,
                      input  logic[4 :0] a1, a2, a3,
                      input  logic[31:0] wd3,
                      output logic[31:0] rd1, rd2
