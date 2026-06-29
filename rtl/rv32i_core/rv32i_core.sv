@@ -1,33 +1,11 @@
-/*`default_nettype none
-
-//This dummy module worked perfeclty
-module datapath(
-    input  logic       clk,
-    input  logic       reset,
-    output logic [5:0] led
-);
-
-    // 28-bit counter (Bit 27 toggles every ~5 seconds at 27 MHz)
-    logic [27:0] counter;
-
-    // Guarantee a clean power-on state in the bitstream
-    initial counter = 28'b0;
-
-    // Synchronous counting logic
-    always_ff @(posedge clk) begin
-            counter <= counter + 1;
-    end
-
-    // Route the highest bits to the LEDs to make the counting visible
-    // (Inverted because the Tang Nano 20K LEDs turn ON when driven low)
-    assign led[0:4] = ~counter[27:23];
-    assign led[5]   = ~reset;
-
-endmodule*/
 
 `default_nettype none
 
-module datapath(input logic clk, reset, output logic[5:0] led);
+module rv32i_core(input logic clk, reset,
+                  input logic DATA_FAULT, FETCH_FAULT,
+                  ram_bus_if.master fetch_bus,
+                  ram_bus_if.master data_bus);
+
     logic RF_write_enable, ALU_src, is_right_shift, is_arithmetic_shift,
           eq, lt, ltu, sub, negate, PC_increment, comparison_flag,
           is_half, is_byte, is_unsigned, is_store, is_load;
@@ -36,14 +14,9 @@ module datapath(input logic clk, reset, output logic[5:0] led);
     shift_result, mask_result, ALU_result, load_result, PC_result, prevPC, PC_plus_4, PC_plus_imm,
     new_PC, prev_PC;
     logic I, S, B, U, J;
-    logic MEMORY_MISALIGNED_ERROR, INSTRUCTION_MISALIGNED_ERROR, MEMORY_OUT_OF_BOUNDS_ERROR;
+    logic STORE_FAULT, STORE_MISALIGNED, LOAD_FAULT, LOAD_MISALIGNED, FETCH_MISALIGNED;
     logic current_cycle_is_end_of_load, previous_cycle_was_start_of_load;
     logic[2:0] result_select;
-    logic[31:0] tohost;
-    assign led = ~tohost[24:19];//Negation for active-low LEDs. This line never actually worked.
-    //assign led = 6'b100111; //This one worked sucesfully.
-    //assign led = ~instruction[6:1];//This is broken as well
-   //assign led = {~main_decoder.INVALID_INSTRUCTION_ERROR, prev_PC[3:2], 3'b101}; //Trying this now.
     decoder main_decoder(
         .RF_write_enable(RF_write_enable),
         .I(I), .S(S), .B(B), .U(U), .J(J),
@@ -77,23 +50,19 @@ module datapath(input logic clk, reset, output logic[5:0] led);
         .PC(PC_result), .addr(ALU_result), .store_data(RF_rd2),
         .MEMORY_MISALIGNED_ERROR(MEMORY_MISALIGNED_ERROR),
         .INSTRUCTION_MISALIGNED_ERROR(INSTRUCTION_MISALIGNED_ERROR),
-        .MEMORY_OUT_OF_BOUNDS_ERROR(MEMORY_OUT_OF_BOUNDS_ERROR),
-        .tohost_wire(tohost)
+        .tohost_wire(tohost),
     );
-    //TEMPORARY: A harvard-style ROM for instructions
-
-    //These next three modules are very important.
-    //They pull calculate the next PC, feed it into the main_instruction_memory.
-    //Because main_instruction_memory is synchronous, it outputs the next instruction on the next clock cycle.
-    //The PC_tracking_register holds this PC so the PC_subsystem can calculate the next PC.
-    //NOTE THAT THIS PROCESSOR DOES NOT HAVE A FETCH STAGE: IT USES THE LATCHING FEATURE OF SYNCRHONOUS ROM TO HOLD ONTO THE INSTRUCTION.
-    //instruction_rom main_instruction_memory(
-    //    .PC(PC_result), .instruction(instruction), .clk(clk)
-    //);
-
-    //TEMPORARY: Miniature instruction ROM
-    instruction_rom main_instruction_memory(
-        .PC(PC_result), .instruction(instruction), .clk(clk)
+    fetch_unit main_fetch_unit(
+        .PC(PC_result), .instruction(instruction),
+        .FETCH_MISALIGNED(FETCH_MISALIGNED)
+    );
+    load_store_unit main_memory_unit(
+        .is_half(is_half), .is_byte(is_byte), .is_word(~(is_byte | is_half)),
+        .is_unsigned(is_unsigned), .is_store(is_store), .is_load(is_load),
+        .address(ALU_result), .store_data(RF_rd2), .load_result(load_result),
+        .LOAD_MISALIGNED(LOAD_MISALIGNED), .STORE_MISALIGNED(STORE_MISALIGNED),
+        .LOAD_FAULT(LOAD_FAULT), .STORE_FAULT(STORE_FAULT),
+        .DATA_FAULT(DATA_FAULT)//This is an input signal
     );
     PC_subsystem PC_calculation_subsystem(
         .new_PC(PC_result), .prev_PC(prev_PC),
@@ -145,4 +114,3 @@ module datapath(input logic clk, reset, output logic[5:0] led);
         .select(result_select)
     );
 endmodule
-/**/

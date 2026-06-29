@@ -51,11 +51,11 @@ module soc_top(input  logic      clk_27MHz, reset_button,
     //Master-slave bus interconnect
     bus_interconnect master_bus(
         //Master 0 (core0 fetch)
-        .fetch_bus(core0_fetch_bus),
+        .core0_fetch_bus(core0_fetch_bus),
         .FETCH_FAULT(core0_FETCH_FAULT),
 
         //Master 1 (core0 data)
-        .data_bus(core0_data_bus),
+        .core0_data_bus(core0_data_bus),
         .DATA_FAULT(core0_DATA_FAULT),
 
         //Slave 0 (boot_rom)
@@ -97,13 +97,13 @@ module soc_top(input  logic      clk_27MHz, reset_button,
     //Slave 2 (mmio_controller)
     mmio mmio_controller(
         .clk(sys_clk),
-        .mmio_bus(mmio_bus),
+        .bus(mmio_bus),
         .led_strip6(led_strip6),
         .MMIO_FAULT(MMIO_FAULT)
     );
 
     //Slave 3/4 (system_ram0)
-    ram_double_port system_ram0(
+    ram_dual_port system_ram0(
         .clk(sys_clk),
 
         //Slave3 (system_ram0_A)
