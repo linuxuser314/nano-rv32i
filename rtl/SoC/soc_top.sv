@@ -3,10 +3,10 @@
 
 /*
 Memory Map (18Kbit aligned for BRAM):
-0x0000_0000 to 0x0000_08FF: ROM (x)
-0x4000_0000 to 0x4000_08FF: Payload (r)
-0x8000_0000 to 0x8000_08FF: MMIO (rw, volatile tag in C/C++ mandatory)
-0xC000_0000 to 0xC000_08FF: RAM (rwx)
+0x0000_0000 to 0x0000_07FF: ROM (x)
+0x4000_0000 to 0x4000_07FF: Payload (r)
+0x8000_0000 to 0x8000_07FF: MMIO (rw, volatile tag in C/C++ mandatory)
+0xC000_0000 to 0xC000_07FF: RAM (rwx)
 */
 
 `default_nettype none
@@ -50,6 +50,9 @@ module soc_top(input  logic      clk_27MHz, reset_button,
 
     //Master-slave bus interconnect
     bus_interconnect master_bus(
+
+        .clk(sys_clk), .reset(sys_reset),
+
         //Master 0 (core0 fetch)
         .core0_fetch_bus(core0_fetch_bus),
         .FETCH_FAULT(core0_FETCH_FAULT),
@@ -79,7 +82,7 @@ module soc_top(input  logic      clk_27MHz, reset_button,
     //Slave 0 (boot_rom)
     ram_single_port #(
         .FILE_PATH("/workspaces/nano-rv32i/software/boot_rom.hex"),
-        .SIZE(2304)
+        .SIZE(512)
     ) boot_rom(
         .clk(sys_clk),
         .bus(boot_rom_bus)
@@ -88,7 +91,7 @@ module soc_top(input  logic      clk_27MHz, reset_button,
     //Slave 1 (payload_rom)
     ram_single_port #(
         .FILE_PATH("/workspaces/nano-rv32i/software/payload_rom.hex"),
-        .SIZE(2304)
+        .SIZE(512)
     ) payload_rom(
         .clk(sys_clk),
         .bus(payload_rom_bus)
@@ -97,13 +100,16 @@ module soc_top(input  logic      clk_27MHz, reset_button,
     //Slave 2 (mmio_controller)
     mmio mmio_controller(
         .clk(sys_clk),
+        .reset(sys_reset),
         .bus(mmio_bus),
         .led_strip6(led_strip6),
         .MMIO_FAULT(MMIO_FAULT)
     );
 
     //Slave 3/4 (system_ram0)
-    ram_dual_port system_ram0(
+    ram_dual_port #(
+        .SIZE(512)
+    ) system_ram0(
         .clk(sys_clk),
 
         //Slave3 (system_ram0_A)

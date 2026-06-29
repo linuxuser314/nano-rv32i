@@ -43,7 +43,9 @@ module rv32i_core(input logic clk, reset,
     );
     fetch_unit main_fetch_unit(
         .PC(PC_result), .instruction(instruction),
-        .FETCH_MISALIGNED(FETCH_MISALIGNED)
+        .FETCH_MISALIGNED(FETCH_MISALIGNED),
+
+        .bus(fetch_bus)
     );
     load_store_unit main_memory_unit(
         .is_half(is_half), .is_byte(is_byte), .is_word(~(is_byte | is_half)),
@@ -51,7 +53,9 @@ module rv32i_core(input logic clk, reset,
         .address(ALU_result), .store_data(RF_rd2), .load_result(load_result),
         .LOAD_MISALIGNED(LOAD_MISALIGNED), .STORE_MISALIGNED(STORE_MISALIGNED),
         .LOAD_FAULT(LOAD_FAULT), .STORE_FAULT(STORE_FAULT),
-        .DATA_FAULT(DATA_FAULT)//This is an input signal
+        .DATA_FAULT(DATA_FAULT),//This is an input signal
+
+        .bus(data_bus)
     );
     PC_subsystem PC_calculation_subsystem(
         .new_PC(PC_result), .prev_PC(prev_PC),

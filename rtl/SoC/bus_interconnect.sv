@@ -3,6 +3,7 @@
 
 module bus_interconnect(
                         input logic clk, reset, //Currently unused, may need in future.
+
                         ram_bus_if.slave core0_fetch_bus,
                         output logic FETCH_FAULT,
 
@@ -60,25 +61,25 @@ module bus_interconnect(
         //Data component
         case(core0_data_bus.address[31:30])
             0: begin
-                //0x0000_0000 to 0x0000_08FF: ROM (x)
+                //0x0000_0000 to 0x0000_07FF: ROM (x)
                 DATA_FAULT = 1;//Region 0 does not have rw privleges.
             end
             1: begin
-                //0x4000_0000 to 0x4000_08FF: Payload ROM(r)
+                //0x4000_0000 to 0x4000_07FF: Payload ROM(r)
                 if(core0_data_bus.write_enable) begin
                     DATA_FAULT = 1;//Region 1 does not have w privleges.
                 end
                 else if(core0_data_bus.read_enable) begin
-                    if(core0_data_bus.address >= 32'h4000_0000 && core0_data_bus.address <= 32'h4000_08FF) begin
+                    if(core0_data_bus.address >= 32'h4000_0000 && core0_data_bus.address <= 32'h4000_07FF) begin
                         data_select = 2'b01;
                     end
                     else DATA_FAULT = 1;
                 end
             end
             2: begin
-                //0x8000_0000 to 0x8000_08FF: MMIO (rw, volatile attribute in C/C++ mandatory)
+                //0x8000_0000 to 0x8000_07FF: MMIO (rw, volatile attribute in C/C++ mandatory)
 
-                if(core0_data_bus.address >= 32'h8000_0000 && core0_data_bus.address <=32'h8000_08FF) begin
+                if(core0_data_bus.address >= 32'h8000_0000 && core0_data_bus.address <=32'h8000_07FF) begin
                     if(core0_data_bus.read_enable) begin
                         data_select = 2'b10;
                     end
@@ -91,8 +92,8 @@ module bus_interconnect(
                 else DATA_FAULT = 1;
             end
             3: begin
-                //0xC000_0000 to 0xC000_08FF: RAM (rwx)
-                if(core0_data_bus.address >= 32'hC000_0000 && core0_data_bus.address <= 32'hC000_08FF) begin
+                //0xC000_0000 to 0xC000_07FF: RAM (rwx)
+                if(core0_data_bus.address >= 32'hC000_0000 && core0_data_bus.address <= 32'hC000_07FF) begin
                    if(core0_data_bus.read_enable) begin
                     data_select = 2'b11;
                    end
@@ -111,23 +112,23 @@ module bus_interconnect(
 
         case(core0_fetch_bus.address[31:30])
             0: begin
-                //0x0000_0000 to 0x0000_08FF: ROM (x)
-                if(core0_fetch_bus.address >= 32'h0000_0000 && core0_fetch_bus.address <= 32'h0000_08FF && core0_fetch_bus.read_enable) begin
+                //0x0000_0000 to 0x0000_07FF: ROM (x)
+                if(core0_fetch_bus.address >= 32'h0000_0000 && core0_fetch_bus.address <= 32'h0000_07FF && core0_fetch_bus.read_enable) begin
                     fetch_select = 2'b01;
                 end
                 else FETCH_FAULT = 1;
             end
             1: begin
-                //0x4000_0000 to 0x4000_08FF: Payload ROM(r)
+                //0x4000_0000 to 0x4000_07FF: Payload ROM(r)
                 FETCH_FAULT = 1;//Payload ROM only has r privleges.
             end
             2: begin
-                //0x8000_0000 to 0x8000_08FF: MMIO (rw, volatile attribute in C/C++ mandatory)
+                //0x8000_0000 to 0x8000_07FF: MMIO (rw, volatile attribute in C/C++ mandatory)
                 FETCH_FAULT = 1;//MMIO only has rw privleges
             end
             3: begin
-                //0xC000_0000 to 0xC000_08FF: RAM (rwx)
-                if(core0_fetch_bus.address >= 32'hC000_0000 && core0_fetch_bus.address <= 32'hC000_08FF && core0_fetch_bus.read_enable) begin
+                //0xC000_0000 to 0xC000_07FF: RAM (rwx)
+                if(core0_fetch_bus.address >= 32'hC000_0000 && core0_fetch_bus.address <= 32'hC000_07FF && core0_fetch_bus.read_enable) begin
                     fetch_select = 2'b10;
                 end
                 else FETCH_FAULT = 1;

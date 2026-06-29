@@ -100,7 +100,7 @@ module decoder(input  logic[31:0] instruction,
                     result_select = 5;
                     is_unsigned = load_sign_bit;//The start of funct3 is a sign flag
                     is_half = load_size_bit_0;//The last bit signals a half
-                    is_byte = load_size_bit_0 ~| load_size_bit_1; //If neitheir of the last two bits are 1 then it's a byte load
+                    is_byte = ~(load_size_bit_0 | load_size_bit_1); //If neitheir of the last two bits are 1 then it's a byte load
                     I = 1;
                 end
             end

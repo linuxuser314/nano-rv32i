@@ -21,17 +21,17 @@ module shifter(input logic[31:0] data_in,
         .data_in(data_in),
         .data_out(bits_reversed_in)
     );
-    
+
     // FIX 1: Removed duplicate driver line
     assign reverse_stage = is_right_shift ? bits_reversed_in : data_in;
-    
+
     // FIX 2: Corrected stage progression to pipe results sequentially forward
     assign stage_1 = shamt[4] ? {reverse_stage[15:0], {16{fill_bit}}} : reverse_stage;
     assign stage_2 = shamt[3] ? {stage_1[23:0],       { 8{fill_bit}}} : stage_1;
     assign stage_3 = shamt[2] ? {stage_2[27:0],       { 4{fill_bit}}} : stage_2;
     assign stage_4 = shamt[1] ? {stage_3[29:0],       { 2{fill_bit}}} : stage_3;
     assign stage_5 = shamt[0] ? {stage_4[30:0],       { 1{fill_bit}}} : stage_4;
-    
+
     // Instantiate for the final reversal (Port B)
     reverse32 rev_out_inst (
         .data_in(stage_5),
