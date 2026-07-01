@@ -5,13 +5,13 @@ module load(input  logic[31:0] data,
             input  logic is_byte, is_half, is_unsigned,
             input  logic[1:0] addr_end,
             output logic[31:0] result);
-    logic shift1, shift2, fill_bit;
-    logic[31:0] stage;
+    /*logic shift1, shift2, fill_bit;
+    logic[31:0] stage;*///Probably uneede,
     logic[15:0] selected_half, top_half, bottom_half;
     logic[7:0] selected_byte, byte_31to24, byte_23to16, byte_15to8, byte_7to0;
-    logic addr0, addr1, top_bit_of_byte, top_bit_of_half;
+    logic /*addr0, */addr1, top_bit_of_byte, top_bit_of_half;
 
-    assign addr0 = addr_end[0];
+    //assign addr0 = addr_end[0]; Probably not needed
     assign addr1 = addr_end[1];
     assign byte_31to24 = data[31:24];
     assign byte_23to16 = data[23:16];

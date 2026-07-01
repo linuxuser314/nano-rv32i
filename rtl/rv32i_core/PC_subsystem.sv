@@ -5,16 +5,14 @@
 //PC_plus_4 is the same as prev_PC when PC_increment is false.
 `default_nettype none
 
-module PC_subsystem(input  logic[31:0] prev_PC, imm, ALU_result,
+module PC_subsystem(input  logic[31:0] prev_PC, imm, jalr_addr,
                     input  logic[1:0] PC_select,
-                    input  logic branch_flag, PC_increment,
+                    input  logic branch_flag, PC_increment, FAULT,
                     output logic[31:0] new_PC, PC_plus_4, PC_plus_imm
                     );
-    logic[31:0] jalr_addr;
-    assign jalr_addr = {ALU_result[31:1], 1'b0};
     //These are pre-selection calculations that are also used for AUIPC and jal/jalr.
     //The PC_increment increments PC by 4 when 1 and 0 when 0, allowing the decoder to stall the PC.
-    assign PC_plus_4 = prev_PC + {29'b0, PC_increment, 2'b0};
+    assign PC_plus_4 = prev_PC + {29'b0, PC_increment & ~FAULT, 2'b0};
     assign PC_plus_imm = prev_PC + imm;
     //Selects the PC behavior for the next PC depending on PC_select.
     always_comb begin

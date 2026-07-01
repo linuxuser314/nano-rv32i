@@ -13,7 +13,8 @@ module rv32i_core(input logic clk, reset,
     logic[31:0] instruction, result_mux_out, RF_rd1, RF_rd2, decoded_immediate, ALU_src_val,
     shift_result, mask_result, ALU_result, load_result, PC_result, PC_plus_4, PC_plus_imm, prev_PC;
     logic I, S, B, U, J;
-    logic STORE_FAULT, STORE_MISALIGNED, LOAD_FAULT, LOAD_MISALIGNED, FETCH_MISALIGNED;
+    logic STORE_FAULT, STORE_MISALIGNED, LOAD_FAULT, LOAD_MISALIGNED,
+    FETCH_MISALIGNED, INVALID_INSTRUCTION;
     logic current_cycle_is_end_of_load, previous_cycle_was_start_of_load;
     logic[2:0] result_select;
     decoder main_decoder(
@@ -30,15 +31,11 @@ module rv32i_core(input logic clk, reset,
         .PC_select(PC_select),
         .PC_increment(PC_increment),
         .result_select(result_select),
-        .FAULT(STORE_FAULT || STORE_MISALIGNED || LOAD_FAULT ||
-        LOAD_MISALIGNED || FETCH_FAULT || FETCH_MISALIGNED),
-        .instruction(instruction)
+        .opcode(instruction[6:0]),
+        .funct7(instruction[31:25]),
+        .funct3(instruction[14:12]),
+        .INVALID_INSTRUCTION(INVALID_INSTRUCTION)
     );
-    /*register1 load_stall_flag_register(
-        .clk(clk), .reset(reset),
-        .data(previous_cycle_was_start_of_load),
-        .result(current_cycle_is_end_of_load)
-    );*/
     register #(
         .SIZE(1)
     ) load_stall_flag_register(
@@ -49,7 +46,6 @@ module rv32i_core(input logic clk, reset,
     fetch_unit main_fetch_unit(
         .PC(PC_result), .instruction(instruction),
         .FETCH_MISALIGNED(FETCH_MISALIGNED),
-
         .bus(fetch_bus)
     );
     load_store_unit main_memory_unit(
@@ -65,14 +61,11 @@ module rv32i_core(input logic clk, reset,
     PC_subsystem PC_calculation_subsystem(
         .new_PC(PC_result), .prev_PC(prev_PC),
         .PC_plus_4(PC_plus_4), .PC_plus_imm(PC_plus_imm),
-        .imm(decoded_immediate), .ALU_result(ALU_result),
-        .PC_increment(PC_increment), .PC_select(PC_select), .branch_flag(comparison_flag)
+        .imm(decoded_immediate), .jalr_addr({ALU_result[31:1], 1'b0}),
+        .PC_increment(PC_increment), .PC_select(PC_select), .branch_flag(comparison_flag),
+        .FAULT(LOAD_FAULT || LOAD_MISALIGNED || STORE_FAULT || STORE_MISALIGNED ||
+               FETCH_FAULT || FETCH_MISALIGNED || INVALID_INSTRUCTION)
     );
-    /*
-    register32 PC_tracking_register(
-        .clk(clk), .reset(reset),
-        .result(prev_PC), .data(PC_result)
-    );*/
     register #(
         .SIZE(32)
     ) PC_tracking_register(

@@ -11,7 +11,7 @@ module store(input  logic[31:0] data,
              output logic[3 :0] write_enable);
 
     byte_shift_left byte_shift_left(
-        .data(data), .shift1(addr_end[0]), .shift2(addr_end[1]), .fill_bit(1'b0), .result(result)
+        .data(data), .shift1(addr_end[0]), .shift2(addr_end[1]), .result(result)
     );
 
     //Like in the load fill_bit calculator, this is a lot of combinational logic!

@@ -5,7 +5,7 @@ This is a basic starter RV32I core. It is my first large hardware design project
 | :--- | :--- |
 | **Target Hardware** | Sipeed Tang Nano 20K (Gowin GW2AR-LV18) |
 | **HDL Language** | SystemVerilog |
-| **Simulation** | Icarus Verilog (`iverilog`) + VVP |
+| **Simulation** | Verilator |
 | **Waveform Viewer** | Surfer |
 | **Synthesis** | Yosys |
 | **Place & Route** | NextPNR-Gowin |
@@ -13,7 +13,7 @@ This is a basic starter RV32I core. It is my first large hardware design project
 
 ## Design
  - **Target:** This core is targeted for the **Sipeed Tang Nano 20K**
- - **Toolchain:** I use **SystemVerilog**, **Icarus Verilog**, **Yosys**, and **NextPNR/Gowin** (**Project Apicula**).
+ - **Toolchain:** I use **SystemVerilog**, **Verilator**, **Yosys**, and **NextPNR/Gowin** (**Project Apicula**).
  - **Architecture:** Uses the **RV32I Base Unprivileged Architecture**
  - **Microarchitecture:** Uses a **primarily Single-Cycle** architecture except for `load` instructions (see below).
  - **Memory:** Uses synchronous **Dual-Ported BRAM** for a seamless **Von Neumann** experience while maintaining Harvard simplicity in the hardware.
