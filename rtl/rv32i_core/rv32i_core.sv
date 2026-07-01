@@ -1,4 +1,3 @@
-/* verilator lint_off UNOPTFLAT *///Just Verilator telling me I have a lot of combinational logic.
 `default_nettype none
 
 module rv32i_core(input logic clk, reset,
