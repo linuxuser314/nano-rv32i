@@ -1,7 +1,7 @@
 `default_nettype none
 
 
-module bus_interconnect(
+module bus_interconnect(input logic clk, reset,
                         ram_bus_if.slave core0_fetch_bus,
                         output logic FETCH_FAULT,
 
@@ -18,6 +18,8 @@ module bus_interconnect(
                         ram_bus_if.master system_ram0_bus_B);
 
     logic[1:0] data_select, fetch_select;
+    logic[1:0] data_select_buffered, fetch_select_buffered;
+    logic fetch_fault_comb;
 
     always_comb begin
         boot_rom_bus.address = core0_fetch_bus.address;
@@ -51,7 +53,7 @@ module bus_interconnect(
         system_ram0_bus_B.write_enable_control = 4'b0;
 
         DATA_FAULT = 1'b0;
-        FETCH_FAULT = 1'b0;
+        fetch_fault_comb = 1'b0;
 
         fetch_select = 2'b0;
         data_select = 2'b0;
@@ -114,26 +116,53 @@ module bus_interconnect(
                 if(core0_fetch_bus.address <= 32'h0000_07FF && core0_fetch_bus.read_enable) begin
                     fetch_select = 2'b01;
                 end
-                else FETCH_FAULT = 1;
+                else fetch_fault_comb = 1;
             end
             1: begin
                 //0x4000_0000 to 0x4000_07FF: Payload ROM(r)
-                FETCH_FAULT = 1;//Payload ROM only has r privleges.
+                fetch_fault_comb = 1;//Payload ROM only has r privleges.
             end
             2: begin
                 //0x8000_0000 to 0x8000_07FF: MMIO (rw, volatile attribute in C/C++ mandatory)
-                FETCH_FAULT = 1;//MMIO only has rw privleges
+                fetch_fault_comb = 1;//MMIO only has rw privleges
             end
             3: begin
                 //0xC000_0000 to 0xC000_07FF: RAM (rwx)
                 if(core0_fetch_bus.address >= 32'hC000_0000 && core0_fetch_bus.address <= 32'hC000_07FF && core0_fetch_bus.read_enable) begin
                     fetch_select = 2'b10;
                 end
-                else FETCH_FAULT = 1;
+                else fetch_fault_comb = 1;
             end
-            default: FETCH_FAULT = 1;
+            default: fetch_fault_comb = 1;
         endcase
-        case(fetch_select)
+        if(MMIO_FAULT) begin
+            DATA_FAULT = 1;
+        end
+    end
+    register #(
+        .SIZE(1)
+    ) fetch_fault_buffer(
+        .din(fetch_fault_comb),
+        .dout(FETCH_FAULT),
+        .clk(clk), .reset(reset), .en(1'b1)
+    );
+    register #(
+        .SIZE(2)
+    ) fetch_select_buffer(
+        .din(fetch_select),
+        .dout(fetch_select_buffered),
+        .clk(clk), .reset(reset), .en(1'b1)
+    );
+
+    register #(
+        .SIZE(2)
+    ) data_select_buffer(
+        .din(data_select),
+        .dout(data_select_buffered),
+        .clk(clk), .reset(reset), .en(1'b1)
+    );
+    always_comb begin
+        case(fetch_select_buffered)
             2'b00: begin end//do nothing
             2'b01: begin
                 core0_fetch_bus.read_data = boot_rom_bus.read_data;
@@ -145,7 +174,8 @@ module bus_interconnect(
             end
             default: core0_fetch_bus.read_data = 32'b0;
         endcase
-        case(data_select)
+
+        case(data_select_buffered)
             2'b00: begin end//do nothing
             2'b01: begin
                 core0_data_bus.read_data = payload_rom_bus.read_data;
@@ -161,7 +191,5 @@ module bus_interconnect(
             end
             default: core0_data_bus.read_data = 32'b0;
         endcase
-        DATA_FAULT = DATA_FAULT || MMIO_FAULT;
     end
-
 endmodule

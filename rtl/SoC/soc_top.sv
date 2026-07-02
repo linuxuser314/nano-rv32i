@@ -2,7 +2,6 @@
 
 
 /*
-Memory Map (18Kbit aligned for BRAM):
 0x0000_0000 to 0x0000_07FF: ROM (x)
 0x4000_0000 to 0x4000_07FF: Payload (r)
 0x8000_0000 to 0x8000_07FF: MMIO (rw, volatile tag in C/C++ mandatory)
@@ -50,7 +49,7 @@ module soc_top(input  logic      clk_27MHz, reset_button,
 
     //Master-slave bus interconnect
     bus_interconnect master_bus(
-
+        .clk(sys_clk), .reset(sys_reset),
         //Master 0 (core0 fetch)
         .core0_fetch_bus(core0_fetch_bus),
         .FETCH_FAULT(core0_FETCH_FAULT),
