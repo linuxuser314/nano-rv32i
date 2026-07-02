@@ -37,3 +37,8 @@ echo 'export PATH="/workspaces/nano-rv32i/tools:$PATH"' >> ~/.bashrc
 echo 'export NANO_ROOT="/workspaces/nano-rv32i"' >> ~/.bashrc
 
 echo "=== Environment Setup Complete! ==="
+
+#This is the script I used to install sv2v, but I need to test it for integration into my Codespace!
+#wget https://github.com/zachjs/sv2v/releases/latest/download/sv2v-Linux.zip
+#unzip sv2v-Linux.zip
+#sudo mv sv2v-Linux/sv2v /usr/local/bin/
