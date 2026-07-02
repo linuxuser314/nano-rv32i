@@ -19,8 +19,13 @@ module shifter(
                       ((~is_right_shift & data_in[0]) | (is_right_shift & data_in[31]));
 
     // 1. Initial reversal using the streaming operator
-    assign reverse_stage = is_right_shift ? {<<{data_in}} : data_in;
-
+    logic [31:0] bits_reversed_in;
+    always_comb begin
+        for (int i = 0; i < 32; i++) begin
+            bits_reversed_in[i] = data_in[31-i];
+        end
+    end
+    assign reverse_stage = is_right_shift ? bits_reversed_in : data_in;
     // 2. The barrel shift stages (Native Left Shift)
     assign stage_1 = shamt[4] ? {reverse_stage[15:0], {16{fill_bit}}} : reverse_stage;
     assign stage_2 = shamt[3] ? {stage_1[23:0],       { 8{fill_bit}}} : stage_1;
@@ -29,6 +34,12 @@ module shifter(
     assign stage_5 = shamt[0] ? {stage_4[30:0],       { 1{fill_bit}}} : stage_4;
 
     // 3. Final reversal using the streaming operator
-    assign result = is_right_shift ? {<<{stage_5}} : stage_5;
+    logic [31:0] bits_reversed_out;
+    always_comb begin
+        for (int i = 0; i < 32; i++) begin
+            bits_reversed_out[i] = stage_5[31-i];
+        end
+    end
+    assign result = is_right_shift ? bits_reversed_out : stage_5;
 
 endmodule

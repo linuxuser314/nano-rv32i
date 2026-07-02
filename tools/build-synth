@@ -2,10 +2,24 @@
 
 set -e
 
-echo -e "\n\n\n======YOSYS SYNTHESIS======\n\n\n" > $NANO_ROOT/synth-log.txt
+# 1. Define the file order explicitly
+SV_FILES="$NANO_ROOT/rtl/interfaces/*.sv \
+          $NANO_ROOT/rtl/utils/*.sv \
+          $NANO_ROOT/rtl/rv32i_core/*.sv \
+          $NANO_ROOT/rtl/peripherals/*.sv \
+          $NANO_ROOT/rtl/SoC/*.sv"
+
+echo -e "\n\n\n======SV2V TRANSPILATION======\n\n\n" > $NANO_ROOT/synth-log.txt
+echo "======SV2V TRANSPILATION======"
+
+# 2. sv2v completely flattens the interfaces and SV features into standard Verilog
+sv2v $SV_FILES > $NANO_ROOT/flattened.v
+
+echo -e "\n\n\n======YOSYS SYNTHESIS======\n\n\n" >> $NANO_ROOT/synth-log.txt
 echo "======YOSYS SYNTHESIS======"
 
-yosys -p "read_verilog -sv $NANO_ROOT/rtl/*.sv; synth_gowin -top datapath -json $NANO_ROOT/core.json" &>> $NANO_ROOT/synth-log.txt
+# 3. Yosys reads the flattened file (Notice we dropped the -sv flag!)
+yosys -p "read_verilog $NANO_ROOT/flattened.v; synth_gowin -top soc_top -json $NANO_ROOT/core.json" &>> $NANO_ROOT/synth-log.txt
 
 echo -e "\n\n\n======NEXTPNR PLACE-AND-ROUTE======\n\n\n" >> $NANO_ROOT/synth-log.txt
 echo "======NEXTPNR PLACE-AND-ROUTE======"
@@ -14,7 +28,8 @@ nextpnr-himbaechel --json $NANO_ROOT/core.json \
                    --write $NANO_ROOT/routed.json \
                    --device GW2AR-LV18QN88C8/I7 \
                    --vopt family=GW2A-18C \
-                   --vopt cst=$NANO_ROOT/nano20k.cst &>> $NANO_ROOT/synth-log.txt
+                   --vopt cst=$NANO_ROOT/nano20k.cst \
+                   --report $NANO_ROOT/timing_report.json &>> $NANO_ROOT/synth-log.txt
 
 echo -e "\n\n\n=======PROJECT APICULA BITSTREAM GENERATION======\n\n\n" >> $NANO_ROOT/synth-log.txt
 echo "=======PROJECT APICULA BITSTREAM GENERATION======"
@@ -24,8 +39,9 @@ gowin_pack -d GW2A-18C -c -o $NANO_ROOT/firmware.fs $NANO_ROOT/routed.json &>> $
 echo -e "\n\nCleaning up...\n\n" >> $NANO_ROOT/synth-log.txt
 echo "Cleaning up..."
 
-rm core.json
-rm routed.json
+rm $NANO_ROOT/flattened.v
+rm $NANO_ROOT/core.json
+rm $NANO_ROOT/routed.json
 
 echo -e "\n\nAll Done!" >> $NANO_ROOT/synth-log.txt
 echo "All done!"
