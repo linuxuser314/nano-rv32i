@@ -1,119 +1,63 @@
-#!/bin/bash
-# Stop script execution if any command fails
-set -e
+#!/usr/bin/bash
 
-IS_RISCV_TEST=0
-DO_DUMP=0
-ASM_FILE=""
+# Exit immediately if a command exits with a non-zero status, and catch pipe failures
+set -eo pipefail
 
-# Parse arguments
-while [[ "$#" -gt 0 ]]; do
-    case $1 in
-        -test) IS_RISCV_TEST=1 ;;
-        -dump) DO_DUMP=1 ;;
-        *) ASM_FILE=$1 ;;
-    esac
-    shift
-done
+echo -e "\n======================================="
+echo "       NANO-RV32I SIMULATION BUILD       "
+echo "======================================="
 
-if [ -z "$ASM_FILE" ]; then
-    echo "Usage: ./tools/build-sim.sh [-test] [-dump] <input_asm.s>"
-    echo "Example (Normal): ./tools/build-sim.sh sim/basic_instruction_test.s"
-    echo "Example (Test)  : ./tools/build-sim.sh -test sim/rv32i-p/simple.S"
-    echo "Example (Dump)  : ./tools/build-sim.sh -test -dump sim/rv32i-p/simple.S"
-    exit 1
+# --- 1. OPTIONAL SOFTWARE COMPILATION ---
+# You mentioned running build-asm manually, so this is commented out.
+# Uncomment these lines if you ever want the simulation to automatically 
+# rebuild the hex files before running!
+#
+# echo "[1/4] Assembling firmware..."
+# $NANO_ROOT/tools/build-asm
+# ----------------------------------------
+
+# --- 2. DEFINE FILES AND DIRECTORIES ---
+echo "[2/4] Gathering SystemVerilog files..."
+
+# Explicitly order files to ensure interfaces are parsed before modules that use them
+SV_FILES="$NANO_ROOT/rtl/interfaces/*.sv \
+          $NANO_ROOT/rtl/utils/*.sv \
+          $NANO_ROOT/rtl/rv32i_core/*.sv \
+          $NANO_ROOT/rtl/peripherals/*.sv \
+          $NANO_ROOT/rtl/SoC/*.sv"
+
+# --- 3. VERILATOR TRANSPILATION ---
+echo "[3/4] Transpiling SystemVerilog to C++ with Verilator..."
+
+# Added performance and optimization flags (-O3, --x-assign, --x-initial)
+# to make the C++ simulation run as fast as natively possible.
+verilator --cc --exe --trace-fst -Wall \
+          -Wno-fatal \
+          -O3 \
+          --x-assign fast \
+          --x-initial fast \
+          $SV_FILES \
+          $NANO_ROOT/sim/main.cpp \
+          --top-module soc_top \
+          --Mdir $NANO_ROOT/obj_dir
+
+# --- 4. C++ COMPILATION ---
+echo "[4/4] Compiling the Verilator C++ model..."
+
+# Suppress the massive makefile output with > /dev/null so you only see errors
+make -C $NANO_ROOT/obj_dir -j$(nproc) -f Vsoc_top.mk > /dev/null
+
+# --- 5. EXECUTE SIMULATION ---
+echo -e "\n======================================="
+echo "          RUNNING SIMULATION             "
+echo "======================================="
+
+# Run the simulation executable
+$NANO_ROOT/obj_dir/Vsoc_top
+
+# Move the trace file to the root directory if the C++ executable dumped it in obj_dir
+if [ -f "$NANO_ROOT/obj_dir/sim_trace.fst" ]; then
+    mv $NANO_ROOT/obj_dir/sim_trace.fst $NANO_ROOT/sim_trace.fst
 fi
 
-# Toolchain prefix
-TOOLCHAIN_PREFIX="riscv64-unknown-elf-"
-
-# Define absolute path to your custom environment configuration
-ENV_DIR="/workspaces/nano-rv32i/sim/custom_env"
-
-echo "==> 1. Assembling $ASM_FILE..."
-if [ $IS_RISCV_TEST -eq 1 ]; then
-    echo "    (Using absolute paths for riscv-tests macros and linker)"
-    
-    # Verify the absolute directory path exists before compiling
-    if [ ! -d "$ENV_DIR" ]; then
-        echo "[ERROR] Custom environment directory not found at: $ENV_DIR"
-        echo "Please make sure your link.ld and riscv_test.h are in that folder."
-        exit 1
-    fi
-
-    # Using absolute directory tracking for include search paths (-I) and linker maps (-T)
-    ${TOOLCHAIN_PREFIX}gcc -march=rv32i -mabi=ilp32 -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles \
-        -I "$ENV_DIR/" \
-        -T "$ENV_DIR/link.ld" \
-        -o temp.elf "$ASM_FILE"
-else
-    echo "    (Using standard bare-metal build)"
-    ${TOOLCHAIN_PREFIX}gcc -march=rv32i -mabi=ilp32 -nostdlib -nostartfiles -Wl,-Ttext=0x0 -o temp.elf "$ASM_FILE"
-fi
-
-# -------------------------------------------------------------------------
-# Intercept: Optional Objdump Generation
-# -------------------------------------------------------------------------
-if [ $DO_DUMP -eq 1 ]; then
-    echo "==> [DUMP] Generating machine code disassembly..."
-    DUMP_FILE="/workspaces/nano-rv32i/sim/dump.txt"
-    ${TOOLCHAIN_PREFIX}objdump -D temp.elf > "$DUMP_FILE"
-    echo "    Saved disassembly to: $DUMP_FILE"
-fi
-
-echo "==> 2. Converting to 32-bit Verilog Hex format..."
-${TOOLCHAIN_PREFIX}objcopy -O verilog --verilog-data-width=4 temp.elf temp.hex
-
-echo "==> 3. Loading Hex file into Instruction ROM path..."
-mkdir -p /workspaces/nano-rv32i/software/
-cp temp.hex /workspaces/nano-rv32i/software/firmware.hex
-
-# -------------------------------------------------------------------------
-# Compilation and Simulation
-# -------------------------------------------------------------------------
-echo "==> 4. Gathering SystemVerilog files recursively..."
-
-# Locate all interface files first (iverilog requires definitions before usage)
-INTERFACE_DIR="/workspaces/nano-rv32i/rtl/interfaces"
-INTERFACE_FILES=""
-if [ -d "$INTERFACE_DIR" ]; then
-    INTERFACE_FILES=$(find "$INTERFACE_DIR" -type f \( -name "*.sv" -o -name "*.v" \))
-fi
-
-# Locate all RTL files recursively across all subfolders
-RTL_FILES=$(find /workspaces/nano-rv32i/rtl -type f \( -name "*.sv" -o -name "*.v" \))
-
-echo "==> 5. Compiling RTL and Testbench using iverilog..."
-# Execute compilation with explicitly ordered file lists
-iverilog -g2012 -s datapath_tb -o sim.vvp \
-    /workspaces/nano-rv32i/sim/datapath_tb.sv \
-    $INTERFACE_FILES \
-    $RTL_FILES
-
-echo "==> 6. Running simulation..."
-vvp sim.vvp -fst
-
-# -------------------------------------------------------------------------
-# Waveform Extraction
-# -------------------------------------------------------------------------
-echo "==> 7. Processing waveform file..."
-
-TARGET_WAVEFORM="/workspaces/nano-rv32i/sim/simulation.fst"
-
-# Intercept the local file and move it to the absolute path for Surfer auto-refresh
-if [ -f "simulation.fst" ]; then
-    mkdir -p "$(dirname "$TARGET_WAVEFORM")"
-    mv simulation.fst "$TARGET_WAVEFORM"
-fi
-
-if [ -f "$TARGET_WAVEFORM" ]; then
-    echo "-------------------------------------------------------"
-    echo "SUCCESS! Waveform safely saved to: $TARGET_WAVEFORM"
-    echo "Refresh Surfer to view the new waveform!"
-    echo "-------------------------------------------------------"
-else
-    echo "WARNING: 'simulation.fst' was not found!"
-fi
-
-# Clean up temporary compilation artifacts
-rm -f temp.elf temp.hex sim.vvp
+echo -e "\nSimulation complete! Open 'sim_trace.fst' in GTKWave, WaveTrace, or Surfer."

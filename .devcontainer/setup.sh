@@ -42,3 +42,6 @@ echo "=== Environment Setup Complete! ==="
 #wget https://github.com/zachjs/sv2v/releases/latest/download/sv2v-Linux.zip
 #unzip sv2v-Linux.zip
 #sudo mv sv2v-Linux/sv2v /usr/local/bin/
+
+#sudo apt-get update && sudo apt-get install -y liblz4-dev
+#That is to instlal the fst compression tool used by Verilator.
