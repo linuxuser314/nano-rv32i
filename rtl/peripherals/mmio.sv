@@ -15,7 +15,7 @@ module mmio(
             case(bus.address)
                 32'h8000_0000: begin
                     if(bus.write_enable) begin
-                        led_strip6 <= bus.write_data[27:22];
+                        led_strip6 <= bus.write_data[5:0];
                     end
                     if(bus.read_enable) begin
                         bus.read_data <= 32'b0;
