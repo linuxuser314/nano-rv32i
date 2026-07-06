@@ -166,30 +166,45 @@ module bus_interconnect(input logic clk, reset,
         mmio_bus.read_enable = 1'b0;
         system_ram0_bus_A.read_enable = 1'b0;
         system_ram0_bus_B.read_enable = 1'b0;
-        case(fetch_select_buffered)
+        case(fetch_select)
             2'b01: begin
-                core0_fetch_bus.read_data = boot_rom_bus.read_data;
                 boot_rom_bus.read_enable = 1'b1;
             end
             2'b10: begin
-                core0_fetch_bus.read_data = system_ram0_bus_A.read_data;
                 system_ram0_bus_A.read_enable = 1'b1;
+            end
+            default: begin end//Defaults already initialized above
+        endcase
+        case(fetch_select_buffered)
+            2'b01: begin
+                core0_fetch_bus.read_data = boot_rom_bus.read_data;
+            end
+            2'b10: begin
+                core0_fetch_bus.read_data = system_ram0_bus_A.read_data;
             end
             default: core0_fetch_bus.read_data = 32'b0;
         endcase
-
-        case(data_select_buffered)
+        case(data_select)
             2'b01: begin
-                core0_data_bus.read_data = payload_rom_bus.read_data;
                 payload_rom_bus.read_enable = 1'b1;
             end
             2'b10: begin
-                core0_data_bus.read_data = mmio_bus.read_data;
                 mmio_bus.read_enable = 1'b1;
             end
             2'b11: begin
-                core0_data_bus.read_data = system_ram0_bus_B.read_data;
                 system_ram0_bus_B.read_enable = 1'b1;
+            end
+            default: begin end//Defaults handled by default assignment above
+        endcase
+        case(data_select_buffered)
+            2'b01: begin
+                core0_data_bus.read_data = payload_rom_bus.read_data;
+            end
+            2'b10: begin
+                core0_data_bus.read_data = mmio_bus.read_data;
+            end
+            2'b11: begin
+                core0_data_bus.read_data = system_ram0_bus_B.read_data;
             end
             default: core0_data_bus.read_data = 32'b0;
         endcase
