@@ -3,7 +3,7 @@
 module mmio(
         input logic clk, reset,
         output logic MMIO_FAULT,
-        output logic[5:0] led_strip6,
+        output logic[31:0] led_strip6,
         ram_bus_if.slave bus
 );
     always_ff @(posedge clk) begin
@@ -15,7 +15,7 @@ module mmio(
             case(bus.address)
                 32'h8000_0000: begin
                     if(bus.write_enable) begin
-                        led_strip6 <= bus.write_data[5:0];
+                        led_strip6 <= bus.write_data[31:0];
                     end
                     if(bus.read_enable) begin
                         bus.read_data <= 32'b0;

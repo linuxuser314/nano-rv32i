@@ -11,7 +11,7 @@
 `default_nettype none
 
 module soc_top(input  logic      clk_27MHz, reset_button,
-               output logic[5:0] led_strip6
+               output logic[31:0] led_strip6
                );
 
     //Leave them simple for now.
@@ -115,4 +115,22 @@ module soc_top(input  logic      clk_27MHz, reset_button,
         //Slave4 (system_ram0_B)
         .bus_B(system_ram0_bus_B)
     );
+    `ifdef VERILATOR
+        logic[31:0] last_test_output;
+        always_ff @(posedge sys_clk) begin
+            // Only print and update if the new data is different from the old data
+            if (led_strip6 != last_test_output) begin
+                // If it writes 1, it passed!
+                if (led_strip6 == 32'd1) begin
+                    $display("RISC-V TEST PASSED! (Code: %0d)", led_strip6);
+                end else begin
+                    // If it writes anything else, it failed
+                    $display("RISC-V TEST FAILED! (Code: %0d)", led_strip6);
+                end
+
+                // Update our tracker so we don't print this exact number again
+                last_test_output <= led_strip6;
+            end
+        end
+    `endif
 endmodule

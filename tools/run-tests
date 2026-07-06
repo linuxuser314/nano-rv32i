@@ -1,0 +1,90 @@
+#!/usr/bin/env python3
+
+import os
+import sys
+import glob
+import shutil
+import subprocess
+
+# --- Directories & Paths ---
+NANO_ROOT = os.environ.get("NANO_ROOT", ".")
+TEST_DIR = os.path.join(NANO_ROOT, "sim/vendor/riscv-tests/rv32i-p-asm")
+BUILD_SIM = os.path.join(NANO_ROOT, "tools/build-sim")
+BUILD_ASM = os.path.join(NANO_ROOT, "tools/build-asm")
+BOOT_ROM = os.path.join(NANO_ROOT, "software/boot_rom.hex")
+VSOC_TOP = os.path.join(NANO_ROOT, "build/obj_dir/Vsoc_top")
+
+def main():
+    print("=" * 50)
+    print("🚀 NANO-RV32I AUTOMATED TEST SUITE")
+    print("=" * 50)
+
+    # 1. Compile the Simulator ONCE
+    print("\n[1/3] Compiling Verilator Model (Running build-sim)...")
+    sim_res = subprocess.run([BUILD_SIM], capture_output=True, text=True)
+    if sim_res.returncode != 0:
+        print("❌ ERROR: Simulator failed to build!")
+        print(sim_res.stderr)
+        sys.exit(1)
+    print("✅ Simulator built successfully.")
+
+    # 2. Find all test files
+    test_files = glob.glob(os.path.join(TEST_DIR, "*.S"))
+    if not test_files:
+        print(f"❌ ERROR: No .S test files found in {TEST_DIR}")
+        sys.exit(1)
+
+    print(f"\n[2/3] Found {len(test_files)} tests. Running suite...\n")
+
+    passed = 0
+    failed = 0
+    crashed = 0
+
+    # 3. The Testing Loop
+    for test in sorted(test_files):
+        test_name = os.path.basename(test).replace('.S', '')
+        hex_file = test.replace('.S', '.hex')
+
+        # A. Assemble the test
+        asm_res = subprocess.run([BUILD_ASM, test, "--riscv-test"], capture_output=True, text=True)
+        if asm_res.returncode != 0:
+            print(f"[{test_name.ljust(15)}] ❌ ASM BUILD FAILED")
+            crashed += 1
+            continue
+
+        # B. Load into ROM
+        shutil.copy(hex_file, BOOT_ROM)
+
+        # C. Run Simulation Executable
+        run_res = subprocess.run([VSOC_TOP], capture_output=True, text=True)
+
+        # D. Parse Output
+        output = run_res.stdout
+        if "RISC-V TEST PASSED!" in output:
+            print(f"[{test_name.ljust(15)}] ✅ PASSED")
+            passed += 1
+        elif "RISC-V TEST FAILED!" in output:
+            # Extract the specific failure code printed by your MMIO fix
+            for line in output.split('\n'):
+                if "FAILED!" in line:
+                    print(f"[{test_name.ljust(15)}] ❌ {line.strip()}")
+            failed += 1
+        else:
+            print(f"[{test_name.ljust(15)}] ⚠️ TIMEOUT / NO RESULT")
+            crashed += 1
+
+    # 4. Final Scoreboard
+    print("\n" + "=" * 50)
+    print("🏆 FINAL SCOREBOARD")
+    print("=" * 50)
+    print(f"✅ PASSED : {passed}")
+    print(f"❌ FAILED : {failed}")
+    print(f"⚠️ CRASHED: {crashed}")
+    
+    if passed == len(test_files):
+        print("\n🎉 CONGRATULATIONS! Your CPU is 100% RISC-V Compliant!")
+    else:
+        print("\n🛠️ Back to the waveforms...")
+
+if __name__ == "__main__":
+    main()

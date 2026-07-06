@@ -24,13 +24,13 @@
   nop;                                                  \
 
 #define rvtest_pass                                     \
-  li t0, 0x40000000;                                    \
+  li t0, 0x80000000;                                    \
   li t1, 1;                                             \
   sw t1, 0(t0);                                         \
   1: j 1b;                                              \
 
 #define rvtest_fail                                     \
-  li t0, 0x40000000;                                    \
+  li t0, 0x80000000;                                    \
   slli t1, gp, 1;                                       \
   ori t1, t1, 1;                                        \
   sw t1, 0(t0);                                         \
