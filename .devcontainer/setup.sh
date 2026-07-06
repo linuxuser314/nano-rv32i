@@ -59,16 +59,3 @@ if ! grep -q "/workspaces/nano-rv32i/tools" ~/.bashrc; then
     echo 'export PATH="/workspaces/nano-rv32i/tools:$PATH"' >> ~/.bashrc
     echo "✅ Added custom tools directory to PATH in ~/.bashrc"
 fi
-
-# Guard for PYTHONPATH
-if ! grep -q "NANO_ROOT/tools" ~/.bashrc; then
-    echo 'export PYTHONPATH="${PYTHONPATH}:${NANO_ROOT}/tools"' >> ~/.bashrc
-    echo "✅ Added tools directory to PYTHONPATH in ~/.bashrc"
-fi
-
-echo "=== Step 8: Activating variables for current installation session ==="
-export NANO_ROOT="/workspaces/nano-rv32i"
-export PATH="/opt/oss-cad-suite/bin:/workspaces/nano-rv32i/tools:$PATH"
-export PYTHONPATH="${PYTHONPATH}:${NANO_ROOT}/tools"
-
-echo "=== Environment Setup Complete! ==="

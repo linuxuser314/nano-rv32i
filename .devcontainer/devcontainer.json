@@ -18,5 +18,10 @@
                 "mshr-h.veriloghdl"
             ]
         }
+    },
+    // Add this block to lock in your environment variables permanently!
+    "containerEnv": {
+        "NANO_ROOT": "/workspaces/nano-rv32i",
+        "PYTHONPATH": "/workspaces/nano-rv32i/tools"
     }
 }

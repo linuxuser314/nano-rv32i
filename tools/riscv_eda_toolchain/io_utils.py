@@ -53,31 +53,32 @@ def get_rtl_files():
     
     return ordered_files
 
-def is_stale(source_files, target_file):
+def is_stale(source_files, target_files):
     """
-    Compares the modification timestamps of source file(s) against a target file.
-    Returns True if the target file needs to be rebuilt (i.e., it doesn't exist
-    or any source file is newer than the target).
-    
-    source_files: Can be a single string path or a list/iterable of string paths.
-    target_file: The string path of the compilation output artifact.
+    Compares the modification timestamps of source file(s) against target file(s).
+    Returns True if any target file needs to be rebuilt (i.e., if any target doesn't 
+    exist or any source file is newer than any target file).
     """
-    # If the target artifact doesn't even exist, it's definitely stale
-    if not os.path.exists(target_file):
-        return True
-
-    target_mtime = os.path.getmtime(target_file)
-
-    # If the user passed a single file path string, wrap it in a list
+    # Force both parameters into lists so we can loop over them uniformly
     if isinstance(source_files, str):
         source_files = [source_files]
+    if isinstance(target_files, str):
+        target_files = [target_files]
 
-    # Check every source file. If even ONE is newer than the target, it's stale.
+    # If even ONE target file is completely missing, the system is stale
+    for target in target_files:
+        if not os.path.exists(target):
+            return True
+
+    # Track down the absolute newest source file timestamp
+    newest_source_time = 0
     for source in source_files:
-        if not os.path.exists(source):
-            continue  # Skip missing files to avoid crashes during cleanup phases
-            
-        if os.path.getmtime(source) > target_mtime:
+        if os.path.exists(source):
+            newest_source_time = max(newest_source_time, os.path.getmtime(source))
+
+    # If any existing target is older than the newest source file, it's stale
+    for target in target_files:
+        if os.path.getmtime(target) < newest_source_time:
             return True
 
     return False

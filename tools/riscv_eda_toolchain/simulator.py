@@ -3,6 +3,7 @@
 import os
 import sys
 import subprocess
+import shutil
 from .io_utils import get_nano_root, is_stale
 
 def compile_hdl(rtl_files, wrapper_cpp, top_module="soc_top"):
@@ -72,4 +73,10 @@ def compile_hdl(rtl_files, wrapper_cpp, top_module="soc_top"):
         return False
 
     print(f"✅ [PASS][0.0][VRIBLE] Simulator compiled successfully: {target_bin}")
+    # ... inside compile_hdl after the make command succeeds ...
+    generated_bin = os.path.join(obj_dir, f"V{top_module}")
+    final_bin = os.path.join(build_dir, "soc_executable")
+
+    print(f"📦 Moving and renaming simulation binary to {final_bin}...")
+    shutil.copy2(generated_bin, final_bin) # copy2 preserves file permissions (executable bits)
     return True
