@@ -7,7 +7,7 @@
 
 module PC_subsystem(input  logic[31:0] prev_PC, imm, jalr_addr,
                     input  logic[1:0] PC_select,
-                    input  logic branch_flag, PC_increment, FAULT,
+                    input  logic branch_flag, PC_increment, FAULT, reset,
                     output logic[31:0] new_PC, PC_plus_4, PC_plus_imm
                     );
     //These are pre-selection calculations that are also used for AUIPC and jal/jalr.
@@ -16,13 +16,18 @@ module PC_subsystem(input  logic[31:0] prev_PC, imm, jalr_addr,
     assign PC_plus_imm = prev_PC + imm;
     //Selects the PC behavior for the next PC depending on PC_select.
     always_comb begin
-        case(PC_select)
-            0: new_PC = PC_plus_4;
-            1: new_PC = PC_plus_imm;
-            2: new_PC = jalr_addr;
-            3: new_PC = branch_flag ? PC_plus_imm : PC_plus_4;
-            default: new_PC = 32'b0;
-        endcase
+        if(reset) begin
+            new_PC = '0;
+        end
+        else begin
+            case(PC_select)
+                0: new_PC = PC_plus_4;
+                1: new_PC = PC_plus_imm;
+                2: new_PC = jalr_addr;
+                3: new_PC = branch_flag ? PC_plus_imm : PC_plus_4;
+                default: new_PC = 32'b0;
+            endcase
+        end
     end
 
 endmodule

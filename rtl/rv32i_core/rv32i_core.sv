@@ -63,7 +63,8 @@ module rv32i_core(input logic clk, reset,
         .imm(decoded_immediate), .jalr_addr({ALU_result[31:1], 1'b0}),
         .PC_increment(PC_increment), .PC_select(PC_select), .branch_flag(comparison_flag),
         .FAULT(LOAD_FAULT || LOAD_MISALIGNED || STORE_FAULT || STORE_MISALIGNED ||
-               FETCH_FAULT || FETCH_MISALIGNED || INVALID_INSTRUCTION)
+               FETCH_FAULT || FETCH_MISALIGNED || INVALID_INSTRUCTION),
+        .reset(reset)
     );
     register #(
         .SIZE(32)
