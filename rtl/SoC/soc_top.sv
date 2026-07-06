@@ -105,7 +105,8 @@ module soc_top(input  logic      clk_27MHz, reset_button,
 
     //Slave 3/4 (system_ram0)
     ram_dual_port #(
-        .SIZE(512)
+        .SIZE(512),
+        .FILE_PATH("/workspaces/nano-rv32i/software/system_ram.hex")
     ) system_ram0(
         .clk(sys_clk),
 

@@ -112,4 +112,20 @@ module rv32i_core(input logic clk, reset,
         .out(result_mux_out),
         .select(result_select)
     );
+    // =================================================================
+    // SIMULATION ONLY: Hardware Fault Monitor
+    // =================================================================
+    `ifdef VERILATOR
+        always_ff @(posedge clk) begin
+            if (reset == 0) begin
+                if (LOAD_FAULT)          $display("HARDWARE FAULT: LOAD_FAULT at PC 0x%08x", prev_PC);
+                if (STORE_FAULT)         $display("HARDWARE FAULT: STORE_FAULT at PC 0x%08x", prev_PC);
+                if (LOAD_MISALIGNED)     $display("HARDWARE FAULT: LOAD_MISALIGNED at PC 0x%08x", prev_PC);
+                if (STORE_MISALIGNED)    $display("HARDWARE FAULT: STORE_MISALIGNED at PC 0x%08x", prev_PC);
+                if (FETCH_FAULT)         $display("HARDWARE FAULT: FETCH_FAULT at PC 0x%08x", prev_PC);
+                if (FETCH_MISALIGNED)    $display("HARDWARE FAULT: FETCH_MISALIGNED at PC 0x%08x", prev_PC);
+                if (INVALID_INSTRUCTION) $display("HARDWARE FAULT: INVALID_INSTRUCTION (0x%08x) at PC 0x%08x", instruction, prev_PC);
+            end
+        end
+    `endif
 endmodule

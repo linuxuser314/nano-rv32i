@@ -52,25 +52,37 @@ def main():
             crashed += 1
             continue
 
-        # B. Load into ROM
-        shutil.copy(hex_file, BOOT_ROM)
+        ## B. Load into ROM and RAM
+        text_hex = test.replace('.S', '.text.hex')
+        data_hex = test.replace('.S', '.data.hex')
+
+        # Copy to the software folder where soc_top.sv expects them!
+        shutil.copy(text_hex, os.path.join(NANO_ROOT, "software/boot_rom.hex"))
+        shutil.copy(data_hex, os.path.join(NANO_ROOT, "software/system_ram.hex"))
 
         # C. Run Simulation Executable
         run_res = subprocess.run([VSOC_TOP], capture_output=True, text=True)
 
         # D. Parse Output
         output = run_res.stdout
+        
+        # Look for our custom fault messages
+        faults = [line.strip() for line in output.split('\n') if "HARDWARE FAULT:" in line]
+
         if "RISC-V TEST PASSED!" in output:
             print(f"[{test_name.ljust(15)}] ✅ PASSED")
             passed += 1
         elif "RISC-V TEST FAILED!" in output:
-            # Extract the specific failure code printed by your MMIO fix
             for line in output.split('\n'):
                 if "FAILED!" in line:
                     print(f"[{test_name.ljust(15)}] ❌ {line.strip()}")
             failed += 1
         else:
-            print(f"[{test_name.ljust(15)}] ⚠️ TIMEOUT / NO RESULT")
+            if faults:
+                # Print the very first fault that occurred
+                print(f"[{test_name.ljust(15)}] 💥 CRASHED ({faults[0]})")
+            else:
+                print(f"[{test_name.ljust(15)}] ⚠️ TIMEOUT / INFINITE LOOP")
             crashed += 1
 
     # 4. Final Scoreboard
