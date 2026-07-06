@@ -12,9 +12,11 @@ __version__ = "1.0.0"
 #from .compiler import compile_asm, slice_elf, format_to_32bit
 #from .simulator import compile_hdl, execute_sim
 from .io_utils import get_nano_root, get_rtl_files, is_stale
+from .simulator import compile_hdl
 # 3. Explicitly define what is exposed when someone runs "from riscv_eda_toolchain import *"
 __all__ = [
     "get_nano_root",
     "get_rtl_files",
-    "is_stale"
+    "is_stale",
+    "compile_hdl"
 ]
