@@ -2,30 +2,29 @@
 
 # Exit immediately if any command fails
 set -e
-
-# --- 1. ARGUMENT PARSING ---
-if [ -z "$1" ]; then
-    echo "Usage: build-asm <path/to/file.S> [--riscv-test]"
-    exit 1
+# Detect flag regardless of order/spelling
+if [[ "$1" == "--riscv-test" || "$1" == "--riscv-tests" ]]; then
+    SRC_FILE="$2"
+    TEST_FLAG=1
+elif [[ "$2" == "--riscv-test" || "$2" == "--riscv-tests" ]]; then
+    SRC_FILE="$1"
+    TEST_FLAG=1
+else
+    SRC_FILE="$1"
+    TEST_FLAG=0
 fi
 
-SRC_FILE="$1"
 DIR=$(dirname "$SRC_FILE")
 BASENAME=$(basename "$SRC_FILE" | sed 's/\.[sS]$//')
-
-OBJ_FILE="$DIR/$BASENAME.o"
-ELF_FILE="$DIR/$BASENAME.elf"
-TEXT_HEX="$DIR/$BASENAME.text.hex"
-DATA_HEX="$DIR/$BASENAME.data.hex"
-DUMP_FILE="$DIR/$BASENAME.dump"
 
 # --- 2. ENVIRONMENT SETUP ---
 AS_FLAGS="-march=rv32i -mabi=ilp32 -c"
 LD_FLAGS="-m elf32lriscv -Ttext 0x00000000"
 
-if [[ "$2" == "-riscv-test" || "$2" == "--riscv-test" ]]; then
-    TEST_ENV="$NANO_ROOT/sim/vendor/riscv-tests/custom_env"
-    TEST_MACROS="$NANO_ROOT/sim/vendor/riscv-tests/isa/macros/scalar"
+if [ "$TEST_FLAG" -eq 1 ]; then
+    # Hardcoded to your workspace to prevent empty-variable root path bugs
+    TEST_ENV="/workspaces/nano-rv32i/sim/vendor/riscv-tests/custom_env"
+    TEST_MACROS="/workspaces/nano-rv32i/sim/vendor/riscv-tests/isa/macros/scalar"
     AS_FLAGS="-march=rv32i -mabi=ilp32 -I$TEST_ENV -I$TEST_MACROS -c"
     LD_FLAGS="-m elf32lriscv -T $TEST_ENV/link.ld"
 fi
