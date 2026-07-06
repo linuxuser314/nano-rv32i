@@ -3,18 +3,20 @@
 # Exit immediately if a command exits with a non-zero status, and catch pipe failures
 set -eo pipefail
 
+# Create directories safely (won't overwrite or fail if they exist)
+mkdir -p $NANO_ROOT/logs
+mkdir -p $NANO_ROOT/build
+
 echo -e "\n======================================="
 echo "       NANO-RV32I SIMULATION BUILD       "
 echo "======================================="
 
 # --- 1. OPTIONAL SOFTWARE COMPILATION ---
-# You mentioned running build-asm manually, so this is commented out.
 # Uncomment these lines if you ever want the simulation to automatically 
 # rebuild the hex files before running!
 #
 # echo "[1/4] Assembling firmware..."
-# $NANO_ROOT/tools/build-asm
-# ----------------------------------------
+# $NANO_ROOT/tools/build-asm > $NANO_ROOT/logs/asm-log.txt
 
 # --- 2. DEFINE FILES AND DIRECTORIES ---
 echo "[2/4] Gathering SystemVerilog files..."
@@ -30,7 +32,8 @@ SV_FILES="$NANO_ROOT/rtl/interfaces/*.sv \
 echo "[3/4] Transpiling SystemVerilog to C++ with Verilator..."
 
 # Added performance and optimization flags (-O3, --x-assign, --x-initial)
-# to make the C++ simulation run as fast as natively possible.
+# Directed the output object directory into the /build folder
+# stdout is routed to a log file, stderr (warnings/errors) stays on the terminal
 verilator --cc --exe --trace-fst -Wall \
           -Wno-fatal \
           -O3 \
@@ -39,25 +42,29 @@ verilator --cc --exe --trace-fst -Wall \
           $SV_FILES \
           $NANO_ROOT/sim/main.cpp \
           --top-module soc_top \
-          --Mdir $NANO_ROOT/obj_dir
+          --Mdir $NANO_ROOT/build/obj_dir > $NANO_ROOT/logs/verilator-log.txt
 
 # --- 4. C++ COMPILATION ---
 echo "[4/4] Compiling the Verilator C++ model..."
 
-# Suppress the massive makefile output with > /dev/null so you only see errors
-make -C $NANO_ROOT/obj_dir -j$(nproc) -f Vsoc_top.mk > /dev/null
+# Compile the model and route the massive makefile stdout to a log
+make -C $NANO_ROOT/build/obj_dir -j$(nproc) -f Vsoc_top.mk > $NANO_ROOT/logs/make-log.txt
 
 # --- 5. EXECUTE SIMULATION ---
 echo -e "\n======================================="
 echo "          RUNNING SIMULATION             "
 echo "======================================="
 
-# Run the simulation executable
-$NANO_ROOT/obj_dir/Vsoc_top
+# Run the simulation executable. 
+# We are routing all of your $display statements into a text log!
+$NANO_ROOT/build/obj_dir/Vsoc_top > $NANO_ROOT/logs/sim-output.txt
 
-# Move the trace file to the root directory if the C++ executable dumped it in obj_dir
-if [ -f "$NANO_ROOT/obj_dir/sim_trace.fst" ]; then
-    mv $NANO_ROOT/obj_dir/sim_trace.fst $NANO_ROOT/sim_trace.fst
+# Move the trace file to the logs directory to keep the root directory clean
+# (main.cpp drops sim_trace.fst in the current working directory)
+if [ -f "sim_trace.fst" ]; then
+    mv sim_trace.fst $NANO_ROOT/logs/sim_trace.fst
 fi
 
-echo -e "\nSimulation complete! Open 'sim_trace.fst' in GTKWave, WaveTrace, or Surfer."
+echo -e "\nSimulation complete!"
+echo " - Waveform saved to: $NANO_ROOT/logs/sim_trace.fst"
+echo " - Terminal output saved to: $NANO_ROOT/logs/sim-output.txt"
