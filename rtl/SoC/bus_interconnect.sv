@@ -23,31 +23,26 @@ module bus_interconnect(input logic clk, reset,
 
     always_comb begin
         boot_rom_bus.address = core0_fetch_bus.address;
-        boot_rom_bus.read_enable = 1'b0;
         boot_rom_bus.write_data = 32'b0;
         boot_rom_bus.write_enable = 1'b0;
         boot_rom_bus.write_enable_control = 4'b0;
 
         payload_rom_bus.address = core0_data_bus.address;
-        payload_rom_bus.read_enable = 1'b0;
         payload_rom_bus.write_data = 32'b0;
         payload_rom_bus.write_enable = 1'b0;
         payload_rom_bus.write_enable_control = 4'b0;
 
         mmio_bus.address = core0_data_bus.address;
-        mmio_bus.read_enable = 1'b0;
         mmio_bus.write_data = 32'b0;
         mmio_bus.write_enable = 1'b0;
         mmio_bus.write_enable_control = 4'b0;
 
         system_ram0_bus_A.address = core0_fetch_bus.address;
-        system_ram0_bus_A.read_enable = 1'b0;
         system_ram0_bus_A.write_data = 32'b0;
         system_ram0_bus_A.write_enable = 1'b0;
         system_ram0_bus_A.write_enable_control = 4'b0;
 
         system_ram0_bus_B.address = core0_data_bus.address;
-        system_ram0_bus_B.read_enable = 1'b0;
         system_ram0_bus_B.write_data = 32'b0;
         system_ram0_bus_B.write_enable = 1'b0;
         system_ram0_bus_B.write_enable_control = 4'b0;
@@ -161,9 +156,17 @@ module bus_interconnect(input logic clk, reset,
         .dout(data_select_buffered),
         .clk(clk), .reset(reset), .en(1'b1)
     );
+
+
     always_comb begin
+
+
+        boot_rom_bus.read_enable = 1'b0;
+        payload_rom_bus.read_enable = 1'b0;
+        mmio_bus.read_enable = 1'b0;
+        system_ram0_bus_A.read_enable = 1'b0;
+        system_ram0_bus_B.read_enable = 1'b0;
         case(fetch_select_buffered)
-            2'b00: begin end//do nothing
             2'b01: begin
                 core0_fetch_bus.read_data = boot_rom_bus.read_data;
                 boot_rom_bus.read_enable = 1'b1;
@@ -176,7 +179,6 @@ module bus_interconnect(input logic clk, reset,
         endcase
 
         case(data_select_buffered)
-            2'b00: begin end//do nothing
             2'b01: begin
                 core0_data_bus.read_data = payload_rom_bus.read_data;
                 payload_rom_bus.read_enable = 1'b1;

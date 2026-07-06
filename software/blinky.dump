@@ -9,16 +9,15 @@ Disassembly of section .text:
    4:	00000313          	li	t1,0
 
 00000008 <main_loop>:
-   8:	0062a023          	sw	t1,0(t0) # 80000000 <__global_pointer$+0x7fffe7d4>
-   c:	000f43b7          	lui	t2,0xf4
-  10:	24038393          	addi	t2,t2,576 # f4240 <__global_pointer$+0xf2a14>
-  14:	00000e13          	li	t3,0
+   8:	0062a023          	sw	t1,0(t0) # 80000000 <__global_pointer$+0x7fffe7d8>
+   c:	00100393          	li	t2,1
+  10:	00000e13          	li	t3,0
 
-00000018 <delay_loop>:
-  18:	007e5663          	bge	t3,t2,24 <delay_done>
-  1c:	001e0e13          	addi	t3,t3,1
-  20:	ff9ff06f          	j	18 <delay_loop>
+00000014 <delay_loop>:
+  14:	007e5663          	bge	t3,t2,20 <delay_done>
+  18:	001e0e13          	addi	t3,t3,1
+  1c:	ff9ff06f          	j	14 <delay_loop>
 
-00000024 <delay_done>:
-  24:	00130313          	addi	t1,t1,1
-  28:	fe1ff06f          	j	8 <main_loop>
+00000020 <delay_done>:
+  20:	00130313          	addi	t1,t1,1
+  24:	fe5ff06f          	j	8 <main_loop>
