@@ -1,6 +1,8 @@
 # nano-rv32i
 This is a basic starter RV32I core. It is my first large hardware design project.
 
+**Notice:** Due to the frustration and complexity of OSS tooling for FPGAs, my infamiliarity with DevOps, Makefiles, and Python, IRL stress and responsbilities, I am taking a sabatical from hardware design. I hope to return in a week or two. I want to write RTL, not navigate the UNIX tax and filesystem errors. The processor is not in a currently functional state. Sorry. I'm still available if you would like to email me with any questions.
+
 | Category | Component / Tool |
 | :--- | :--- |
 | **Target Hardware** | Sipeed Tang Nano 20K (Gowin GW2AR-LV18) |
