@@ -3,8 +3,8 @@
 `default_nettype none
 //[2 +: $clog2(SIZE)] allows me to slice the correct bit range for the address depending on the size involved.
 module ram_dual_port #(
-             parameter int SIZE,
-             parameter string FILE_PATH
+             parameter int SIZE//,
+             //parameter string FILE_PATH
             )
             (input logic clk,
             ram_bus_if.slave bus_A,

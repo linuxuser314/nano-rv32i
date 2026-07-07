@@ -14,6 +14,40 @@ module soc_top(input  logic      clk_27MHz, reset_button,
                output logic[31:0] led_strip6
                );
 
+    string text_hex_path;
+    string data_hex_path;
+    //string payload_hex_path;
+
+    initial begin
+        // 1. Check for the BOOT_ROM flag. If missing, crash safely.
+        if (!$value$plusargs("BOOT_ROM=%s", text_hex_path)) begin
+            $fatal(1, "ERROR: MISSING TEXT HEX PATH (+BOOT_ROM flag required)");
+        end
+        else begin
+            $display("Loading Instructions from: %s", text_hex_path);
+            $readmemh(text_hex_path, boot_rom.ram);
+        end
+
+        // 2. Check for the SYS_RAM flag. If missing, crash safely.
+        if (!$value$plusargs("SYS_RAM=%s", data_hex_path)) begin
+            $fatal(1, "ERROR: MISSING RAM HEX PATH (+SYS_RAM flag required)");
+        end
+        else begin
+            $display("Loading Data from: %s", data_hex_path);
+            $readmemh(data_hex_path, system_ram0.ram);
+        end
+        /*
+        // 3. Check for the PAYLOAD_ROM flag.
+        if (!$value$plusargs("PAYLOAD_ROM=%s", payload_hex_path)) begin
+            $fatal(1, "ERROR: MISSING PAYLOAD HEX PATH (+PAYLOAD_ROM flag required)");
+        end
+        else begin
+            $display("Loading Payload from: %s", payload_hex_path);
+            $readmemh(payload_hex_path, payload_array);
+        end
+        */
+    end
+
     //Leave them simple for now.
     logic sys_clk, sys_reset;
     assign sys_clk = clk_27MHz;
@@ -78,7 +112,7 @@ module soc_top(input  logic      clk_27MHz, reset_button,
 
     //Slave 0 (boot_rom)
     ram_single_port #(
-        .FILE_PATH("/workspaces/nano-rv32i/software/boot_rom.hex"),
+        //.FILE_PATH(text_hex_path),
         .SIZE(512)
     ) boot_rom(
         .clk(sys_clk),
@@ -87,7 +121,7 @@ module soc_top(input  logic      clk_27MHz, reset_button,
 
     //Slave 1 (payload_rom)
     ram_single_port #(
-        .FILE_PATH("/workspaces/nano-rv32i/software/payload_rom.hex"),
+        //.FILE_PATH(payload_hex_path),
         .SIZE(512)
     ) payload_rom(
         .clk(sys_clk),
@@ -105,8 +139,8 @@ module soc_top(input  logic      clk_27MHz, reset_button,
 
     //Slave 3/4 (system_ram0)
     ram_dual_port #(
-        .SIZE(512),
-        .FILE_PATH("/workspaces/nano-rv32i/software/system_ram.hex")
+        .SIZE(512)//,
+       // .FILE_PATH(data_hex_path)
     ) system_ram0(
         .clk(sys_clk),
 
@@ -134,4 +168,6 @@ module soc_top(input  logic      clk_27MHz, reset_button,
             end
         end
     `endif
+
+    
 endmodule

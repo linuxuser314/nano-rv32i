@@ -1,102 +1,143 @@
 #!/usr/bin/env python3
+# tools/run-tests
 
 import os
 import sys
 import glob
-import shutil
+import time
 import subprocess
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
-# --- Directories & Paths ---
-NANO_ROOT = os.environ.get("NANO_ROOT", ".")
-TEST_DIR = os.path.join(NANO_ROOT, "sim/vendor/riscv-tests/rv32i-p-asm")
-BUILD_SIM = os.path.join(NANO_ROOT, "tools/build-sim")
-BUILD_ASM = os.path.join(NANO_ROOT, "tools/build-asm")
-BOOT_ROM = os.path.join(NANO_ROOT, "software/boot_rom.hex")
-VSOC_TOP = os.path.join(NANO_ROOT, "build/obj_dir/Vsoc_top")
+# Inject the tools directory into Python's path so it can find your package
+script_dir = os.path.dirname(os.path.abspath(__file__))
+if script_dir not in sys.path:
+    sys.path.insert(0, script_dir)
+
+import riscv_eda_toolchain
+from rich.console import Console
+from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn, TimeElapsedColumn
+
+console = Console()
+NANO_ROOT = riscv_eda_toolchain.get_nano_root()
+
+# Update this path if you kept it as build/obj_dir/Vsoc_top
+SIM_BIN = os.path.join(NANO_ROOT, "build", "soc_executable") 
+
+def format_log(stat, elapsed, proc, msg):
+    """Generates the scannable [STAT][TIME][PROC] output format."""
+    return f"[{stat:<4}][{elapsed:>5.1f}][{proc:<6}] {msg}"
+
+def run_test_node(asm_file):
+    """
+    The worker function executed by the parallel processes.
+    Compiles the assembly, runs the simulation, and returns the formatted result.
+    """
+    start_time = time.time()
+    basename = os.path.splitext(os.path.basename(asm_file))[0]
+    out_prefix = os.path.join(NANO_ROOT, "build", "tests", basename)
+    
+    # 1. Compile the test using the custom riscv-tests linkers
+    success = riscv_eda_toolchain.compile_asm(
+        src_file=asm_file, 
+        target_path=out_prefix, 
+        is_test_suite=True
+    )
+    
+    if not success:
+        elapsed = time.time() - start_time
+        return format_log("FAIL", elapsed, "GCC", f"Compilation failed for {basename}.S")
+        
+    # 2. Run the Hardware Simulation
+    text_hex = f"{out_prefix}.text.hex"
+    data_hex = f"{out_prefix}.data.hex"
+    
+    cmd = [
+        SIM_BIN,
+        f"+BOOT_ROM={text_hex}",
+        f"+SYS_RAM={data_hex}"
+    ]
+    
+    # Run Verilator isolated (timeout prevents infinite loops from broken CPU logic)
+    try:
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+    except subprocess.TimeoutExpired:
+        elapsed = time.time() - start_time
+        return format_log("FAIL", elapsed, "VRIBLE", f"Simulation TIMEOUT for {basename}")
+
+    elapsed = time.time() - start_time
+    
+    # 3. Determine Pass/Fail Status
+    # Note: riscv-tests usually print "OK" or exit with specific codes.
+    # Adjust this logic based on what your testbench actually outputs.
+    if res.returncode == 0: 
+        return format_log("PASS", elapsed, "VRIBLE", f"{basename}")
+    else:
+        # Include the stdout so you can see why it failed!
+        return format_log("FAIL", elapsed, "VRIBLE", f"{basename} -> {res.stdout.strip()}")
 
 def main():
-    print("=" * 50)
-    print("🚀 NANO-RV32I AUTOMATED TEST SUITE")
-    print("=" * 50)
-
-    # 1. Compile the Simulator ONCE
-    print("\n[1/3] Compiling Verilator Model (Running build-sim)...")
-    sim_res = subprocess.run([BUILD_SIM], capture_output=True, text=True)
-    if sim_res.returncode != 0:
-        print("❌ ERROR: Simulator failed to build!")
-        print(sim_res.stderr)
-        sys.exit(1)
-    print("✅ Simulator built successfully.")
-
-    # 2. Find all test files
-    test_files = glob.glob(os.path.join(TEST_DIR, "*.S"))
-    if not test_files:
-        print(f"❌ ERROR: No .S test files found in {TEST_DIR}")
-        sys.exit(1)
-
-    print(f"\n[2/3] Found {len(test_files)} tests. Running suite...\n")
-
-    passed = 0
-    failed = 0
-    crashed = 0
-
-    # 3. The Testing Loop
-    for test in sorted(test_files):
-        test_name = os.path.basename(test).replace('.S', '')
-        hex_file = test.replace('.S', '.hex')
-
-        # A. Assemble the test
-        asm_res = subprocess.run([BUILD_ASM, test, "--riscv-test"], capture_output=True, text=True)
-        if asm_res.returncode != 0:
-            print(f"[{test_name.ljust(15)}] ❌ ASM BUILD FAILED")
-            crashed += 1
-            continue
-
-        ## B. Load into ROM and RAM
-        text_hex = test.replace('.S', '.text.hex')
-        data_hex = test.replace('.S', '.data.hex')
-
-        # Copy to the software folder where soc_top.sv expects them!
-        shutil.copy(text_hex, os.path.join(NANO_ROOT, "software/boot_rom.hex"))
-        shutil.copy(data_hex, os.path.join(NANO_ROOT, "software/system_ram.hex"))
-
-        # C. Run Simulation Executable
-        run_res = subprocess.run([VSOC_TOP], capture_output=True, text=True)
-
-        # D. Parse Output
-        output = run_res.stdout
-        
-        # Look for our custom fault messages
-        faults = [line.strip() for line in output.split('\n') if "HARDWARE FAULT:" in line]
-
-        if "RISC-V TEST PASSED!" in output:
-            print(f"[{test_name.ljust(15)}] ✅ PASSED")
-            passed += 1
-        elif "RISC-V TEST FAILED!" in output:
-            for line in output.split('\n'):
-                if "FAILED!" in line:
-                    print(f"[{test_name.ljust(15)}] ❌ {line.strip()}")
-            failed += 1
-        else:
-            if faults:
-                # Print the very first fault that occurred
-                print(f"[{test_name.ljust(15)}] 💥 CRASHED ({faults[0]})")
-            else:
-                print(f"[{test_name.ljust(15)}] ⚠️ TIMEOUT / INFINITE LOOP")
-            crashed += 1
-
-    # 4. Final Scoreboard
-    print("\n" + "=" * 50)
-    print("🏆 FINAL SCOREBOARD")
-    print("=" * 50)
-    print(f"✅ PASSED : {passed}")
-    print(f"❌ FAILED : {failed}")
-    print(f"⚠️ CRASHED: {crashed}")
+    # 1. Automatically ensure the hardware model is up to date!
+    rtl_files = riscv_eda_toolchain.get_rtl_files()
+    wrapper_cpp = os.path.join(NANO_ROOT, "sim", "main.cpp")
     
-    if passed == len(test_files):
-        print("\n🎉 CONGRATULATIONS! Your CPU is 100% RISC-V Compliant!")
-    else:
-        print("\n🛠️ Back to the waveforms...")
+    console.print("[cyan]Checking hardware model dependencies...[/cyan]")
+    hdl_success = riscv_eda_toolchain.compile_hdl(rtl_files, wrapper_cpp)
+    
+    if not hdl_success:
+        console.print("[bold red]❌ Hardware simulation build failed! Aborting test suite.[/bold red]")
+        sys.exit(1)
+
+    # Search for the RISC-V UI (User Integer) tests...
+    # Update this path if your tests are stored in a different subfolder
+    test_dir = os.path.join(NANO_ROOT, "sim", "vendor", "riscv-tests", "rv32i-p-asm")
+    test_files = glob.glob(os.path.join(test_dir, "*.S"))
+    
+    if not test_files:
+        console.print(f"[bold yellow]⚠️ No test files found in {test_dir}[/bold yellow]")
+        sys.exit(1)
+
+    console.print(f"🚀 [bold cyan]Dispatching {len(test_files)} tests to parallel workers...[/bold cyan]\n")
+    
+    pass_count = 0
+    fail_count = 0
+
+    # Initialize the rich progress bar
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TaskProgressColumn(),
+        TimeElapsedColumn(),
+        console=console,
+    ) as progress:
+        
+        task = progress.add_task("[cyan]Running Test Suite...", total=len(test_files))
+        
+        # Fire up the multi-core engine
+        with ProcessPoolExecutor() as executor:
+            # Submit all files to the pool
+            future_to_test = {executor.submit(run_test_node, f): f for f in test_files}
+            
+            # As each parallel worker finishes, process the result immediately
+            for future in as_completed(future_to_test):
+                result_log = future.result()
+                
+                if "[PASS]" in result_log:
+                    pass_count += 1
+                else:
+                    fail_count += 1
+                
+                # rich allows us to print directly above the live progress bar safely!
+                if "[FAIL]" in result_log:
+                    progress.console.print(f"[bold red]{result_log}[/bold red]")
+                else:
+                    progress.console.print(f"[green]{result_log}[/green]")
+                
+                progress.advance(task)
+
+    # Final summary output
+    print("-" * 50)
+    print(format_log("DONE", 0.0, "SYS", f"Test Suite Complete. PASS: {pass_count} | FAIL: {fail_count}"))
 
 if __name__ == "__main__":
     main()

@@ -4,15 +4,15 @@
 //[2 +: $clog2(SIZE)] allows me to slice the correct bit range for the address depending on the size involved.
 
 module ram_single_port #(
-             parameter int SIZE,
-             parameter FILE_PATH = ""
+             parameter int SIZE//,
+             //parameter FILE_PATH = ""
             )
             (input logic clk,
             ram_bus_if.slave bus);
     logic[31:0] ram[SIZE];
     initial begin
         for (int i = 0; i < SIZE; i++) ram[i] = 32'b0;
-        $readmemh(FILE_PATH, ram);
+        //$readmemh(FILE_PATH, ram);
     end
 
     always_ff @(posedge clk) begin

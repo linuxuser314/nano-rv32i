@@ -42,7 +42,7 @@ def compile_hdl(rtl_files, wrapper_cpp, top_module="soc_top"):
         "verilator",
         "--cc",
         "--exe",
-        "--trace",
+        "--trace-fst",
         "-Wall",
         "-Mdir", obj_dir,
         "--top-module", top_module,
