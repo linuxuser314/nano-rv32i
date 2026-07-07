@@ -4,7 +4,7 @@
     "features": {
         "ghcr.io/devcontainers/features/common-utils:2.5.9": {}
     },
-    "postCreateCommand": "bash .devcontainer/setup.sh",
+    "postCreateCommand": "echo 'please run setup.sh script'",
     "customizations": {
         "vscode": {
             "extensions": [
