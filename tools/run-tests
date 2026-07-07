@@ -64,16 +64,29 @@ def run_test_node(asm_file):
         elapsed = time.time() - start_time
         return format_log("FAIL", elapsed, "VRIBLE", f"Simulation TIMEOUT for {basename}")
 
+   # ... (subprocess.run block above remains the same) ...
+    except subprocess.TimeoutExpired:
+        elapsed = time.time() - start_time
+        return format_log("FAIL", elapsed, "VRIBLE", f"Simulation TIMEOUT for {basename}")
+
     elapsed = time.time() - start_time
     
-    # 3. Determine Pass/Fail Status
-    # Note: riscv-tests usually print "OK" or exit with specific codes.
-    # Adjust this logic based on what your testbench actually outputs.
-    if res.returncode == 0: 
+    # 3. Determine Pass/Fail Status by reading the SystemVerilog terminal output
+    stdout_text = res.stdout.strip()
+    
+    if "RISC-V TEST PASSED!" in stdout_text:
         return format_log("PASS", elapsed, "VRIBLE", f"{basename}")
+    
+    elif "RISC-V TEST FAILED!" in stdout_text:
+        # Extract the exact line where it failed so you can see the error code
+        fail_line = [line for line in stdout_text.split('\n') if "RISC-V TEST FAILED!" in line]
+        context = fail_line[0] if fail_line else "Hardware reported failure."
+        return format_log("FAIL", elapsed, "VRIBLE", f"{basename} -> {context}")
+        
     else:
-        # Include the stdout so you can see why it failed!
-        return format_log("FAIL", elapsed, "VRIBLE", f"{basename} -> {res.stdout.strip()}")
+        # Sanitize the snippet to remove any square brackets that would crash 'rich'
+        snippet = stdout_text[-100:].replace('\n', ' ').replace('[', '(').replace(']', ')')
+        return format_log("FAIL", elapsed, "VRIBLE", f"{basename} -> No pass/fail signature. <{snippet}>")
 
 def main():
     # 1. Automatically ensure the hardware model is up to date!
