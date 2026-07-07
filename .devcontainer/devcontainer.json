@@ -9,10 +9,11 @@
         "vscode": {
             "extensions": [
                 "surfer-project.surfer",
-                "mshr-h.VerilogHDL", 
+                "mshr-h.VerilogHDL",
                 "yzhang.markdown-all-in-one",
                 "shd101wyy.markdown-preview-enhanced",
-                "zhwu95.riscv"
+                "zhwu95.riscv",
+                "ms-python.python"
             ]
         }
     },
