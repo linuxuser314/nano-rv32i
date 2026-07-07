@@ -1,25 +1,19 @@
 # tools/riscv_eda_toolchain/__init__.py
 
-"""
-RISC-V EDA Toolchain Master Package
-Centralizes compilation, simulation, and EDA tasks for the nano-rv32i core.
-"""
-
-# 1. Define the version of your toolchain
 __version__ = "1.0.0"
 
-# 2. Pull functions from submodules up to the package surface
-#from .compiler import compile_asm, slice_elf, format_to_32bit
-#from .simulator import compile_hdl, execute_sim
-from .io_utils import get_nano_root, get_rtl_files, is_stale
-from .simulator import compile_hdl
+from .io_utils import get_nano_root, get_rtl_files, is_stale, ToolchainResult
 from .compiler import format_to_32bit, compile_asm
-# 3. Explicitly define what is exposed when someone runs "from riscv_eda_toolchain import *"
+from .simulator import compile_hdl
+from .synthesis import synthesize
+
 __all__ = [
     "get_nano_root",
     "get_rtl_files",
     "is_stale",
+    "ToolchainResult",
     "compile_hdl",
     "format_to_32bit",
-    "compile_asm"
+    "compile_asm",
+    "synthesize"
 ]
