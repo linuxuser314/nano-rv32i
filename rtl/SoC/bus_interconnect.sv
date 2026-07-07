@@ -3,7 +3,6 @@
 
 module bus_interconnect #(
                           parameter int BOOT_ROM_SIZE = 4096,
-                          parameter int PAYLOAD_ROM_SIZE = 4096,
                           parameter int SYSTEM_RAM0_SIZE = 4096
                         )(input logic clk, reset,
                           ram_bus_if.slave core0_fetch_bus,
@@ -13,7 +12,6 @@ module bus_interconnect #(
                           output logic DATA_FAULT,
 
                           ram_bus_if.master boot_rom_bus,
-                          ram_bus_if.master payload_rom_bus,
 
                           ram_bus_if.master mmio_bus,
                           input logic MMIO_FAULT,
@@ -30,11 +28,6 @@ module bus_interconnect #(
         boot_rom_bus.write_data = 32'b0;
         boot_rom_bus.write_enable = 1'b0;
         boot_rom_bus.write_enable_control = 4'b0;
-
-        payload_rom_bus.address = core0_data_bus.address;
-        payload_rom_bus.write_data = 32'b0;
-        payload_rom_bus.write_enable = 1'b0;
-        payload_rom_bus.write_enable_control = 4'b0;
 
         mmio_bus.address = core0_data_bus.address;
         mmio_bus.write_data = 32'b0;
@@ -64,22 +57,13 @@ module bus_interconnect #(
                 DATA_FAULT = 1;//Region 0 does not have rw privleges.
             end
             1: begin
-                //0x4000_0000 to 0x4000_07FF: Payload ROM(r)
-                if(core0_data_bus.write_enable) begin
-                    DATA_FAULT = 1;//Region 1 does not have w privleges.
-                end
-                else if(core0_data_bus.read_enable) begin
-                    if(core0_data_bus.address >= 32'h4000_0000 &&
-                    core0_data_bus.address < (32'h4000_0000 + PAYLOAD_ROM_SIZE * 4)) begin
-                        data_select = 2'b01;
-                    end
-                    else DATA_FAULT = 1;
-                end
+                DATA_FAULT = 1;
             end
             2: begin
                 //0x8000_0000 to 0x8000_07FF: MMIO (rw, volatile attribute in C/C++ mandatory)
 
-                if(core0_data_bus.address <= BOOT_ROM_SIZE) begin
+                if(core0_data_bus.address >= 32'h8000_0000 &&
+                core0_data_bus.address < 32'h8000_07FF) begin
                     if(core0_data_bus.read_enable) begin
                         data_select = 2'b10;
                     end
@@ -169,7 +153,6 @@ module bus_interconnect #(
 
 
         boot_rom_bus.read_enable = 1'b0;
-        payload_rom_bus.read_enable = 1'b0;
         mmio_bus.read_enable = 1'b0;
         system_ram0_bus_A.read_enable = 1'b0;
         system_ram0_bus_B.read_enable = 1'b0;
@@ -193,7 +176,7 @@ module bus_interconnect #(
         endcase
         case(data_select)
             2'b01: begin
-                payload_rom_bus.read_enable = 1'b1;
+                //Should something be here?
             end
             2'b10: begin
                 mmio_bus.read_enable = 1'b1;
@@ -205,7 +188,7 @@ module bus_interconnect #(
         endcase
         case(data_select_buffered)
             2'b01: begin
-                core0_data_bus.read_data = payload_rom_bus.read_data;
+                core0_data_bus.read_data = 32'b0;
             end
             2'b10: begin
                 core0_data_bus.read_data = mmio_bus.read_data;
