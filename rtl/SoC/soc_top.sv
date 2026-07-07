@@ -11,13 +11,14 @@ Memory regions expanded to 16KB, did not update map yet!
 `default_nettype none
 
 module soc_top(input  logic      clk_27MHz, reset_button,
-               output logic[31:0] tohost
+               output logic[5:0] led_strip6
                );
     localparam int BOOT_ROM_SIZE = 4096;
     localparam int SYSTEM_RAM0_SIZE = 4096;
     localparam string text_hex_path = "/workspaces/nano-rv32i/build/target/text.hex";
     localparam string data_hex_path = "/workspaces/nano-rv32i/build/target/data.hex";
-
+    logic[31:0] tohost;
+    assign led_strip6 = tohost[5:0];
 
     //Leave them simple for now.
     logic sys_clk, sys_reset;
