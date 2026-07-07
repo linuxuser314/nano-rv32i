@@ -13,9 +13,9 @@
 module soc_top(input  logic      clk_27MHz, reset_button,
                output logic[31:0] led_strip6
                );
-    int boot_rom_size 4096;
-    int payload_rom_size 4096;
-    int system_ram0_size 4096;
+    localparam int BOOT_ROM_SIZE = 4096;
+    localparam int PAYLOAD_ROM_SIZE = 4096;
+    localparam int SYSTEM_RAM0_SIZE = 4096;
     string text_hex_path;
     string data_hex_path;
     //string payload_hex_path;
@@ -85,9 +85,9 @@ module soc_top(input  logic      clk_27MHz, reset_button,
 
     //Master-slave bus interconnect
     bus_interconnect #(
-        .boot_rom_size(boot_rom_size),
-        .payload_rom_size(payload_rom_size),
-        .system_ram0_size(system_ram0_size)
+        .BOOT_ROM_SIZE(BOOT_ROM_SIZE),
+        .PAYLOAD_ROM_SIZE(PAYLOAD_ROM_SIZE),
+        .SYSTEM_RAM0_SIZE(SYSTEM_RAM0_SIZE)
     ) master_bus(
         .clk(sys_clk), .reset(sys_reset),
         //Master 0 (core0 fetch)
@@ -119,7 +119,7 @@ module soc_top(input  logic      clk_27MHz, reset_button,
     //Slave 0 (boot_rom)
     ram_single_port #(
         //.FILE_PATH(text_hex_path),
-        .SIZE(boot_rom_size)
+        .SIZE(BOOT_ROM_SIZE)
     ) boot_rom(
         .clk(sys_clk),
         .bus(boot_rom_bus)
@@ -128,7 +128,7 @@ module soc_top(input  logic      clk_27MHz, reset_button,
     //Slave 1 (payload_rom)
     ram_single_port #(
         //.FILE_PATH(payload_hex_path),
-        .SIZE(payload_rom_size)
+        .SIZE(PAYLOAD_ROM_SIZE)
     ) payload_rom(
         .clk(sys_clk),
         .bus(payload_rom_bus)
@@ -145,7 +145,7 @@ module soc_top(input  logic      clk_27MHz, reset_button,
 
     //Slave 3/4 (system_ram0)
     ram_dual_port #(
-        .SIZE(system_ram0_size)//,
+        .SIZE(SYSTEM_RAM0_SIZE)//,
        // .FILE_PATH(data_hex_path)
     ) system_ram0(
         .clk(sys_clk),

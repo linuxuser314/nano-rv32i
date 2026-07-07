@@ -8,14 +8,11 @@
     "customizations": {
         "vscode": {
             "extensions": [
-                "ethan-barry.systemverilog-lang",
                 "surfer-project.surfer",
-                "chipsalliance.verible",
-                "mshr-h.VerilogHDL",
+                "mshr-h.VerilogHDL", 
                 "yzhang.markdown-all-in-one",
                 "shd101wyy.markdown-preview-enhanced",
-                "zhwu95.riscv",
-                "mshr-h.veriloghdl"
+                "zhwu95.riscv"
             ]
         }
     },
