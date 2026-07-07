@@ -61,5 +61,5 @@ if ! grep -q "/workspaces/nano-rv32i/tools" ~/.bashrc; then
     echo 'export PATH="/workspaces/nano-rv32i/tools:$PATH"' >> ~/.bashrc
     echo "✅ Added custom tools directory to PATH in ~/.bashrc"
 fi
-
-COCOTB_IGNORE_PYTHON_REQUIRES=1 pip install cocotb numpy fastcrc msgspec --break-system-packages
+#I think this line was causing it to hang
+#COCOTB_IGNORE_PYTHON_REQUIRES=1 pip install cocotb numpy fastcrc msgspec --break-system-packages
