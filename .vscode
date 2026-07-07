@@ -1,0 +1,4 @@
+{
+    "verilog.linting.linter": "verilator",
+    "verilog.linting.verilator.arguments": "-Wall -Wno-fatal -I${workspaceFolder}/rtl/interfaces -I${workspaceFolder}/rtl/utils -I${workspaceFolder}/rtl/rv32i_core -I${workspaceFolder}/rtl/peripherals -I${workspaceFolder}/rtl/SoC"
+}

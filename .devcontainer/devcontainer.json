@@ -4,19 +4,22 @@
     "features": {
         "ghcr.io/devcontainers/features/common-utils:2.5.9": {}
     },
-    "postCreateCommand": "bash .devcontainer/setup.sh",
+    "postCreateCommand": "echo 'please run setup.sh script'",
     "customizations": {
         "vscode": {
             "extensions": [
-                "ethan-barry.systemverilog-lang",
                 "surfer-project.surfer",
-                "chipsalliance.verible",
                 "mshr-h.VerilogHDL",
                 "yzhang.markdown-all-in-one",
                 "shd101wyy.markdown-preview-enhanced",
                 "zhwu95.riscv",
-                "mshr-h.veriloghdl"
+                "ms-python.python"
             ]
         }
+    },
+    // Add this block to lock in your environment variables permanently!
+    "containerEnv": {
+        "NANO_ROOT": "/workspaces/nano-rv32i",
+        "PYTHONPATH": "/workspaces/nano-rv32i/tools"
     }
 }

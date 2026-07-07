@@ -5,14 +5,16 @@
 
 module ram_single_port #(
              parameter int SIZE,
-             parameter FILE_PATH = ""
+             parameter string FILE_PATH = ""
             )
             (input logic clk,
             ram_bus_if.slave bus);
     logic[31:0] ram[SIZE];
     initial begin
-        for (int i = 0; i < SIZE; i++) ram[i] = 32'b0;
-        $readmemh(FILE_PATH, ram);
+    for (int i = 0; i < SIZE; i++) ram[i] = 32'b0;
+        if(FILE_PATH != "") begin
+            $readmemh(FILE_PATH, ram);
+        end
     end
 
     always_ff @(posedge clk) begin
