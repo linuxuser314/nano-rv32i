@@ -78,7 +78,7 @@ module bus_interconnect #(
             3: begin
                 //0xC000_0000 to 0xC000_07FF: RAM (rwx)
                 if(core0_data_bus.address >= 32'hC000_0000 &&
-                core0_data_bus.address < (32'hC000_0000 + SYSTEM_RAM0_SIZE * 4)) begin
+                core0_data_bus.address < (32'hC000_0000 + 32'(SYSTEM_RAM0_SIZE * 4))) begin
                    if(core0_data_bus.read_enable) begin
                     data_select = 2'b11;
                    end
@@ -98,7 +98,7 @@ module bus_interconnect #(
         case(core0_fetch_bus.address[31:30])
             0: begin
                 //0x0000_0000 to 0x0000_07FF: ROM (x)
-                if(core0_fetch_bus.address < (32'h0000_0000 + BOOT_ROM_SIZE * 4) && core0_fetch_bus.read_enable) begin
+                if(core0_fetch_bus.address < (32'h0000_0000 + 32'(BOOT_ROM_SIZE * 4)) && core0_fetch_bus.read_enable) begin
                     fetch_select = 2'b01;
                 end
                 else fetch_fault_comb = 1;
