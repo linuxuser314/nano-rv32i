@@ -36,7 +36,7 @@ module rv32i_core(input logic clk, reset,
         .funct3(instruction[14:12]),
         .INVALID_INSTRUCTION(INVALID_INSTRUCTION)
     );
-    register #(
+    dff_register #(
         .SIZE(1)
     ) load_stall_flag_register(
         .clk(clk), .reset(reset), .en(1'b1),
@@ -67,7 +67,7 @@ module rv32i_core(input logic clk, reset,
                FETCH_FAULT || /*FETCH_MISALIGNED || Causing a combinational loop, will fix when pipelining*/ INVALID_INSTRUCTION),
         .reset(reset)
     );
-    register #(
+    dff_register #(
         .SIZE(32)
     ) PC_tracking_register(
         .clk(clk), .reset(reset), .en(1'b1),

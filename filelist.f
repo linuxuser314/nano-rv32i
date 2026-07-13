@@ -14,7 +14,7 @@ rtl/utils/byte_shift_left.sv
 rtl/utils/byte_shift_right.sv
 rtl/utils/mux2.sv
 rtl/utils/mux8.sv
-rtl/utils/register.sv
+rtl/utils/dff_register.sv
 rtl/utils/shifter.sv
 rtl/utils/ram_single_port.sv
 rtl/utils/ram_dual_port.sv

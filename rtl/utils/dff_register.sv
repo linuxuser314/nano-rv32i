@@ -1,6 +1,6 @@
 `default_nettype none
 
-module register #(
+module dff_register #(
                 parameter int SIZE = 1
                 ) (
                 input logic[SIZE - 1:0] din,
