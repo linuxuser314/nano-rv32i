@@ -68,7 +68,12 @@ module rv32i_core(input logic clk, reset,
         .reset(reset)
     );
     dff_register #(
-        .SIZE(32)
+        .SIZE(32),
+        `ifdef VERILATOR
+            .RESET_VALUE(32'hC000_0000)
+        `else
+            .RESET_VALUE('0)
+        `endif
     ) PC_tracking_register(
         .clk(clk), .reset(reset), .en(1'b1),
         .din(PC_result), .dout(prev_PC)
