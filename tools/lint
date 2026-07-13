@@ -1,0 +1,34 @@
+#!/bin/bash
+set -e # Abort immediately if any individual command fails
+
+# Verify NANO_ROOT is defined before proceeding
+if [ -z "$NANO_ROOT" ]; then
+    echo "❌ ERROR: \$NANO_ROOT environment variable is not set."
+    exit 1
+fi
+
+# Define explicit path constants
+FILELIST="$NANO_ROOT/filelist.f"
+DIR_LINT_BUILD="$NANO_ROOT/build/lint"
+V_LINT="$DIR_LINT_BUILD/lint_design.v"
+
+# 1. Ensure the lint build folder exists
+mkdir -p "$DIR_LINT_BUILD"
+
+# 2. Extract include paths from filelist.f and convert '+incdir+path' to '-Ipath'
+SV2V_INCLUDES=$(grep '^+incdir+' "$FILELIST" | sed 's/^+incdir+/-I/' | tr '\n' ' ')
+
+# 3. Clean up file list paths (ignoring comments, empty lines, and \r)
+SV_FILES=$(grep -v '^\s*//' "$FILELIST" | grep -v '^+incdir+' | grep -v '^\s*$' | tr -d '\r' | tr '\n' ' ')
+
+echo "=== Step 1: Preprocessing SystemVerilog with sv2v ==="
+# Move to NANO_ROOT to handle relative file resolution within the filelist cleanly
+cd "$NANO_ROOT"
+sv2v $SV2V_INCLUDES $SV_FILES > "$V_LINT"
+
+echo "=== Step 2: Linting with Verilator ==="
+# --lint-only: Performs syntactic and semantic checks without generating C++ simulation models
+# -Wall: Enables all standard Verilator code style and design warnings
+verilator --lint-only -Wall --top-module soc_top "$V_LINT"
+
+echo "✅ SUCCESS: Code passed all lint checks successfully!"
