@@ -11,20 +11,18 @@ fi
 mkdir -p "$NANO_ROOT/build/verilator"
 
 echo "=== Step 1: Compiling Hardware and Testbench with Verilator ==="
-# -O0: Disables optimizations to preserve user-named combinational wires like ALU_result
-# --trace-max-array 4096: Forces Verilator to include large memory arrays and register files in the trace
-# -o: Directs the final executable binary to the specified location
-verilator --binary --trace-fst \
+# Appended the tools/verilator.vlt file to the compilation sequence
+verilator --cc --exe --build --trace-fst --vpi \
           -O0 \
           --trace-max-array 4096 \
           --Mdir "$NANO_ROOT/build/verilator" \
           -o "$NANO_ROOT/build/verilator/Vsoc_top" \
           --top-module soc_top \
+          "$NANO_ROOT/tools/verilator.vlt" \
           -f "$NANO_ROOT/filelist.f" \
-          "$NANO_ROOT/sim/tb_soc_top.cpp"
+          "$NANO_ROOT/sim/verilator_testbench.cpp"
 
 echo "=== Step 2: Running Simulation Execution ==="
-# Execute the simulation binary using absolute workspace positioning without altering directory context
 "$NANO_ROOT/build/verilator/Vsoc_top"
 
 echo "✅ SUCCESS: Simulation completed. Waveform generated at build/verilator/simulation.fst"
