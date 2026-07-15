@@ -15,8 +15,8 @@ module soc_top(input  logic      clk_27MHz, reset_button,
                );
     localparam int BOOT_ROM_SIZE = 4096;
     localparam int SYSTEM_RAM0_SIZE = 4096;
-    localparam string text_hex_path = "/workspaces/nano-rv32i/build/target/text.hex";
-    localparam string data_hex_path = "/workspaces/nano-rv32i/build/target/data.hex";
+    localparam string bootloader_hex_path = "/workspaces/nano-rv32i/build/target/bootloader.hex";
+    localparam string sim_payload_hex_path = "/workspaces/nano-rv32i/build/target/sim_payload.hex";
     logic[31:0] tohost;
     assign led_strip6 = tohost[5:0];
 
@@ -83,7 +83,7 @@ module soc_top(input  logic      clk_27MHz, reset_button,
 
     //Slave 0 (boot_rom)
     ram_single_port #(
-        .FILE_PATH(text_hex_path),
+        .FILE_PATH(bootloader_hex_path),
         .SIZE(BOOT_ROM_SIZE)
     ) boot_rom(
         .clk(sys_clk),
@@ -102,7 +102,7 @@ module soc_top(input  logic      clk_27MHz, reset_button,
     //Slave 3/4 (system_ram0)
     ram_dual_port #(
         .SIZE(SYSTEM_RAM0_SIZE),
-       .FILE_PATH(data_hex_path)
+       .FILE_PATH(sim_payload_hex_path)
     ) system_ram0(
         .clk(sys_clk),
 
