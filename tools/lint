@@ -15,16 +15,16 @@ INC_FLAGS=$(grep '^+incdir+' "$FILELIST" | sed 's/^+incdir+/-I/' | tr '\n' ' ')
 # 2. Clean up file list paths (ignoring comments, empty lines, and \r)
 SV_FILES=$(grep -v '^\s*//' "$FILELIST" | grep -v '^+incdir+' | grep -v '^\s*$' | tr -d '\r' | tr '\n' ' ')
 
-echo "=== Step 1: Running sv2v Parser Check ==="
+echo "=== Step 1: Linting Native SystemVerilog with Verilator ==="
+# Verilator ingests the original un-flattened SystemVerilog code tracks.
+# Omitting the '-Wno-fatal' flag ensures any warning forces a hard script termination.
+verilator --lint-only -Wall --top-module soc_top $INC_FLAGS $SV_FILES
+
+echo "=== Step 2: Running sv2v Parser Check ==="
 cd "$NANO_ROOT"
 # Run sv2v strictly to ensure the codebase resolves structural translation rules.
 # Output is routed to /dev/null so it does not mix with native linter targets.
 sv2v $INC_FLAGS $SV_FILES > /dev/null
 echo "✓ sv2v source translation check passed."
-
-echo "=== Step 2: Linting Native SystemVerilog with Verilator ==="
-# Verilator ingests the original un-flattened SystemVerilog code tracks.
-# Omitting the '-Wno-fatal' flag ensures any warning forces a hard script termination.
-verilator --lint-only -Wall --top-module soc_top $INC_FLAGS $SV_FILES
 
 echo "✅ LINT SUCCESS: Codebase passed all checks with zero warnings!"

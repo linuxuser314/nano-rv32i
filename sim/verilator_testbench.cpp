@@ -31,12 +31,8 @@ int main(int argc, char** argv) {
     top->trace(tfp, 99); 
     tfp->open("/workspaces/nano-rv32i/logs/verilator/simulation.fst");
 
-    // Initialize VPI context structures
     VerilatedVpi::callValueCbs();
 
-    // =====================================================================
-    // VPI HANDLE CACHING (Look up once at startup)
-    // =====================================================================
     std::cout << "[TB] Resolving internal fault monitoring VPI handles..." << std::endl;
     vpiHandle h_load_fault        = vpi_handle_by_name((PLI_BYTE8*)"TOP.soc_top.core0.LOAD_FAULT", NULL);
     vpiHandle h_store_fault       = vpi_handle_by_name((PLI_BYTE8*)"TOP.soc_top.core0.STORE_FAULT", NULL);
@@ -50,6 +46,10 @@ int main(int argc, char** argv) {
     top->reset_button = 1; 
 
     uint64_t max_sim_ticks = 100000;
+    
+    // Track the tohost state to detect changes
+    uint32_t prev_tohost = 0;
+    int exit_code = 0;
 
     std::cout << "[TB] Beginning optimized simulation loop..." << std::endl;
 
@@ -65,11 +65,10 @@ int main(int argc, char** argv) {
         top->eval();
         tfp->dump(sim_time);
 
-        // Service the VPI internal state engine
         VerilatedVpi::callValueCbs(); 
 
-        // Fast pointer evaluations using cached handles
         if (!top->reset_button) {
+            // 1. Check for Hardware Faults
             if (sample_vpi_handle(h_load_fault) ||
                 sample_vpi_handle(h_store_fault) ||
                 sample_vpi_handle(h_load_misaligned) ||
@@ -78,22 +77,43 @@ int main(int argc, char** argv) {
                 sample_vpi_handle(h_fetch_misaligned) ||
                 sample_vpi_handle(h_invalid_inst)) {
                 
-                std::cerr << "\n[TB] ❌ FATAL: Core hardware fault condition tripped. Aborting simulation loop." << std::endl;
+                std::cerr << "\n[TB] ❌ FATAL: Core hardware fault condition tripped. Aborting." << std::endl;
+                exit_code = 1;
+                break;
+            }
+
+            // 2. Monitor tohost for riscv-tests output on the rising clock edge
+            if (top->clk_27MHz && top->tohost != prev_tohost) {
+                prev_tohost = top->tohost;
                 
-                tfp->close();
-                delete top;
-                delete tfp;
-                delete contextp;
-                return 1;
+                if (top->tohost == 1) {
+                    std::cout << "\n[TB] ✅ riscv-test PASSED (tohost = 1)" << std::endl;
+                    exit_code = 0;
+                    break;
+                } 
+                else if (top->tohost > 1 && (top->tohost & 1)) {
+                    // riscv-tests failure signature: (test_num << 1) | 1
+                    uint32_t test_num = top->tohost >> 1;
+                    std::cerr << "\n[TB] ❌ riscv-test FAILED at test case: " << test_num 
+                              << " (tohost = " << top->tohost << ")" << std::endl;
+                    exit_code = 1;
+                    break;
+                }
             }
         }
 
         sim_time++;
     }
 
+    if (sim_time >= max_sim_ticks) {
+        std::cerr << "\n[TB] ⚠️ TIMEOUT: Simulation reached maximum ticks." << std::endl;
+        exit_code = 1;
+    }
+
     tfp->close();
     delete top;
     delete tfp;
     delete contextp;
-    return 0;
+    
+    return exit_code;
 }

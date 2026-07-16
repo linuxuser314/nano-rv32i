@@ -11,14 +11,17 @@ Memory regions expanded to 16KB, did not update map yet!
 `default_nettype none
 
 module soc_top(input  logic      clk_27MHz, reset_button,
+               `ifdef VERILATOR
+                   output logic[31:0] tohost,
+                `endif
                output logic[5:0] led_strip6
+
                );
     localparam int BOOT_ROM_SIZE = 4096;
     localparam int SYSTEM_RAM0_SIZE = 4096;
     localparam string bootloader_hex_path = "/workspaces/nano-rv32i/build/target/bootloader.hex";
     localparam string sim_payload_hex_path = "/workspaces/nano-rv32i/build/target/sim_payload.hex";
-    logic[31:0] tohost;
-    assign led_strip6 = tohost[5:0];
+
 
     //Leave them simple for now.
     logic sys_clk, sys_reset;
@@ -95,7 +98,10 @@ module soc_top(input  logic      clk_27MHz, reset_button,
         .clk(sys_clk),
         .reset(sys_reset),
         .bus(mmio_bus),
-        .tohost(tohost),
+        .led_strip6(led_strip6),
+        `ifdef VERILATOR
+            .tohost(tohost),
+        `endif
         .MMIO_FAULT(MMIO_FAULT)
     );
 
