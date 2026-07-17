@@ -47,9 +47,10 @@ int main(int argc, char** argv) {
 
     uint64_t max_sim_ticks = 100000;
     
-    // Track the tohost state to detect changes
     uint32_t prev_tohost = 0;
+    uint8_t prev_clk = 0;
     int exit_code = 0;
+    int fault_countdown = -1; // -1 means no fault detected yet
 
     std::cout << "[TB] Beginning optimized simulation loop..." << std::endl;
 
@@ -64,44 +65,60 @@ int main(int argc, char** argv) {
 
         top->eval();
         tfp->dump(sim_time);
-
         VerilatedVpi::callValueCbs(); 
 
         if (!top->reset_button) {
-            // 1. Check for Hardware Faults
-            if (sample_vpi_handle(h_load_fault) ||
-                sample_vpi_handle(h_store_fault) ||
-                sample_vpi_handle(h_load_misaligned) ||
-                sample_vpi_handle(h_store_misaligned) ||
-                sample_vpi_handle(h_fetch_fault) ||
-                sample_vpi_handle(h_fetch_misaligned) ||
-                sample_vpi_handle(h_invalid_inst)) {
+            // Evaluate strictly on the positive clock edge
+            if (top->clk_27MHz && !prev_clk) {
                 
-                std::cerr << "\n[TB] ❌ FATAL: Core hardware fault condition tripped. Aborting." << std::endl;
-                exit_code = 1;
-                break;
-            }
+                // 1. Check for Hardware Faults (if not already counting down)
+                if (fault_countdown < 0) {
+                    bool fault_detected = false;
+                    
+                    if (sample_vpi_handle(h_load_fault))       { std::cerr << "\n[TB] ⚡ Detected LOAD_FAULT"; fault_detected = true; }
+                    if (sample_vpi_handle(h_store_fault))      { std::cerr << "\n[TB] ⚡ Detected STORE_FAULT"; fault_detected = true; }
+                    if (sample_vpi_handle(h_load_misaligned))  { std::cerr << "\n[TB] ⚡ Detected LOAD_MISALIGNED"; fault_detected = true; }
+                    if (sample_vpi_handle(h_store_misaligned)) { std::cerr << "\n[TB] ⚡ Detected STORE_MISALIGNED"; fault_detected = true; }
+                    if (sample_vpi_handle(h_fetch_fault))      { std::cerr << "\n[TB] ⚡ Detected FETCH_FAULT"; fault_detected = true; }
+                    if (sample_vpi_handle(h_fetch_misaligned)) { std::cerr << "\n[TB] ⚡ Detected FETCH_MISALIGNED"; fault_detected = true; }
+                    if (sample_vpi_handle(h_invalid_inst))     { std::cerr << "\n[TB] ⚡ Detected INVALID_INSTRUCTION"; fault_detected = true; }
 
-            // 2. Monitor tohost for riscv-tests output on the rising clock edge
-            if (top->clk_27MHz && top->tohost != prev_tohost) {
-                prev_tohost = top->tohost;
-                
-                if (top->tohost == 1) {
-                    std::cout << "\n[TB] ✅ riscv-test PASSED (tohost = 1)" << std::endl;
-                    exit_code = 0;
-                    break;
-                } 
-                else if (top->tohost > 1 && (top->tohost & 1)) {
-                    // riscv-tests failure signature: (test_num << 1) | 1
-                    uint32_t test_num = top->tohost >> 1;
-                    std::cerr << "\n[TB] ❌ riscv-test FAILED at test case: " << test_num 
-                              << " (tohost = " << top->tohost << ")" << std::endl;
-                    exit_code = 1;
-                    break;
+                    if (fault_detected) {
+                        std::cerr << " -> Waiting 3 cycles before exit to capture waveform..." << std::endl;
+                        fault_countdown = 3; 
+                    }
+                }
+
+                // 2. Handle Countdown
+                if (fault_countdown >= 0) {
+                    if (fault_countdown == 0) {
+                        std::cerr << "[TB] ❌ FATAL: Fault countdown reached. Aborting." << std::endl;
+                        exit_code = 1;
+                        break;
+                    }
+                    fault_countdown--;
+                }
+
+                // 3. Monitor tohost (only if not faulting)
+                if (fault_countdown < 0 && top->tohost != prev_tohost) {
+                    prev_tohost = top->tohost;
+                    if (top->tohost == 1) {
+                        std::cout << "\n[TB] ✅ riscv-test PASSED (tohost = 1)" << std::endl;
+                        exit_code = 0;
+                        break;
+                    } 
+                    else if (top->tohost > 1 && (top->tohost & 1)) {
+                        uint32_t test_num = top->tohost >> 1;
+                        std::cerr << "\n[TB] ❌ riscv-test FAILED at test case: " << test_num 
+                                  << " (tohost = " << top->tohost << ")" << std::endl;
+                        exit_code = 1;
+                        break;
+                    }
                 }
             }
         }
 
+        prev_clk = top->clk_27MHz;
         sim_time++;
     }
 
