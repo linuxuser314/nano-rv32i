@@ -1,0 +1,20 @@
+name: RISC-V CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test-in-codespace-env:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Tests in Devcontainer
+        uses: devcontainers/ci@v0.3
+        with:
+          runCmd: |
+            lint
+            synthesize
+            test-dynamic

@@ -63,4 +63,4 @@ if ! grep -q "/workspaces/nano-rv32i/tools" ~/.bashrc; then
 fi
 #I think this line was causing it to hang
 #COCOTB_IGNORE_PYTHON_REQUIRES=1 pip install cocotb numpy fastcrc msgspec --break-system-packages
-pip install numpy fastctc msgspec --break-system-packages
+pip install numpy fastcrc msgspec --break-system-packages
