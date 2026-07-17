@@ -18,11 +18,11 @@
   - [x] Restructure my `rtl` directory for my rapidly growing set of modules
   - [x] Move memory components from datapath and rename datapath to rv32i_core to integrate it into the SoC design.
   - [ ] Test SoC design
-- [ ] Add MMIO for program output and for debugging.
+- [x] Add MMIO for program output and for debugging.
 - [ ] Write a program in assembly that mimics the functionality of my `Baremetal-Blinker` repository.
 - [ ] Add a functioning bootloader that loads a binary file from SPI flash and/or UART so I can flash my core without re-synthesizing it.
 - [ ] Add makefile for easier startup.
-- [ ] Create automatic riscv-tests testing script and deploy with GitHub Actions.
+- [x] Create automatic riscv-tests testing script and deploy with GitHub Actions.
 - [ ] Use riscv-torture and incorporate that into my testing routine.
 - [ ] Use symbiyosys for formal verification of my core and add to automation setup.
 ### Long Term  
