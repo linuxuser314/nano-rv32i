@@ -1,3 +1,0 @@
-[submodule "tests/riscv-formal/framework"]
-	path = tests/riscv-formal/framework
-	url = https://github.com/YosysHQ/riscv-formal.git

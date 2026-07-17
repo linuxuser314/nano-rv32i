@@ -43,3 +43,5 @@ blinky.dump
 # Temporary files and logs central directory (eventually to hopefully replace all those other things above)
 /build/
 /logs/
+
+/checks/
