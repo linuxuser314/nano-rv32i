@@ -17,7 +17,11 @@ module PC_subsystem(input  logic[31:0] prev_PC, imm, jalr_addr,
     //Selects the PC behavior for the next PC depending on PC_select.
     always_comb begin
         if(reset) begin
-            new_PC = '0;
+            //`ifdef VERILATOR
+            //    new_PC = 32'hC000_0000;//Jump straight to system RAM
+            //`else
+                new_PC = '0;
+            //`endif
         end
         else begin
             case(PC_select)

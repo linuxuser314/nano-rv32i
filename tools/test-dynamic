@@ -1,0 +1,79 @@
+#!/bin/bash
+
+# Ensure NANO_ROOT is set, fallback to current directory if not
+NANO_ROOT="${NANO_ROOT:-.}"
+
+# Update paths using NANO_ROOT
+TEST_DIR="${NANO_ROOT}/sim/vendor/riscv-tests/rv32i-p-asm"
+LOG_DIR="${NANO_ROOT}/logs/assembly"
+
+# Create the log directory if it doesn't exist
+mkdir -p "$LOG_DIR"
+
+PASSED=0
+FAILED=0
+
+echo "========================================"
+echo " Running RISC-V RV32I Test Suite"
+echo "========================================"
+
+# Check if the directory exists
+if [ ! -d "$TEST_DIR" ]; then
+    echo "❌ Error: Test directory '$TEST_DIR' not found."
+    exit 1
+fi
+
+#Builds the compiled verilator model
+simulate
+
+for test_file in "$TEST_DIR"/*.S; do
+    # Prevent loop from executing if the glob fails to find any .S files
+    [ -e "$test_file" ] || continue
+
+    # Extract the base name (e.g., "add", "sh")
+    test_name=$(basename "$test_file" .S)
+    
+    # 1. Assemble the payload and route output to the log file
+    log_file="$LOG_DIR/${test_name}.log"
+    "assemble" "$test_file" > "$log_file" 2>&1
+    
+    if [ $? -ne 0 ]; then
+        printf "%-15s 🛠️  FAIL (Assembly/Compilation Error)\n" "$test_name"
+        ((FAILED++))
+        continue
+    fi
+    
+    # 2. Run simulation and capture all output (stdout and stderr)
+    sim_output=$("$NANO_ROOT/build/verilator/Vsoc_top" 2>&1)
+    sim_status=$?
+    
+    # 3. Parse the results
+    if [ $sim_status -eq 0 ]; then
+        printf "%-15s ✅ PASS\n" "$test_name"
+        ((PASSED++))
+    else
+        # Extract the specific failure reason from the C++ log
+        if echo "$sim_output" | grep -q "riscv-test FAILED"; then
+            # Grabs the string starting with "at test case..."
+            fail_msg=$(echo "$sim_output" | grep "riscv-test FAILED" | sed -E 's/.*(at test case.*)/\1/')
+            printf "%-15s ❌ FAIL (%s)\n" "$test_name" "$fail_msg"
+            
+        elif echo "$sim_output" | grep -q "FATAL: Core hardware fault"; then
+            printf "%-15s 💥 CRASH (Hardware Fault Triggered)\n" "$test_name"
+            
+        elif echo "$sim_output" | grep -q "TIMEOUT"; then
+            printf "%-15s ⏳ TIMEOUT (Exceeded maximum ticks)\n" "$test_name"
+            
+        else
+            printf "%-15s ❓ UNKNOWN (Exit code: %d)\n" "$test_name" "$sim_status"
+        fi
+        ((FAILED++))
+    fi
+done
+
+echo "========================================"
+echo " Test Run Complete. Passed: $PASSED | Failed: $FAILED"
+echo "========================================"
+
+# Exit with failure code if any tests failed (useful for GitHub Actions CI)
+exit $FAILED

@@ -1,0 +1,28 @@
+#!/bin/bash
+set -e
+
+# Verify NANO_ROOT environment variable configuration
+if [ -z "$NANO_ROOT" ]; then
+    echo "❌ ERROR: \$NANO_ROOT environment variable is not set."
+    exit 1
+fi
+
+# Ensure the target intermediate directory exists
+mkdir -p "$NANO_ROOT/build/verilator"
+
+echo "=== Step 1: Compiling Hardware and Testbench with Verilator ==="
+# Appended the tools/verilator.vlt file to the compilation sequence
+verilator --cc --exe --build --trace-fst --vpi \
+          -O0 \
+          --trace-max-array 4096 \
+          --Mdir "$NANO_ROOT/build/verilator" \
+          -o "$NANO_ROOT/build/verilator/Vsoc_top" \
+          --top-module soc_top \
+          "$NANO_ROOT/tools/verilator.vlt" \
+          -f "$NANO_ROOT/filelist.f" \
+          "$NANO_ROOT/sim/verilator_testbench.cpp"
+
+echo "=== Step 2: Running Simulation Execution ==="
+"$NANO_ROOT/build/verilator/Vsoc_top"
+
+echo "✅ SUCCESS: Simulation completed. Waveform generated at build/verilator/simulation.fst"

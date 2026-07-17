@@ -1,0 +1,30 @@
+#!/bin/bash
+set -e # Abort immediately if any individual command fails
+
+# Verify NANO_ROOT is defined before proceeding
+if [ -z "$NANO_ROOT" ]; then
+    echo "❌ ERROR: \$NANO_ROOT environment variable is not set."
+    exit 1
+fi
+
+FILELIST="$NANO_ROOT/filelist.f"
+
+# 1. Extract include paths and convert '+incdir+path' to '-I$NANO_ROOT/path'
+# Using | as the sed delimiter to avoid conflicts with the slashes in the path
+INC_FLAGS=$(grep '^+incdir+' "$FILELIST" | sed "s|^+incdir+|-I$NANO_ROOT/|" | tr '\n' ' ')
+
+# 2. Clean up file list paths and prepend $NANO_ROOT to every file path
+SV_FILES=$(grep -v '^\s*//' "$FILELIST" | grep -v '^+incdir+' | grep -v '^\s*$' | tr -d '\r' | sed "s|^|$NANO_ROOT/|" | tr '\n' ' ')
+
+echo "=== Step 1: Linting Native SystemVerilog with Verilator ==="
+# Verilator ingests the original un-flattened SystemVerilog code tracks.
+# Omitting the '-Wno-fatal' flag ensures any warning forces a hard script termination.
+verilator --lint-only -Wall --top-module soc_top $INC_FLAGS $SV_FILES
+
+echo "=== Step 2: Running sv2v Parser Check ==="
+# Run sv2v strictly to ensure the codebase resolves structural translation rules.
+# Output is routed to /dev/null so it does not mix with native linter targets.
+sv2v $INC_FLAGS $SV_FILES > /dev/null
+echo "✓ sv2v source translation check passed."
+
+echo "✅ LINT SUCCESS: Codebase passed all checks with zero warnings!"

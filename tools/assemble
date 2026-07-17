@@ -1,0 +1,56 @@
+#!/bin/bash
+set -e
+# Fallback mechanism: If NANO_ROOT is unset in this subshell, calculate it dynamically
+NANO_ROOT="${NANO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+
+# Resolve absolute path to the nano-rv32i root directory
+#REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+#I alread have NANO_ROOT available and enabled by the bashrc and setup by the setup.sh script.
+# Verify assembly file argument is provided
+if [ -z "$1" ]; then
+    echo "❌ Error: No assembly source file specified."
+    echo "Usage: assemble <path/to/file.s or path/to/file.S>"
+    exit 1
+fi
+
+# Resolve file paths
+SOURCE_FILE="$1"
+if [[ "$SOURCE_FILE" != /* ]]; then
+    SOURCE_FILE="$(pwd)/$SOURCE_FILE"
+fi
+
+if [ ! -f "$SOURCE_FILE" ]; then
+    echo "❌ Error: Source file '$SOURCE_FILE' not found."
+    exit 1
+fi
+
+# Directory mappings
+TARGET_DIR="$NANO_ROOT/build/target"
+INTERMEDIATE_DIR="$NANO_ROOT/build/assemble"
+LINKER_SCRIPT="$NANO_ROOT/sim/custom_env/link.ld"
+
+mkdir -p "$TARGET_DIR"
+mkdir -p "$INTERMEDIATE_DIR"
+
+echo "[ASSEMBLE] Compiling: $SOURCE_FILE"
+
+# Compile and Link in a single step using GCC to enable preprocessor (#include) evaluation
+# Targets strict RV32I, disables standard runtimes, and links via our unified linker script
+riscv64-unknown-elf-gcc -march=rv32i -mabi=ilp32 -static -fvisibility=hidden \
+    -nostdlib -nostartfiles -T "$LINKER_SCRIPT" \
+    -I "$NANO_ROOT/sim/custom_env" \
+    -I "$NANO_ROOT/sim/vendor/riscv-tests/custom_env" \
+    "$SOURCE_FILE" -o "$INTERMEDIATE_DIR/software.elf"
+
+# Generate disassembly dump using numeric registers (x0-x31) instead of ABI names
+riscv64-unknown-elf-objdump -d -M numeric "$INTERMEDIATE_DIR/software.elf" > "$INTERMEDIATE_DIR/software.dump"
+echo "[ASSEMBLE] Disassembly generated: build/assemble/software.dump"
+
+# Extract the contiguous raw binary layout
+riscv64-unknown-elf-objcopy -O binary "$INTERMEDIATE_DIR/software.elf" "$INTERMEDIATE_DIR/software.bin"
+
+# Convert to 32-bit little-endian hex with the mandatory array starting pointer
+echo "@00000000" > "$TARGET_DIR/sim_payload.hex"
+hexdump -v -e '1/4 "%08x\n"' "$INTERMEDIATE_DIR/software.bin" >> "$TARGET_DIR/sim_payload.hex"
+
+echo "🎉 [ASSEMBLE] Done. Payload output to: build/target/sim_payload.hex"

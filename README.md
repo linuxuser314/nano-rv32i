@@ -1,8 +1,6 @@
 # nano-rv32i
 This is a basic starter RV32I core. It is my first large hardware design project.
 
-**Notice:** Due to the frustration and complexity of OSS tooling for FPGAs, my infamiliarity with DevOps, Makefiles, and Python, IRL stress and responsbilities, I am taking a sabatical from hardware design. I hope to return in a week or two. I want to write RTL, not navigate the UNIX tax and filesystem errors. The processor is not in a currently functional state. Sorry. I'm still available if you would like to email me with any questions.
-
 | Category | Component / Tool |
 | :--- | :--- |
 | **Target Hardware** | Sipeed Tang Nano 20K (Gowin GW2AR-LV18) |
@@ -21,65 +19,18 @@ This is a basic starter RV32I core. It is my first large hardware design project
  - **Memory:** Uses synchronous **Dual-Ported BRAM** for a seamless **Von Neumann** experience while maintaining Harvard simplicity in the hardware.
  - **Fetching:** Calculates the next PC *combinationally* before feeding it into the synchronous BRAM. This eliminates the need for a dedicated fetch cycle while working with FPGA primitives.
  - **Loads & Stores:** Because memory is synchronous, loads and stores present a challenge. Stores calculate the address and present the data on the memory port. It is committed on the rising edge of the clock. Loads calculate the address and present it to the memory address port. On the next cycle the result is read from the data port, it is shifted/masked (if necessary), and is written back to the register file. The load delay is managed by a FSM in the decoder (the decoder is combinational with an external 1-bit register for a load flag).
- - **Tested:** All operations pass the official `riscv-tests` suite (except for ma_data, see below).
+ - **Tested:** All operations have passed the `riscv-tests` suite except for ma_data, ld_st, and st_ld (all untested). However, due to continued development, the core has regressed. I intend to get it passing all tests again (via an automated script) shortly.
 
 ## Limitations
   - **Read-After-Write (RAW) Memory Hazards:** Currently the design uses read-before-write BRAM, which means that a store to a specific address immediately followed by a load from that address will read the **old** memory value. Since this is a rare case and I will have to modify it during pipelining anyway I will leave this for now.
   - **Misaligned Memory Accesses:** Currently, the core does not support misaligned memory accesses (`addr % 4 != 0` for words, `addr % 2 != 0` for halfwords). Since I am implementing an **Unprivileged Architecture**, I cannot currently add a **Trap Handler** to handle misaligned accesses.
 
 ---
-
-## TODO:
-### Short Term
-- [x] Compile, simulate, and testbench all small components.
-- [x] Compile, simulate, and testbench all major components.
-- [x] Finish anything I forgot on the datapath module.
-- [x] Build the decoder module (one giant casez statement).
-- [x] Make memory use Gowin BRAM natively.
-- [x] Add code to import memory.
-- [x] Run riscv-tests to make sure it's all working properly.
-- [x] Clean up testfiles in my repository.
-- [x] Update devcontainer.json for full automatic setup.
-- [x] Synthesize it to my FPGA.
-- [ ] Clean up and refactor code:
-  - [x] Refactor my code to have an internal core module and a top-level SoC module that links to memory, MMIO, etc.
-  - [ ] Add a boot ROM and payload data for proper flashing while bypassing Project Apicula's limitations for data initialization in dual-ported BRAM
-  - [ ] Go through each module and add proper comments, remove old commented-out code, etc.
-  - [x] Restructure my `rtl` directory for my rapidly growing set of modules
-  - [ ] Update build scripts to reflect updated directory structure
-  - [ ] Move memory components from datapath and rename datapath to rv32i_core to integrate it into the SoC design.
-  - [ ] Test SoC design
-- [ ] Add MMIO for program output and for debugging.
-- [ ] Write a program in assembly that mimics the functionality of my `Baremetal-Blinker` repository.
-- [ ] Add a functioning bootloader that loads a binary file from SPI flash and/or UART so I can flash my core without re-synthesizing it.
-- [ ] Add makefile for easier startup.
-- [ ] Create automatic riscv-tests testing script and deploy with GitHub Actions.
-- [ ] Use riscv-torture and incorporate that into my testing routine.
-- [ ] Use symbiyosys for formal verification of my core and add to automation setup.
-### Long Term  
-- [ ] Turn it into a pipelined processor  
-- [ ] Add Zicsr extension
-- [ ] Add B extension  
-- [ ] Add C extension  
-- [ ] Add M extension  
-- [ ] Do a deep-dive performance analysis to tune it for improved performance  
-- [ ] Add an exception handler that uses UART for debugging  
-- [ ] Make the exception handler handle misaligned memory loads/stores or implement it in hardware  
-- [ ] Create a full MMIO  
-### Ultra long-term
-- [ ] Build a simple operating system
-- [ ] Add micro-POSIX features using Newlib and syscalls
-- [ ] Connect a system bus and DRAM controller.
-- [ ] Integrate MMIO and caches into memory bus
-- [ ] Add multicore processing
-- [ ] Add a lightweight fully customized  MMU and integrate it into my RTOS
-- [ ] Create a command-line operating system using POSIX-compliant C utilities
-- [ ] Use TCC for self-hosting compilation
-- [ ] Add video/audio drivers and IO
-- [ ] Add a GUI running in userspace for my OS
-- [ ] Add GUI apps
-- [ ] Emulate or manage directly in hardware for another architecture to emulate a computer or game controller (for example an NES emulator or a parallel MIPS decoder for PS1)
-- [ ] One major architectural feature such as deep pipelining, scoreboarded OoO, or superscalarism.
+## Current Progress
+I am currently working on adding:
+ - Adding an automated riscv-tests script
+ - Fixing any failed tests
+ - Automating tests via GitHub Actions
 
 ## Lessons Learned & Challenges Overcome
 Throughout this process, I have spent many hours debugging weird quirks and trying to get my toolchain to work.
@@ -93,4 +44,4 @@ Throughout this process, I have spent many hours debugging weird quirks and tryi
 
 I learned about RISC-V using Sarah and David Harris's *Digital Design and Computer Architecture, RISC-V Edition* (2022). I used their SystemVerilog references, schematics, and appendices to design this core, expanding where they missed instructions and optimizing for synchronous memory.
 
-Throughout this process I have used Google Gemini AI and GitHub Copilot for brainstorming, debugging, rubber-ducking, improvement suggestion, testbenches, and toolchain management (build scripts, linker scripts, quick assembly tests). 95% of the RTL is my own, but I could not have done it without AI as a tutor.
+Throughout this process I have used Google Gemini AI and GitHub Copilot for brainstorming, debugging, rubber-ducking, improvement suggestion, testbenches, and toolchain management (build scripts, linker scripts, quick assembly tests). 95% of the RTL is my own, but AI proved to be an invaluable tutor.

@@ -10,12 +10,13 @@ module rv32i_core(input logic clk, reset,
           is_half, is_byte, is_unsigned, is_store, is_load;
     logic[1 :0] PC_select, mask_ctrl;
     logic[31:0] instruction, result_mux_out, RF_rd1, RF_rd2, decoded_immediate, ALU_src_val,
-    shift_result, mask_result, ALU_result, load_result, PC_result, PC_plus_4, PC_plus_imm, prev_PC;
+    shift_result, mask_result, load_result, PC_result, PC_plus_4, PC_plus_imm, prev_PC;
     logic I, S, B, U, J;
     logic STORE_FAULT, STORE_MISALIGNED, LOAD_FAULT, LOAD_MISALIGNED,
     FETCH_MISALIGNED, INVALID_INSTRUCTION;
     logic current_cycle_is_end_of_load, previous_cycle_was_start_of_load;
     logic[2:0] result_select;
+    (* keep *) logic[31:0] ALU_result;
     decoder main_decoder(
         .RF_write_enable(RF_write_enable),
         .I(I), .S(S), .B(B), .U(U), .J(J),
@@ -35,7 +36,7 @@ module rv32i_core(input logic clk, reset,
         .funct3(instruction[14:12]),
         .INVALID_INSTRUCTION(INVALID_INSTRUCTION)
     );
-    register #(
+    dff_register #(
         .SIZE(1)
     ) load_stall_flag_register(
         .clk(clk), .reset(reset), .en(1'b1),
@@ -63,11 +64,16 @@ module rv32i_core(input logic clk, reset,
         .imm(decoded_immediate), .jalr_addr({ALU_result[31:1], 1'b0}),
         .PC_increment(PC_increment), .PC_select(PC_select), .branch_flag(comparison_flag),
         .FAULT(LOAD_FAULT || LOAD_MISALIGNED || STORE_FAULT || STORE_MISALIGNED ||
-               FETCH_FAULT || FETCH_MISALIGNED || INVALID_INSTRUCTION),
+               FETCH_FAULT || /*FETCH_MISALIGNED || Causing a combinational loop, will fix when pipelining*/ INVALID_INSTRUCTION),
         .reset(reset)
     );
-    register #(
-        .SIZE(32)
+    dff_register #(
+        .SIZE(32),
+        `ifdef VERILATOR
+            .RESET_VALUE(32'hC000_0000)
+        `else
+            .RESET_VALUE('0)
+        `endif
     ) PC_tracking_register(
         .clk(clk), .reset(reset), .en(1'b1),
         .din(PC_result), .dout(prev_PC)

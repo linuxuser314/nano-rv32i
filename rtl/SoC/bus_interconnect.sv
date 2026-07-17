@@ -24,30 +24,20 @@ module bus_interconnect #(
     logic fetch_fault_comb;
 
     always_comb begin
-        boot_rom_bus.address = core0_fetch_bus.address;
-        boot_rom_bus.write_data = 32'b0;
-        boot_rom_bus.write_enable = 1'b0;
-        boot_rom_bus.write_enable_control = 4'b0;
 
         mmio_bus.address = core0_data_bus.address;
         mmio_bus.write_data = 32'b0;
         mmio_bus.write_enable = 1'b0;
         mmio_bus.write_enable_control = 4'b0;
 
-        system_ram0_bus_A.address = core0_fetch_bus.address;
-        system_ram0_bus_A.write_data = 32'b0;
-        system_ram0_bus_A.write_enable = 1'b0;
-        system_ram0_bus_A.write_enable_control = 4'b0;
-
         system_ram0_bus_B.address = core0_data_bus.address;
         system_ram0_bus_B.write_data = 32'b0;
         system_ram0_bus_B.write_enable = 1'b0;
         system_ram0_bus_B.write_enable_control = 4'b0;
 
-        DATA_FAULT = 1'b0;
-        fetch_fault_comb = 1'b0;
 
-        fetch_select = 2'b0;
+
+        DATA_FAULT = 1'b0;
         data_select = 2'b0;
 
         //Data component
@@ -92,6 +82,25 @@ module bus_interconnect #(
             end
             default: DATA_FAULT = 1;
         endcase
+        if(MMIO_FAULT) begin
+            DATA_FAULT = 1;
+        end
+    end
+    always_comb begin
+
+        boot_rom_bus.address = core0_fetch_bus.address;
+        boot_rom_bus.write_data = 32'b0;
+        boot_rom_bus.write_enable = 1'b0;
+        boot_rom_bus.write_enable_control = 4'b0;
+
+
+        system_ram0_bus_A.address = core0_fetch_bus.address;
+        system_ram0_bus_A.write_data = 32'b0;
+        system_ram0_bus_A.write_enable = 1'b0;
+        system_ram0_bus_A.write_enable_control = 4'b0;
+        fetch_fault_comb = 1'b0;
+
+        fetch_select = 2'b0;
 
         //Fetch component
 
@@ -121,18 +130,15 @@ module bus_interconnect #(
             end
             default: fetch_fault_comb = 1;
         endcase
-        if(MMIO_FAULT) begin
-            DATA_FAULT = 1;
-        end
     end
-    register #(
+    dff_register #(
         .SIZE(1)
     ) fetch_fault_buffer(
         .din(fetch_fault_comb),
         .dout(FETCH_FAULT),
         .clk(clk), .reset(reset), .en(1'b1)
     );
-    register #(
+    dff_register #(
         .SIZE(2)
     ) fetch_select_buffer(
         .din(fetch_select),
@@ -140,7 +146,7 @@ module bus_interconnect #(
         .clk(clk), .reset(reset), .en(1'b1)
     );
 
-    register #(
+    dff_register #(
         .SIZE(2)
     ) data_select_buffer(
         .din(data_select),
@@ -153,9 +159,7 @@ module bus_interconnect #(
 
 
         boot_rom_bus.read_enable = 1'b0;
-        mmio_bus.read_enable = 1'b0;
         system_ram0_bus_A.read_enable = 1'b0;
-        system_ram0_bus_B.read_enable = 1'b0;
         case(fetch_select)
             2'b01: begin
                 boot_rom_bus.read_enable = 1'b1;
@@ -165,6 +169,8 @@ module bus_interconnect #(
             end
             default: begin end//Defaults already initialized above
         endcase
+    end
+    always_comb begin
         case(fetch_select_buffered)
             2'b01: begin
                 core0_fetch_bus.read_data = boot_rom_bus.read_data;
@@ -174,6 +180,11 @@ module bus_interconnect #(
             end
             default: core0_fetch_bus.read_data = 32'b0;
         endcase
+    end
+    always_comb begin
+
+        mmio_bus.read_enable = 1'b0;
+        system_ram0_bus_B.read_enable = 1'b0;
         case(data_select)
             2'b01: begin
                 //Should something be here?
@@ -186,6 +197,8 @@ module bus_interconnect #(
             end
             default: begin end//Defaults handled by default assignment above
         endcase
+    end
+    always_comb begin
         case(data_select_buffered)
             2'b01: begin
                 core0_data_bus.read_data = 32'b0;

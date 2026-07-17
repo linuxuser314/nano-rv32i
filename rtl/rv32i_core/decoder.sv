@@ -88,6 +88,11 @@ module decoder(input  logic[6:0] opcode,
                 previous_cycle_was_start_of_load = 1;//Triggers the output that goes to the register in the datapath
                 I = 1;//I-type immediate decoding
 
+                /*NECESSARY SO LOAD/STORE UNIT KNOWS HOW TO CHECK ALIGNMENT!!!*/
+                is_half = load_size_bit_0;//The last bit signals a half
+                is_byte = ~(load_size_bit_0 | load_size_bit_1); //If neitheir of the last two bits are 1 then it's a byte load
+               
+
             end
             else begin
                 RF_write_enable = 1;

@@ -1,0 +1,66 @@
+#!/bin/bash
+set -e # Abort immediately if any individual command fails
+
+# Verify NANO_ROOT is defined before proceeding
+if [ -z "$NANO_ROOT" ]; then
+    echo "❌ ERROR: \$NANO_ROOT environment variable is not set."
+    exit 1
+fi
+
+# Define explicit path constants
+FILELIST="$NANO_ROOT/filelist.f"
+CST_FILE="$NANO_ROOT/nano20k.cst"
+BITSTREAM_OUT="$NANO_ROOT/bitstream.fs"
+
+DIR_SYNTH_BUILD="$NANO_ROOT/build/synth"
+DIR_PNR_BUILD="$NANO_ROOT/build/pnr"
+DIR_SYNTH_LOG="$NANO_ROOT/logs/synth"
+DIR_PNR_LOG="$NANO_ROOT/logs/pnr"
+
+V_SYNTH="$DIR_SYNTH_BUILD/synthesized_design.v"
+JSON_SYNTH="$DIR_SYNTH_BUILD/core.json"
+JSON_PNR="$DIR_PNR_BUILD/core.pnr.json"
+
+LOG_YOSYS="$DIR_SYNTH_LOG/yosys.log"
+LOG_PNR="$DIR_PNR_LOG/nextpnr.log"
+
+# 1. Guarantee all output and logging directory paths exist
+mkdir -p "$DIR_SYNTH_BUILD" "$DIR_PNR_BUILD" "$DIR_SYNTH_LOG" "$DIR_PNR_LOG"
+
+# 2. Extract include paths from filelist.f and convert '+incdir+path' to '-Ipath'
+SV2V_INCLUDES=$(grep '^+incdir+' "$FILELIST" | sed 's/^+incdir+/-I/' | tr '\n' ' ')
+
+# 3. Clean up file list paths (ignoring comments, empty lines, and \r)
+SV_FILES=$(grep -v '^\s*//' "$FILELIST" | grep -v '^+incdir+' | grep -v '^\s*$' | tr -d '\r' | tr '\n' ' ')
+
+echo "=== Step 1: Converting SystemVerilog to Verilog-2005 via sv2v ==="
+# Move to NANO_ROOT to handle relative file resolution within the filelist flawlessly
+cd "$NANO_ROOT"
+sv2v $SV2V_INCLUDES $SV_FILES > "$V_SYNTH"
+
+echo "=== Step 2: Running Yosys Synthesis ==="
+echo "📋 Logging synthesis trace to: $LOG_YOSYS"
+yosys -l "$LOG_YOSYS" -p "
+    logger -werror \"Latch inferred\";
+    read_verilog $V_SYNTH;
+    synth_gowin -top soc_top -json $JSON_SYNTH
+"
+
+echo "=== Step 3: Running Place & Route via nextpnr-himbaechel ==="
+echo "📋 Logging P&R trace to: $LOG_PNR"
+nextpnr-himbaechel \
+    --json "$JSON_SYNTH" \
+    --write "$JSON_PNR" \
+    --device GW2AR-LV18QN88C8/I7 \
+    --vopt family=GW2A-18C \
+    --vopt cst="$CST_FILE" \
+    --freq 27 \
+    --log "$LOG_PNR"
+
+echo "=== Step 4: Generating Bitstream via gowin_pack ==="
+gowin_pack \
+    -d GW2A-18C \
+    -o "$BITSTREAM_OUT" \
+    "$JSON_PNR"
+
+echo "✅ SUCCESS: Hardware bitstream successfully generated at $BITSTREAM_OUT"

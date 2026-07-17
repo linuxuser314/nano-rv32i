@@ -1,25 +1,25 @@
-# Include Directories (Macros and Headers)
+// Include Directories (Macros and Headers)
 +incdir+rtl/interfaces
 +incdir+rtl/rv32i_core
 +incdir+rtl/utils
 +incdir+rtl/peripherals
 +incdir+rtl/SoC
 
-# 1. Interfaces
+// 1. Interfaces
 rtl/interfaces/ram_bus_if.sv
 
-# 2. Utilities
+// 2. Utilities
 rtl/utils/adder.sv
 rtl/utils/byte_shift_left.sv
 rtl/utils/byte_shift_right.sv
 rtl/utils/mux2.sv
 rtl/utils/mux8.sv
-rtl/utils/register.sv
+rtl/utils/dff_register.sv
 rtl/utils/shifter.sv
 rtl/utils/ram_single_port.sv
 rtl/utils/ram_dual_port.sv
 
-# 3. Core Modules
+// 3. Core Modules
 rtl/rv32i_core/address_check.sv
 rtl/rv32i_core/ALU_comparator.sv
 rtl/rv32i_core/decoder.sv
@@ -34,7 +34,7 @@ rtl/rv32i_core/register_file.sv
 rtl/rv32i_core/fetch_unit.sv
 rtl/rv32i_core/rv32i_core.sv
 
-# 4. Peripherals & SoC
+// 4. Peripherals & SoC
 rtl/peripherals/mmio.sv
 rtl/SoC/bus_interconnect.sv
 rtl/SoC/soc_top.sv

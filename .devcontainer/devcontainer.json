@@ -4,7 +4,7 @@
     "features": {
         "ghcr.io/devcontainers/features/common-utils:2.5.9": {}
     },
-    "postCreateCommand": "echo 'please run setup.sh script'",
+    "postCreateCommand": "bash /workspaces/nano-rv32i/tools/setup",
     "customizations": {
         "vscode": {
             "extensions": [
@@ -13,7 +13,8 @@
                 "yzhang.markdown-all-in-one",
                 "shd101wyy.markdown-preview-enhanced",
                 "zhwu95.riscv",
-                "ms-python.python"
+                "ms-python.python",
+                "GitHub.vscode-github-actions"
             ]
         }
     },

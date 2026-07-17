@@ -1,0 +1,8 @@
+`verilator_config
+public -module "rv32i_core" -var "LOAD_FAULT"
+public -module "rv32i_core" -var "STORE_FAULT"
+public -module "rv32i_core" -var "LOAD_MISALIGNED"
+public -module "rv32i_core" -var "STORE_MISALIGNED"
+public -module "rv32i_core" -var "FETCH_FAULT"
+public -module "rv32i_core" -var "FETCH_MISALIGNED"
+public -module "rv32i_core" -var "INVALID_INSTRUCTION"
