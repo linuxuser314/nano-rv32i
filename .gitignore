@@ -44,4 +44,4 @@ blinky.dump
 /build/
 /logs/
 
-/checks/
+/tests/riscv-formal/

@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -e
+
+# Dynamically locate the repository root
+REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "/workspaces/nano-rv32i")
+
+# Enforce target output filename in the current working directory
+OUTPUT_FILE="./flattened.v"
+
+echo "Flattening core RTL modules via sv2v..."
+
+sv2v -I"$REPO_ROOT/rtl/interfaces" \
+     -I"$REPO_ROOT/rtl/rv32i_core" \
+     -I"$REPO_ROOT/rtl/utils" \
+     -I"$REPO_ROOT/rtl/peripherals" \
+     -I"$REPO_ROOT/rtl/SoC" \
+     "$REPO_ROOT/rtl/interfaces/ram_bus_if.sv" \
+     "$REPO_ROOT/rtl/utils"/*.sv \
+     "$REPO_ROOT/rtl/rv32i_core"/*.sv \
+     "$REPO_ROOT/rtl/peripherals"/*.sv \
+     "$REPO_ROOT/rtl/SoC"/*.sv \
+     > "$OUTPUT_FILE"
+
+echo "Success: ${OUTPUT_FILE} created in $(pwd)"
