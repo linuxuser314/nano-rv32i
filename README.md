@@ -16,29 +16,47 @@ This is a basic starter RV32I core. It is my first large hardware design project
  - **Toolchain:** I use **SystemVerilog**, **Verilator**, **Yosys**, and **NextPNR/Gowin** (**Project Apicula**).
  - **Architecture:** Uses the **RV32I Base Unprivileged Architecture**
  - **Microarchitecture:** Uses a **primarily Single-Cycle** architecture except for `load` instructions (see below).
- - **Memory:** Uses synchronous **Dual-Ported BRAM** for a seamless **Von Neumann** experience while maintaining Harvard simplicity in the hardware.
+ - **Memory:** Uses synchronous **Dual-Ported BRAM** for a seamless **Von Neumann** experience while maintaining the simplicity of a Harvard architecture in hardware.
  - **Fetching:** Calculates the next PC *combinationally* before feeding it into the synchronous BRAM. This eliminates the need for a dedicated fetch cycle while working with FPGA primitives.
  - **Loads & Stores:** Because memory is synchronous, loads and stores present a challenge. Stores calculate the address and present the data on the memory port. It is committed on the rising edge of the clock. Loads calculate the address and present it to the memory address port. On the next cycle the result is read from the data port, it is shifted/masked (if necessary), and is written back to the register file. The load delay is managed by a FSM in the decoder (the decoder is combinational with an external 1-bit register for a load flag).
- - **Tested:** All operations have passed the `riscv-tests` suite except for ma_data, ld_st, and st_ld (all untested). However, due to continued development, the core has regressed. I intend to get it passing all tests again (via an automated script) shortly.
+ - **Tested:** All operations have passed the `riscv-tests` suite, and synthesis, linting, simulation, and testing are automated via GitHub Actions on every commit and pull request.
 
 ## Limitations
-  - **Read-After-Write (RAW) Memory Hazards:** Currently the design uses read-before-write BRAM, which means that a store to a specific address immediately followed by a load from that address will read the **old** memory value. Since this is a rare case and I will have to modify it during pipelining anyway I will leave this for now.
   - **Misaligned Memory Accesses:** Currently, the core does not support misaligned memory accesses (`addr % 4 != 0` for words, `addr % 2 != 0` for halfwords). Since I am implementing an **Unprivileged Architecture**, I cannot currently add a **Trap Handler** to handle misaligned accesses.
 
----
-## Current Progress
-I am currently working on adding:
- - Adding an automated riscv-tests script
- - Fixing any failed tests
- - Automating tests via GitHub Actions
+## Getting Started
+ - To use this processor, first set up the environment on your device. It is highly recommended to use the VSCode docker extension or GitHub Codespaces. If you have any difficulties setting up the environment, let me know. 
+   - Note: I do not have a setup for running this on anything but x86 Linux currently. Sorry.
+ - Put your executable RISC-V binary in the `build/target/bootloader.hex` for synthesis. Due to a silent bug in `gowin_pack` to initialize dual-ported Block RAM with data, this is currently the only way to run code on the physical FPGA. Note that the bootloader does not have rw priveleges, only x priveleges, so the .data or .rodata sections should be excluded from this part.
+ - Run the `synthesize` command. It should generate a bitstream.fs file in your repository root directory.
+ - Flash the FPGA
+   - Download or transfer the bitstream.fs file to your device with the USB port to flash the FPGA.
+   - Install `openFPGALoader` on your device and run this command: ```openFPGALoader -b tangnano20k [path/to/bitstream.fs]``` This loads the bitstream onto the FPGA's SRAM. To flash the FPGA so that the design stays on permanently, add the -f flag.
+## Current Status
+Recently Acomplished:
+   - Adding an automated riscv-tests script
+   - Fixing any failed tests
+   - Automating tests via GitHub Actions
+ - In Progress:
+   - Testing memory system
+ - Next Up:
+   - RVFI Formal verification wrapper for `riscv-formal`
+   - Fixing any unknown bugs found during formal verification
+ - Future Plans:
+   - Pipeline the processor
+   - Integrate a high performance tightly-coupled memory
+   - Add a bootloader
+   - Add exception handling and the Zicsr extension
+   - Add compressed instructions
 
 ## Lessons Learned & Challenges Overcome
 Throughout this process, I have spent many hours debugging weird quirks and trying to get my toolchain to work.
-- **Learning SystemVerilog:** This is my first real SystemVerilog project, so I was getting familiar with the syntax of the language and it's various oddities.
-- **Icarus Verilog Limitations:** I had to modify various parts of my code so I could sucessfully use Icarus Verilog (`iverilog`) for simulation, since it does not support full modern SystemVerilog.
+- **Learning SystemVerilog:** This is my first real SystemVerilog project, so I was getting familiar with the syntax of the language and its various oddities.
+- **Icarus Verilog Limitations:** I had to modify various parts of my code so I could successfully use Icarus Verilog (`iverilog`) for simulation, since it does not support full modern SystemVerilog.
 - **RISC-V GNU Toolchain:** Overcoming the complications of preprocessors, linker scripts, macros, and more.
 - **RISC-V Tests:** Getting valid Verilog .hex files from assembly using the GNU toolchain and overcoming complex macro headers.
-- `$readmemh` **and OSS CAD:** OSS Cad (specifically **Project Apicula** (`gowin_pack`) is apparently finicky when it comes to loading data into dual-ported Block RAM at startup. This caused hours of frustration and the classic "it works in simulation, but not in synthesis" error not because my code was incorrect, but because my toolchain was silently deleting my code and causing my processor to go into an error state when it fetched the first instruction from zeroed-out BRAM.
+- `$readmemh` **and OSS CAD:** OSS CAD (specifically **Project Apicula** (`gowin_pack`) is apparently finicky when it comes to loading data into dual-ported Block RAM at startup. This caused hours of frustration and the classic "it works in simulation, but not in synthesis" error not because my code was incorrect, but because my toolchain was silently deleting my code and causing my processor to go into an error state when it fetched the first instruction from zeroed-out BRAM.
+- **Toolchain Stress:** I had to take a week off because of the stress of trying to build a Python toolchain system. There were so many things going wrong... I wanted to write RTL, not navigate the UNIX tax of OSS EDA tools.
 
 ## Development Methodology
 
