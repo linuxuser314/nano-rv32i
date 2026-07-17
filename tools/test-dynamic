@@ -1,7 +1,14 @@
 #!/bin/bash
 
-# Update this path if the tests are located elsewhere
-TEST_DIR="sim/vendor/riscv-tests/rv32i-p-asm"
+# Ensure NANO_ROOT is set, fallback to current directory if not
+NANO_ROOT="${NANO_ROOT:-.}"
+
+# Update paths using NANO_ROOT
+TEST_DIR="${NANO_ROOT}/sim/vendor/riscv-tests/rv32i-p-asm"
+LOG_DIR="${NANO_ROOT}/logs/assembly"
+
+# Create the log directory if it doesn't exist
+mkdir -p "$LOG_DIR"
 
 PASSED=0
 FAILED=0
@@ -17,11 +24,16 @@ if [ ! -d "$TEST_DIR" ]; then
 fi
 
 for test_file in "$TEST_DIR"/*.S; do
+    # Prevent loop from executing if the glob fails to find any .S files
+    [ -e "$test_file" ] || continue
+
     # Extract the base name (e.g., "add", "sh")
     test_name=$(basename "$test_file" .S)
     
-    # 1. Assemble the payload
-    tools/assemble "$test_file" > /dev/null 2>&1
+    # 1. Assemble the payload and route output to the log file
+    log_file="$LOG_DIR/${test_name}.log"
+    "$NANO_ROOT/tools/assemble" "$test_file" > "$log_file" 2>&1
+    
     if [ $? -ne 0 ]; then
         printf "%-15s 🛠️  FAIL (Assembly/Compilation Error)\n" "$test_name"
         ((FAILED++))
@@ -29,7 +41,7 @@ for test_file in "$TEST_DIR"/*.S; do
     fi
     
     # 2. Run simulation and capture all output (stdout and stderr)
-    sim_output=$(build/verilator/Vsoc_top 2>&1)
+    sim_output=$("$NANO_ROOT/build/verilator/Vsoc_top" 2>&1)
     sim_status=$?
     
     # 3. Parse the results
