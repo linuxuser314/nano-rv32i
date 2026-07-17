@@ -15,6 +15,7 @@ jobs:
         uses: devcontainers/ci@v0.3
         with:
           runCmd: |
+            source ~/.bashrc
             lint
             synthesize
             test-dynamic

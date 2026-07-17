@@ -4,7 +4,7 @@
     "features": {
         "ghcr.io/devcontainers/features/common-utils:2.5.9": {}
     },
-    "postCreateCommand": "bash ./workspaces/nano-rv32i/tools/setup && source ~/.bashrc",
+    "postCreateCommand": "bash /workspaces/nano-rv32i/tools/setup",
     "customizations": {
         "vscode": {
             "extensions": [
