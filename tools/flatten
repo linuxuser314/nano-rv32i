@@ -1,24 +1,28 @@
 #!/usr/bin/env bash
-set -e
+set -e # Abort immediately if any individual command fails
 
-# Dynamically locate the repository root
-REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "/workspaces/nano-rv32i")
+# Verify NANO_ROOT is defined before proceeding
+if [ -z "$NANO_ROOT" ]; then
+    echo "❌ ERROR: \$NANO_ROOT environment variable is not set."
+    exit 1
+fi
 
-# Enforce target output filename in the current working directory
-OUTPUT_FILE="./flattened.v"
+# Save the absolute destination path before changing directories
+OUTPUT_FILE="$(pwd)/flattened.v"
+FILELIST="$NANO_ROOT/filelist.f"
 
-echo "Flattening core RTL modules via sv2v..."
+echo "Flattening core RTL modules via sv2v using filelist.f..."
 
-sv2v -I"$REPO_ROOT/rtl/interfaces" \
-     -I"$REPO_ROOT/rtl/rv32i_core" \
-     -I"$REPO_ROOT/rtl/utils" \
-     -I"$REPO_ROOT/rtl/peripherals" \
-     -I"$REPO_ROOT/rtl/SoC" \
-     "$REPO_ROOT/rtl/interfaces/ram_bus_if.sv" \
-     "$REPO_ROOT/rtl/utils"/*.sv \
-     "$REPO_ROOT/rtl/rv32i_core"/*.sv \
-     "$REPO_ROOT/rtl/peripherals"/*.sv \
-     "$REPO_ROOT/rtl/SoC"/*.sv \
-     > "$OUTPUT_FILE"
+# 1. Extract include paths from filelist.f and convert '+incdir+path' to '-Ipath'
+SV2V_INCLUDES=$(grep '^+incdir+' "$FILELIST" | sed 's/^+incdir+/-I/' | tr '\n' ' ')
 
-echo "Success: ${OUTPUT_FILE} created in $(pwd)"
+# 2. Clean up file list paths (ignoring comments, empty lines, and \r)
+SV_FILES=$(grep -v '^\s*//' "$FILELIST" | grep -v '^+incdir+' | grep -v '^\s*$' | tr -d '\r' | tr '\n' ' ')
+
+# 3. Move to NANO_ROOT to handle relative file and include path resolution flawlessly
+cd "$NANO_ROOT"
+
+# 4. Run sv2v with exact dependency ordering
+sv2v $SV2V_INCLUDES $SV_FILES > "$OUTPUT_FILE"
+
+echo "✅ SUCCESS: Complete flattened design generated at ${OUTPUT_FILE}"
