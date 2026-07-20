@@ -4,7 +4,7 @@
     "features": {
         "ghcr.io/devcontainers/features/common-utils:2.5.9": {}
     },
-    "postCreateCommand": "echo -e 'please run setup for your correct computer architecture'",
+    "postCreateCommand": "bash /workspaces/nano-rv32i/tools/setup",
     "customizations": {
         "vscode": {
             "extensions": [
