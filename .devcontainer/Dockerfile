@@ -20,8 +20,15 @@ RUN apt-get update && apt-get install -y \
     gcc-riscv64-unknown-elf \
     && rm -rf /var/lib/apt/lists/*
 
-# 4. Install OSS CAD Suite
-RUN wget -q "https://github.com/YosysHQ/oss-cad-suite-build/releases/download/${OSS_CAD_VERSION}/oss-cad-suite-linux-x64-${OSS_CAD_VERSION}.tgz" -O /tmp/oss-cad-suite.tgz && \
+# 4. Install OSS CAD Suite Dynamically
+ARG TARGETARCH
+RUN if [ "$TARGETARCH" = "arm64" ]; then \
+        ARCH_STR="linux-arm64"; \
+    else \
+        ARCH_STR="linux-x64"; \
+    fi && \
+    TARBALL_URL=$(curl -s https://api.github.com/repos/YosysHQ/oss-cad-suite-build/releases/latest | grep "browser_download_url.*${ARCH_STR}-.*\.tgz" | cut -d '"' -f 4) && \
+    wget -q "$TARBALL_URL" -O /tmp/oss-cad-suite.tgz && \
     tar -xzf /tmp/oss-cad-suite.tgz -C /opt/ && \
     rm /tmp/oss-cad-suite.tgz
 
