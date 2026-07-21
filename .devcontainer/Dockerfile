@@ -44,7 +44,7 @@ RUN pip install numpy fastcrc msgspec --break-system-packages
 
 # 7. Pre-fetch riscv-formal to /opt/ (Safe from the workspace volume mount)
 RUN mkdir -p /opt/riscv-formal && \
-    curl -sL "https://api.github.com/repos/YosysHQ/riscv-formal/tarball" | tar -xz -C /opt/riscv-formal --strip-components=1
+    curl --retry 3 -f -sL "https://api.github.com/repos/YosysHQ/riscv-formal/tarball" | tar -xz -C /opt/riscv-formal --strip-components=1
 
 # Set the default directory when the container opens
 WORKDIR $NANO_ROOT
