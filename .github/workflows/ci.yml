@@ -11,18 +11,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Run Tests in Devcontainer
         uses: devcontainers/ci@v0.3
         with:
-          # Define the registry and image name
           imageName: ghcr.io/${{ github.repository }}/nano-rv32i-env
-          
-          # Use the registry image as a cache
           cacheFrom: ghcr.io/${{ github.repository }}/nano-rv32i-env
-          
-          # Push the built image back to the registry for caching
           push: always
-          
           runCmd: |
             setup-basic
             lint
