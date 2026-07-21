@@ -11,7 +11,6 @@ ENV PATH="/opt/oss-cad-suite/bin:$NANO_ROOT/tools:$PATH"
 # 2. Pin Tool Versions (Update these dates/tags when you want to upgrade)
 ARG OSS_CAD_VERSION="20260718" 
 ARG SV2V_VERSION="v0.0.11"
-ARG RISCV_FORMAL_BRANCH="master"
 
 # 3. Install Core System Dependencies & Python
 RUN apt-get update && apt-get install -y \
@@ -45,7 +44,7 @@ RUN pip install numpy fastcrc msgspec --break-system-packages
 
 # 7. Pre-fetch riscv-formal to /opt/ (Safe from the workspace volume mount)
 RUN mkdir -p /opt/riscv-formal && \
-    curl -sL "https://api.github.com/repos/YosysHQ/riscv-formal/tarball/${RISCV_FORMAL_BRANCH}" | tar -xz -C /opt/riscv-formal --strip-components=1
+    curl -sL "https://api.github.com/repos/YosysHQ/riscv-formal/tarball" | tar -xz -C /opt/riscv-formal --strip-components=1
 
 # Set the default directory when the container opens
 WORKDIR $NANO_ROOT
