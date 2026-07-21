@@ -16,7 +16,6 @@ jobs:
         with:
           push: never
           runCmd: |
-            source ~/.bashrc
             test-formal
 
       - name: Upload Formal Logs

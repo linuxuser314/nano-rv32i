@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo -e "WARNING: This setup script installs everything AUTOMATICALLY. It will likely interfere with the Docker image.
+echo -e "This script is only to be used when installing the tools on your local machine"
+
 # Exit immediately if a command exits with a non-zero status
 set -e
 

@@ -1,10 +1,12 @@
 {
     "name": "RISC-V Hardware Dev Environment",
-    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
     "features": {
         "ghcr.io/devcontainers/features/common-utils:2.5.9": {}
     },
-    "postCreateCommand": "bash /workspaces/nano-rv32i/tools/setup",
+    "postCreateCommand": "bash /workspaces/nano-rv32i/tools/setup-basic",
     "customizations": {
         "vscode": {
             "extensions": [
@@ -13,14 +15,12 @@
                 "yzhang.markdown-all-in-one",
                 "shd101wyy.markdown-preview-enhanced",
                 "zhwu95.riscv",
-                "ms-python.python",
                 "GitHub.vscode-github-actions"
             ]
         }
     },
     // Add this block to lock in your environment variables permanently!
     "containerEnv": {
-        "NANO_ROOT": "/workspaces/nano-rv32i",
-        "PYTHONPATH": "/workspaces/nano-rv32i/tools"
+        "NANO_ROOT": "/workspaces/nano-rv32i"
     }
 }
