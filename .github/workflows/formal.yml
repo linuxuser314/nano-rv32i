@@ -14,6 +14,14 @@ jobs:
       - name: Run Formal Verification in Devcontainer
         uses: devcontainers/ci@v0.3
         with:
+          push: never
           runCmd: |
             source ~/.bashrc
             test-formal
+
+      - name: Upload Formal Logs
+        if: always() # Ensures logs are uploaded even if formal checks fail
+        uses: actions/upload-artifact@v4
+        with:
+          name: formal-verification-logs
+          path: logs/
