@@ -9,7 +9,7 @@ ENV NANO_ROOT="/workspaces/nano-rv32i"
 ENV PATH="/opt/oss-cad-suite/bin:$NANO_ROOT/tools:$PATH"
 
 # 2. Pin Tool Versions (Update these dates/tags when you want to upgrade)
-ARG OSS_CAD_VERSION="20240321" 
+ARG OSS_CAD_VERSION="20260718" 
 ARG SV2V_VERSION="v0.0.11"
 ARG RISCV_FORMAL_BRANCH="master"
 
