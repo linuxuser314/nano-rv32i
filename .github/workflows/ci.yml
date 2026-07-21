@@ -14,20 +14,20 @@ jobs:
       - name: Run Tests in Devcontainer
         uses: devcontainers/ci@v0.3
         with:
-          # Define the registry and image name dynamically
-          #imageName: ghcr.io/${{ github.repository }}/nano-rv32i-env
+          # Define the registry and image name
+          imageName: ghcr.io/${{ github.repository }}/nano-rv32i-env
           
-          # Use the registry image as a cache to skip rebuilding
-          #cacheFrom: ghcr.io/${{ github.repository }}/nano-rv32i-env
+          # Use the registry image as a cache
+          cacheFrom: ghcr.io/${{ github.repository }}/nano-rv32i-env
           
-          # Always push the newly built image back to the registry
-          #push: always
+          # Push the built image back to the registry for caching
+          push: always
+          
           runCmd: |
             setup-basic
             lint
             synthesize
             test-dynamic
-          cacheFrom: ""
 
       - name: Upload Logs
         if: always()
