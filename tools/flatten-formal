@@ -9,7 +9,7 @@ fi
 
 # Explicit path constants
 OUTPUT_FILE="$NANO_ROOT/tests/riscv-formal/cores/nano-rv32i/flattened.v"
-WRAPPER_FILE="$NANO_ROOT/tests/riscv-formal/cores/nano-rv32i/rvfi_wrapper.sv"
+WRAPPER_FILE="$NANO_ROOT/rvfi_wrapper.sv"
 
 echo "Flattening core RTL + RVFI wrapper via sv2v..."
 

@@ -1,0 +1,19 @@
+name: RISC-V Formal Verification
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  formal-verification:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Formal Verification in Devcontainer
+        uses: devcontainers/ci@v0.3
+        with:
+          runCmd: |
+            source ~/.bashrc
+            test-formal
