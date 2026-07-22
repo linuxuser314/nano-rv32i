@@ -2,7 +2,29 @@ name: RISC-V Formal Verification
 
 on:
   push:
+    paths:
+      # RTL and Hardware Logic
+      - 'rtl/**'
+      - 'rvfi_wrapper.sv'
+      - 'filelist.f'
+      
+      # Formal Setup & Configurations
+      - 'checks.cfg'
+      - 'tests/**'
+      - 'tools/**'
+      
+      # Workflow itself
+      - '.github/workflows/formal.yml'
+
   pull_request:
+    paths:
+      - 'rtl/**'
+      - 'rvfi_wrapper.sv'
+      - 'filelist.f'
+      - 'checks.cfg'
+      - 'tests/**'
+      - 'tools/**'
+      - '.github/workflows/formal.yml'
 
 jobs:
   formal-verification:
@@ -35,4 +57,3 @@ jobs:
           path: |
             logs/
             tests/
-          
