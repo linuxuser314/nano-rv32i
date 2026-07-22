@@ -16,7 +16,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.DEVCONTAINER_PUSH_PULL }}
 
       - name: Run Tests in Devcontainer
         uses: devcontainers/ci@v0.3
