@@ -24,7 +24,7 @@ module load_store_unit(ram_bus_if.master bus,
         .addr_end(address[1:0]), .is_half(is_half), .is_byte(is_byte),
         .write_enable(write_enable_output)
     );
-    assign bus.write_enable_control = write_enable_output & {3{is_store}, 1'b0};
+    assign bus.write_enable_control = write_enable_output & {4{is_store}};
     load load_mask_shift_and_extend(
         .data(bus.read_data), .result(load_result), .addr_end(address[1:0]),
         .is_byte(is_byte), .is_half(is_half), .is_unsigned(is_unsigned)
