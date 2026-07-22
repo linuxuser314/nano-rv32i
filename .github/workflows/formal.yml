@@ -22,7 +22,6 @@ jobs:
         uses: devcontainers/ci@v0.3
         with:
           imageName: ghcr.io/${{ github.repository }}/nano-rv32i-env
-          cacheFrom: ghcr.io/${{ github.repository }}/nano-rv32i-env
           push: always
           runCmd: |
             setup-basic
