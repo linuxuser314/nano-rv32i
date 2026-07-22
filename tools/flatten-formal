@@ -16,7 +16,7 @@ echo "Flattening core RTL + RVFI wrapper via sv2v..."
 # Change directory to ensure smooth path resolution
 cd "$NANO_ROOT"
 
-sv2v \
+sv2v -DRISCV_FORMAL\
     -I"rtl/interfaces" \
     -I"rtl/rv32i_core" \
     -I"rtl/utils" \
