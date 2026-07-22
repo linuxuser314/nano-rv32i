@@ -24,6 +24,7 @@ jobs:
           imageName: ghcr.io/${{ github.repository }}/nano-rv32i-env
           push: always
           runCmd: |
+            set -e
             setup-basic
             lint
             synthesize
