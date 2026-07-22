@@ -15,7 +15,8 @@
                 "yzhang.markdown-all-in-one",
                 "shd101wyy.markdown-preview-enhanced",
                 "zhwu95.riscv",
-                "GitHub.vscode-github-actions"
+                "GitHub.vscode-github-actions",
+                "ms-azuretools.vscode-containers"
             ]
         }
     },
