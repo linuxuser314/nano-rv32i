@@ -67,8 +67,7 @@ module rv32i_core(input logic clk, reset,
         .PC_plus_4(PC_plus_4), .PC_plus_imm(PC_plus_imm),
         .imm(decoded_immediate), .jalr_addr({ALU_result[31:1], 1'b0}),
         .PC_increment(PC_increment), .PC_select(PC_select), .branch_flag(comparison_flag),
-        .FAULT(LOAD_FAULT || LOAD_MISALIGNED || STORE_FAULT || STORE_MISALIGNED ||
-               FETCH_FAULT || /*FETCH_MISALIGNED || Causing a combinational loop, will fix when pipelining*/ INVALID_INSTRUCTION),
+        .FAULT(FAULT && ~FETCH_FAULT /*FETCH_FAULT is causing a combinational loop for some reason... Will eventually need to fix that!*/),
         .reset(reset)
     );
     dff_register #(

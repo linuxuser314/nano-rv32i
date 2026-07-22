@@ -11,8 +11,10 @@ module load_store_unit(ram_bus_if.master bus,
     logic MISALIGNED;
     logic[3:0] write_enable_output;
 
+`ifdef RISCV_FORMAL
     logic[3:0] read_rmask_rvfi;
     assign read_rmask_rvfi = write_enable_output & {4{is_load}};
+`endif
     assign MISALIGNED = (is_word & (address[0] | address[1])) | (is_half & address[0]);
     assign bus.write_enable = is_store & ~MISALIGNED;
     assign bus.read_enable = is_load & ~MISALIGNED;
