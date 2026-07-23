@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo -e "WARNING: This setup script installs everything AUTOMATICALLY. It will likely interfere with the Docker image.
+echo -e "This script is only to be used when installing the tools on your local machine"
+
 # Exit immediately if a command exits with a non-zero status
 set -e
 
@@ -64,3 +67,35 @@ fi
 #I think this line was causing it to hang
 #COCOTB_IGNORE_PYTHON_REQUIRES=1 pip install cocotb numpy fastcrc msgspec --break-system-packages
 pip install numpy fastcrc msgspec --break-system-packages
+
+
+
+echo "=== Step 8: Setting up riscv-formal ==="
+
+# Determine the workspace root
+WORKSPACE_DIR="${NANO_ROOT:-${GITHUB_WORKSPACE:-$(pwd)}}"
+RISCV_FORMAL_DIR="$WORKSPACE_DIR/tests/riscv-formal"
+CORE_DIR="$RISCV_FORMAL_DIR/cores/nano-rv32i"
+
+if [ ! -d "$RISCV_FORMAL_DIR" ]; then
+    echo "Downloading and extracting YosysHQ/riscv-formal tarball..."
+    mkdir -p "$RISCV_FORMAL_DIR"
+    
+    # The GitHub API tarball endpoint automatically fetches the default branch
+    curl -sL https://api.github.com/repos/YosysHQ/riscv-formal/tarball | tar -xz -C "$RISCV_FORMAL_DIR" --strip-components=1
+else
+    echo "⏩ riscv-formal already exists in tests/riscv-formal."
+fi
+
+echo "Creating symlinks for nano-rv32i core..."
+# Ensure the specific core directory exists within riscv-formal
+mkdir -p "$CORE_DIR"
+
+# Remove the symlink if it already exists to prevent script failure on rerun
+rm -f "$CORE_DIR/checks.cfg"
+
+# Create the symlink pointing to the checks.cfg in the root directory
+# Using absolute paths here ensures the symlink resolves correctly regardless of where the script is executed
+ln -s "$WORKSPACE_DIR/checks.cfg" "$CORE_DIR/checks.cfg"
+
+echo "✅ riscv-formal setup complete."

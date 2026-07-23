@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# Ensure NANO_ROOT is set, fallback to default if empty
+NANO_ROOT="${NANO_ROOT:-/workspaces/nano-rv32i}"
+
+# Define absolute paths
+CORE_DIR="$NANO_ROOT/tests/riscv-formal/cores/nano-rv32i"
+LOG_DIR="$NANO_ROOT/logs/formal"
+LOG_FILE="$LOG_DIR/formal_log.log"
+SUMMARY_FILE="$LOG_DIR/formal_done_summary.log"
+
+echo "=== Step 1: Ensuring Log Directory Exists ==="
+mkdir -p "$LOG_DIR"
+
+echo "=== Step 2: Navigating to Core Directory ==="
+cd "$CORE_DIR" || { echo "Error: Unable to access directory $CORE_DIR"; exit 1; }
+
+echo "=== Step 3: Cleaning Previous Artifacts ==="
+rm -rf checks flattened.v
+
+echo "=== Step 4: Flattening RTL ==="
+flatten-formal
+
+echo "=== Step 5: Copying checks.cfg to core directory ==="
+cp $NANO_ROOT/checks.cfg $CORE_DIR/checks.cfg
+
+echo "=== Step 6: Generating Formal Checks ==="
+python3 ../../checks/genchecks.py
+
+echo "=== Step 7: Executing SymbiYosys Formal Checks ==="
+# Notes on 'make' flags used:
+# -C checks     : Operates directly inside the generated 'checks' directory
+# -k            : Keep going on error so all remaining checks execute
+# -j$(nproc)    : Parallelize jobs across all CPU cores
+make -C checks -k -j$(nproc) | tee "$LOG_FILE" | grep --line-buffered "DONE" | tee "$SUMMARY_FILE"
+
+echo "=== Step 8: Evaluating Formal Verification Results ==="
+
+# 1. Check if any line in the summary contains FAIL or ERROR
+# 2. Check if PASS is entirely missing (e.g., if make crashed prematurely)
+if grep -q -E "FAIL|ERROR" "$SUMMARY_FILE" || ! grep -q "PASS" "$SUMMARY_FILE"; then
+    echo "❌ Formal verification FAILED or ended prematurely. See $LOG_FILE for details."
+    exit 1
+else
+    echo "✅ All formal checks PASSED successfully."
+    exit 0
+fi

@@ -1,0 +1,18 @@
+#!/bin/bash
+set -e
+
+echo "=== Initializing Workspace Environment ==="
+
+# 1. Copy riscv-formal from the safe /opt/ directory into the live workspace
+# The -n flag ensures it won't overwrite files if they already exist from a previous Codespace session
+cp -rn /opt/riscv-formal $NANO_ROOT/tests/
+
+# 2. Configure the specific nano-rv32i core directory
+CORE_DIR="$NANO_ROOT/tests/riscv-formal/cores/nano-rv32i"
+mkdir -p "$CORE_DIR"
+
+# 3. Create the configuration symlink
+rm -f "$CORE_DIR/checks.cfg"
+ln -s "$NANO_ROOT/checks.cfg" "$CORE_DIR/checks.cfg"
+
+echo "✅ Environment initialization complete."

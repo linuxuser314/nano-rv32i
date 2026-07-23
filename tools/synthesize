@@ -24,6 +24,76 @@ JSON_PNR="$DIR_PNR_BUILD/core.pnr.json"
 LOG_YOSYS="$DIR_SYNTH_LOG/yosys.log"
 LOG_PNR="$DIR_PNR_LOG/nextpnr.log"
 
+# 1. Guarantee all output, logging, and target directory paths exist
+mkdir -p "$DIR_SYNTH_BUILD" "$DIR_PNR_BUILD" "$DIR_SYNTH_LOG" "$DIR_PNR_LOG" "$NANO_ROOT/build/target"
+
+# 2. Create dummy sim_payload.hex if it does not already exist
+if [ ! -f "$NANO_ROOT/build/target/sim_payload.hex" ]; then
+    echo "Creating default sim_payload.hex..."
+    cat << 'EOF' > "$NANO_ROOT/build/target/sim_payload.hex"
+@00000000
+00000000
+EOF
+fi
+
+# 3. Create comprehensive RV32I bootloader.hex if it does not already exist.
+#This is dummy data designed to make sure that Yosys knows that the processor is actually doing something...
+if [ ! -f "$NANO_ROOT/build/target/bootloader.hex" ]; then
+    echo "Creating multi-instruction RV32I test bootloader.hex..."
+    cat << 'EOF' > "$NANO_ROOT/build/target/bootloader.hex"
+@00000000
+100000b7
+00000117
+10000093
+1f40a193
+00a0b213
+0ff0c293
+00f0e313
+0f00f393
+00209413
+0010d493
+4010d513
+002085b3
+40110633
+008096b3
+0020a733
+0020b7b3
+0020c833
+0080d8b3
+4080d933
+0020e9b3
+0020fa33
+0020a023
+00209223
+00208323
+0000aa83
+00409b03
+0060cb83
+0040dc03
+00608c83
+00000463
+00000013
+00101463
+00000013
+00104463
+00000013
+0000d463
+00000013
+00106463
+00000013
+0000f463
+00000013
+0000000f
+0000100f
+00800d6f
+00000013
+00000e17
+00ce0de7
+00000013
+0000006f
+EOF
+fi
+
 # 1. Guarantee all output and logging directory paths exist
 mkdir -p "$DIR_SYNTH_BUILD" "$DIR_PNR_BUILD" "$DIR_SYNTH_LOG" "$DIR_PNR_LOG"
 

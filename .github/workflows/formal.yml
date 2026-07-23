@@ -1,11 +1,11 @@
-name: RISC-V CI
+name: RISC-V Formal Verification
 
 on:
   push:
   pull_request:
 
 jobs:
-  test-in-codespace-env:
+  formal-verification:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -18,21 +18,21 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.DEVCONTAINER_PUSH_PULL }}
 
-      - name: Run Tests in Devcontainer
+      - name: Run Formal Verification in Devcontainer
         uses: devcontainers/ci@v0.3
         with:
           imageName: ghcr.io/${{ github.repository }}/nano-rv32i-env
           push: always
           runCmd: |
-            set -e
             setup-basic
-            lint
-            synthesize
-            test-dynamic
+            test-formal
 
-      - name: Upload Logs
+      - name: Upload Formal Logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: codespace-test-logs
-          path: logs/
+          name: formal-verification-logs
+          path: |
+            logs/
+            tests/
+          

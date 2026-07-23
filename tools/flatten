@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -e # Abort immediately if any individual command fails
+
+# Verify NANO_ROOT is defined before proceeding
+if [ -z "$NANO_ROOT" ]; then
+    echo "❌ ERROR: \$NANO_ROOT environment variable is not set."
+    exit 1
+fi
+
+# Save the absolute destination path before changing directories
+OUTPUT_FILE="$(pwd)/flattened.v"
+FILELIST="$NANO_ROOT/filelist.f"
+
+echo "Flattening core RTL modules via sv2v using filelist.f..."
+
+# 1. Extract include paths from filelist.f and convert '+incdir+path' to '-Ipath'
+SV2V_INCLUDES=$(grep '^+incdir+' "$FILELIST" | sed 's/^+incdir+/-I/' | tr '\n' ' ')
+
+# 2. Clean up file list paths (ignoring comments, empty lines, and \r)
+SV_FILES=$(grep -v '^\s*//' "$FILELIST" | grep -v '^+incdir+' | grep -v '^\s*$' | tr -d '\r' | tr '\n' ' ')
+
+# 3. Move to NANO_ROOT to handle relative file and include path resolution flawlessly
+cd "$NANO_ROOT"
+
+# 4. Run sv2v with exact dependency ordering
+sv2v $SV2V_INCLUDES $SV_FILES > "$OUTPUT_FILE"
+
+echo "✅ SUCCESS: Complete flattened design generated at ${OUTPUT_FILE}"

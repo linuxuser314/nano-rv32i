@@ -17,6 +17,11 @@ module rv32i_core(input logic clk, reset,
     logic current_cycle_is_end_of_load, previous_cycle_was_start_of_load;
     logic[2:0] result_select;
     (* keep *) logic[31:0] ALU_result;
+`ifdef RISCV_FORMAL
+    logic FAULT;
+    assign FAULT = LOAD_FAULT || LOAD_MISALIGNED || STORE_FAULT || STORE_MISALIGNED ||
+                   FETCH_FAULT || FETCH_MISALIGNED || INVALID_INSTRUCTION;
+`endif
     decoder main_decoder(
         .RF_write_enable(RF_write_enable),
         .I(I), .S(S), .B(B), .U(U), .J(J),
