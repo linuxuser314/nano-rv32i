@@ -16,12 +16,11 @@ This is a basic starter RV32I core. It is my first large hardware design project
 ## Design
 ### SoC Diagram
 ![RV32I SoC Top-Level Diagram](docs/soc.jpg)
-### Core Datapth
+### Core Datapath
 ![RV32I Single-Cycle Core Datapath](docs/rv32i_core.jpg)
 
-## Design
  - **Target:** This core is targeted for the **Sipeed Tang Nano 20K**
- - **Toolchain:** I use **SystemVerilog**, **Verilator**, **Yosys**, and **NextPNR/Gowin** (**Project Apicula**).
+ - **Toolchain:** I use **SystemVerilog**, **Verilator**, **Yosys**, **NextPNR**, and **Project Apicula**.
  - **Architecture:** Uses the **RV32I Base Unprivileged Architecture**
  - **Microarchitecture:** Uses a **primarily Single-Cycle** architecture except for `load` instructions (see below).
  - **Memory:** Uses synchronous **Dual-Ported BRAM** for a seamless **Von Neumann** experience while maintaining the simplicity of a Harvard architecture in hardware.
@@ -35,22 +34,19 @@ This is a basic starter RV32I core. It is my first large hardware design project
 ## Getting Started
  - To use this processor, first set up the environment on your device. It is highly recommended to use the VSCode docker extension or GitHub Codespaces. If you have any difficulties setting up the environment, let me know. 
    - Note: I do not have a setup for running this on anything but x86 Linux currently. Sorry.
- - Put your executable RISC-V binary in the `build/target/bootloader.hex` for synthesis. Due to a silent bug in `gowin_pack` to initialize dual-ported Block RAM with data, this is currently the only way to run code on the physical FPGA. Note that the bootloader does not have rw priveleges, only x priveleges, so the .data or .rodata sections should be excluded from this part.
+ - Put your executable RISC-V binary in the `build/target/bootloader.hex` for synthesis. Due to a silent bug in `gowin_pack` to initialize dual-ported Block RAM with data, this is currently the only way to run code on the physical FPGA. Note that the bootloader does not have rw privileges, only x priveleges, so the .data or .rodata sections should be excluded from this part.
  - Run the `synthesize` command. It should generate a bitstream.fs file in your repository root directory.
  - Flash the FPGA
    - Download or transfer the bitstream.fs file to your device with the USB port to flash the FPGA.
    - Install `openFPGALoader` on your device and run this command: ```openFPGALoader -b tangnano20k [path/to/bitstream.fs]``` This loads the bitstream onto the FPGA's SRAM. To flash the FPGA so that the design stays on permanently, add the -f flag.
  - To formally verify the processor, run the `test-formal` command. To run riscv-tests, run the `test-dynamic` command. To check linting, run the `lint` command.
 ## Current Status
- - Recently Acomplished:
+ - Recently Accomplished:
    - Adding an automated riscv-tests script
    - Incorporating riscv-formal for **formal verification** of my processor.
    - Automating tests and verification via GitHub Actions
  - In Progress:
    - Assembly and C FSM blinker (see `linuxuser314/baremetal-blinker` for a similar example)
- - Next Up:
-   - RVFI Formal verification wrapper for `riscv-formal`
-   - Fixing any unknown bugs found during formal verification
  - Future Plans:
    - Pipeline the processor
    - Integrate a high performance tightly-coupled memory

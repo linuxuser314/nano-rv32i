@@ -16,7 +16,7 @@ main_loop:
     # Change the number below! 
     # Use '5' for Simulation. Use '1000000' (or more) for the FPGA.
     # ====================================================================
-    li t2, 2            
+    li t2, 9000000            
     
     # 4. Reset the current delay counter
     li t3, 0             
