@@ -10,6 +10,14 @@ This is a basic starter RV32I core. It is my first large hardware design project
 | **Synthesis** | Yosys |
 | **Place & Route** | NextPNR-Gowin |
 | **Bitstream Tool** | Project Apicula |
+| **Formal Verification** | `riscv-formal` and SymbiYosys |
+| **CI/CD** | GitHub Actions |
+
+## Design
+### SoC Diagram
+![RV32I SoC Top-Level Diagram](docs/soc.jpg)
+### Core Datapth
+![RV32I Single-Cycle Core Datapath](docs/rv32i_core.jpg)
 
 ## Design
  - **Target:** This core is targeted for the **Sipeed Tang Nano 20K**
@@ -19,7 +27,7 @@ This is a basic starter RV32I core. It is my first large hardware design project
  - **Memory:** Uses synchronous **Dual-Ported BRAM** for a seamless **Von Neumann** experience while maintaining the simplicity of a Harvard architecture in hardware.
  - **Fetching:** Calculates the next PC *combinationally* before feeding it into the synchronous BRAM. This eliminates the need for a dedicated fetch cycle while working with FPGA primitives.
  - **Loads & Stores:** Because memory is synchronous, loads and stores present a challenge. Stores calculate the address and present the data on the memory port. It is committed on the rising edge of the clock. Loads calculate the address and present it to the memory address port. On the next cycle the result is read from the data port, it is shifted/masked (if necessary), and is written back to the register file. The load delay is managed by a FSM in the decoder (the decoder is combinational with an external 1-bit register for a load flag).
- - **Tested:** All operations have passed the `riscv-tests` suite, and synthesis, linting, simulation, and testing are automated via GitHub Actions on every commit and pull request.
+ - **Tested and Verified:** Processor fully passes **riscv-tests**, **riscv-formal**, and the Verilator linter. Commits and PRs are tested using GitHub Actions.
 
 ## Limitations
   - **Misaligned Memory Accesses:** Currently, the core does not support misaligned memory accesses (`addr % 4 != 0` for words, `addr % 2 != 0` for halfwords). Since I am implementing an **Unprivileged Architecture**, I cannot currently add a **Trap Handler** to handle misaligned accesses.
@@ -32,13 +40,14 @@ This is a basic starter RV32I core. It is my first large hardware design project
  - Flash the FPGA
    - Download or transfer the bitstream.fs file to your device with the USB port to flash the FPGA.
    - Install `openFPGALoader` on your device and run this command: ```openFPGALoader -b tangnano20k [path/to/bitstream.fs]``` This loads the bitstream onto the FPGA's SRAM. To flash the FPGA so that the design stays on permanently, add the -f flag.
+ - To formally verify the processor, run the `test-formal` command. To run riscv-tests, run the `test-dynamic` command. To check linting, run the `lint` command.
 ## Current Status
-Recently Acomplished:
+ - Recently Acomplished:
    - Adding an automated riscv-tests script
-   - Fixing any failed tests
-   - Automating tests via GitHub Actions
+   - Incorporating riscv-formal for **formal verification** of my processor.
+   - Automating tests and verification via GitHub Actions
  - In Progress:
-   - Testing memory system
+   - Assembly and C FSM blinker (see `linuxuser314/baremetal-blinker` for a similar example)
  - Next Up:
    - RVFI Formal verification wrapper for `riscv-formal`
    - Fixing any unknown bugs found during formal verification
@@ -48,6 +57,7 @@ Recently Acomplished:
    - Add a bootloader
    - Add exception handling and the Zicsr extension
    - Add compressed instructions
+   - Add multiplication extension
 
 ## Lessons Learned & Challenges Overcome
 Throughout this process, I have spent many hours debugging weird quirks and trying to get my toolchain to work.
