@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+set -e
+
+# Fallback NANO_ROOT to current working directory if not set
+NANO_ROOT="${NANO_ROOT:-$(pwd)}"
+
+GEN_NETLIST=false
+OPEN_GUI=false
+
+# Parse command line flags
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -n|--net|--netlist)
+      GEN_NETLIST=true
+      shift
+      ;;
+    -p|--physical)
+      OPEN_GUI=true
+      shift
+      ;;
+    -h|--help)
+      echo "Usage: $0 [options]"
+      echo "  -n, --net, --netlist    Generate netlistsvg SVG diagram from build/synth/core.json"
+      echo "  -p, --physical          Launch nextpnr-himbaechel GUI using build artifacts"
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo "Use -h or --help for usage details."
+      exit 1
+      ;;
+  esac
+done
+
+# Ensure build and log directories exist
+mkdir -p "$NANO_ROOT/build"
+mkdir -p "$NANO_ROOT/logs"
+
+# 1. Handle Netlist SVG Generation
+if [ "$GEN_NETLIST" = true ]; then
+  JSON_FILE="${JSON_SYNTH:-$NANO_ROOT/build/synth/core.json}"
+  OUT_SVG="$NANO_ROOT/build/netlist.svg"
+
+  if [ ! -f "$JSON_FILE" ]; then
+    echo "❌ Error: $JSON_FILE not found. Run synthesis first!"
+    exit 1
+  fi
+
+  echo "🎨 Generating netlist SVG at: $OUT_SVG"
+
+  if command -v netlistsvg &> /dev/null; then
+    netlistsvg "$JSON_FILE" -o "$OUT_SVG"
+    echo "✅ Done! Generated netlist diagram in $OUT_SVG"
+  elif command -v npx &> /dev/null; then
+    npx --yes netlistsvg "$JSON_FILE" -o "$OUT_SVG"
+    echo "✅ Done! Generated netlist diagram in $OUT_SVG"
+  else
+    echo "❌ Error: Neither 'netlistsvg' nor 'npm/npx' is available in this environment."
+    echo "To enable Node.js/npm in your DevContainer, add this feature to devcontainer.json:"
+    echo '  "ghcr.io/devcontainers/features/node:1": {}'
+    exit 1
+  fi
+fi
+
+# 2. Handle NextPNR Physical GUI Launch
+if [ "$OPEN_GUI" = true ]; then
+  JSON_SYNTH="${JSON_SYNTH:-$NANO_ROOT/build/synth/core.json}"
+  JSON_PNR="${JSON_PNR:-$NANO_ROOT/build/pnr.json}"
+  CST_FILE="${CST_FILE:-$NANO_ROOT/src/tangnano20k.cst}"
+  LOG_PNR="${LOG_PNR:-$NANO_ROOT/logs/pnr.log}"
+
+  if [ ! -f "$JSON_SYNTH" ]; then
+    echo "❌ Error: $JSON_SYNTH not found. Run synthesis first!"
+    exit 1
+  fi
+
+  echo "🖥️  Launching nextpnr-himbaechel GUI..."
+  echo "📋 Logging P&R trace to: $LOG_PNR"
+  nextpnr-himbaechel \
+      --json "$JSON_SYNTH" \
+      --write "$JSON_PNR" \
+      --device GW2AR-LV18QN88C8/I7 \
+      --vopt family=GW2A-18C \
+      --vopt cst="$CST_FILE" \
+      --freq 27 \
+      --log "$LOG_PNR" \
+      --gui
+fi

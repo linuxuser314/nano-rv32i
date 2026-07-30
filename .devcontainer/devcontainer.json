@@ -3,8 +3,20 @@
     "build": {
         "dockerfile": "Dockerfile"
     },
+    // Explicitly set the default user for the container
+    "remoteUser": "vscode",
+    "containerUser": "vscode",
     "features": {
-        "ghcr.io/devcontainers/features/common-utils:2.5.9": {}
+        "ghcr.io/devcontainers/features/common-utils:2.5.9": {
+            "username": "vscode",
+            "uid": "1000",
+            "gid": "1000"
+        },
+        "ghcr.io/devcontainers/features/desktop-lite:1": {
+            "webPort": "6080",
+            "password": "vscode" // Optional: defaults to vscode anyway
+        },
+        "ghcr.io/devcontainers/features/node:2.1.0": {}
     },
     "postCreateCommand": "bash /workspaces/nano-rv32i/tools/setup-basic",
     "customizations": {
@@ -20,7 +32,6 @@
             ]
         }
     },
-    // Add this block to lock in your environment variables permanently!
     "containerEnv": {
         "NANO_ROOT": "/workspaces/nano-rv32i"
     }
