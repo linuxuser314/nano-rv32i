@@ -27,7 +27,7 @@ module soc_top(input  logic      clk_27MHz, reset_button,
     logic sys_clk, sys_reset;
     assign sys_clk = clk_27MHz;
     assign sys_reset = reset_button;
-
+    logic[5:0] debug_data;
     logic MMIO_FAULT;
     logic core0_FETCH_FAULT, core0_DATA_FAULT;
 
@@ -51,6 +51,7 @@ module soc_top(input  logic      clk_27MHz, reset_button,
         //Data reading/writing
         .DATA_FAULT(core0_DATA_FAULT),
         .data_bus(core0_data_bus),
+        .debug_data(debug_data),
 
         .clk(sys_clk), .reset(sys_reset)
     );
@@ -99,6 +100,7 @@ module soc_top(input  logic      clk_27MHz, reset_button,
         .reset(sys_reset),
         .bus(mmio_bus),
         .led_strip6(led_strip6),
+        .debug_data(debug_data),
         `ifdef VERILATOR
             .tohost(tohost),
         `endif

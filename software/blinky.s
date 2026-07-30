@@ -9,7 +9,7 @@ _start:
 main_loop:
     # 2. Write the current binary count to the LEDs
     # (Hardware will naturally ignore anything above bit 5)
-    sw t1, 0(t0)         
+    sw t1, 4(t0)         
 
     # ====================================================================
     # 3. ADJUSTABLE DELAY

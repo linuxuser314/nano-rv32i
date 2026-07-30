@@ -2,6 +2,7 @@
 
 module mmio(
         input logic clk, reset,
+        input logic[5:0] debug_data,
         output logic MMIO_FAULT,
         output logic[5:0] led_strip6,
         `ifdef VERILATOR
@@ -9,6 +10,7 @@ module mmio(
         `endif
         ram_bus_if.slave bus
 );
+    logic[31:0] counter;
     always_ff @(posedge clk) begin
         MMIO_FAULT <= 0;
         if(reset) begin
@@ -41,5 +43,11 @@ module mmio(
                 default: MMIO_FAULT <= 1;
             endcase
         end
+        //Dummy test to make sure bitstream is getting to its destination.
+        //led_strip6[0] is nearest to the S1, while led_strip6 is nearest to the LVDS connector.
+        //counter <= counter + 1;
+        //led_strip6 <= ~counter[27:22];
+
+        //led_strip6 <= debug_data;
     end
 endmodule

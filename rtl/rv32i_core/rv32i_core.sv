@@ -2,6 +2,7 @@
 
 module rv32i_core(input logic clk, reset,
                   input logic DATA_FAULT, FETCH_FAULT,
+                  output logic debug_data[5:0],
                   ram_bus_if.master fetch_bus,
                   ram_bus_if.master data_bus);
 
@@ -17,6 +18,8 @@ module rv32i_core(input logic clk, reset,
     logic current_cycle_is_end_of_load, previous_cycle_was_start_of_load;
     logic[2:0] result_select;
     (* keep *) logic[31:0] ALU_result;
+
+    always debug_data = PC_result[7:2];
 `ifdef RISCV_FORMAL
     logic FAULT;
     assign FAULT = LOAD_FAULT || LOAD_MISALIGNED || STORE_FAULT || STORE_MISALIGNED ||

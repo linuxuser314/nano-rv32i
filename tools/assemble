@@ -3,18 +3,36 @@ set -e
 # Fallback mechanism: If NANO_ROOT is unset in this subshell, calculate it dynamically
 NANO_ROOT="${NANO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 
-# Resolve absolute path to the nano-rv32i root directory
-#REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-#I alread have NANO_ROOT available and enabled by the bashrc and setup by the setup.sh script.
+BOOT_MODE=0
+SOURCE_FILE=""
+
+# Parse command-line arguments
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        -b|--boot) BOOT_MODE=1; shift ;;
+        -h|--help) 
+            echo "Usage: assemble [-b|--boot] <path/to/file.s or path/to/file.S>"
+            exit 0 
+            ;;
+        *) 
+            if [ -n "$SOURCE_FILE" ]; then
+                echo "❌ Error: Multiple source files specified."
+                exit 1
+            fi
+            SOURCE_FILE="$1"
+            shift 
+            ;;
+    esac
+done
+
 # Verify assembly file argument is provided
-if [ -z "$1" ]; then
+if [ -z "$SOURCE_FILE" ]; then
     echo "❌ Error: No assembly source file specified."
-    echo "Usage: assemble <path/to/file.s or path/to/file.S>"
+    echo "Usage: assemble [-b|--boot] <path/to/file.s or path/to/file.S>"
     exit 1
 fi
 
 # Resolve file paths
-SOURCE_FILE="$1"
 if [[ "$SOURCE_FILE" != /* ]]; then
     SOURCE_FILE="$(pwd)/$SOURCE_FILE"
 fi
@@ -27,12 +45,22 @@ fi
 # Directory mappings
 TARGET_DIR="$NANO_ROOT/build/target"
 INTERMEDIATE_DIR="$NANO_ROOT/build/assemble"
-LINKER_SCRIPT="$NANO_ROOT/sim/custom_env/link.ld"
+
+# Apply boot flag configuration
+if [ $BOOT_MODE -eq 1 ]; then
+    LINKER_SCRIPT="$NANO_ROOT/sim/custom_env/link_boot.ld"
+    OUTPUT_HEX="$TARGET_DIR/bootloader.hex"
+    echo "[ASSEMBLE] Bootloader mode activated."
+else
+    LINKER_SCRIPT="$NANO_ROOT/sim/custom_env/link.ld"
+    OUTPUT_HEX="$TARGET_DIR/sim_payload.hex"
+fi
 
 mkdir -p "$TARGET_DIR"
 mkdir -p "$INTERMEDIATE_DIR"
 
 echo "[ASSEMBLE] Compiling: $SOURCE_FILE"
+echo "[ASSEMBLE] Using Linker: $LINKER_SCRIPT"
 
 # Compile and Link in a single step using GCC to enable preprocessor (#include) evaluation
 # Targets strict RV32I, disables standard runtimes, and links via our unified linker script
@@ -50,7 +78,7 @@ echo "[ASSEMBLE] Disassembly generated: build/assemble/software.dump"
 riscv64-unknown-elf-objcopy -O binary "$INTERMEDIATE_DIR/software.elf" "$INTERMEDIATE_DIR/software.bin"
 
 # Convert to 32-bit little-endian hex with the mandatory array starting pointer
-echo "@00000000" > "$TARGET_DIR/sim_payload.hex"
-hexdump -v -e '1/4 "%08x\n"' "$INTERMEDIATE_DIR/software.bin" >> "$TARGET_DIR/sim_payload.hex"
+echo "@00000000" > "$OUTPUT_HEX"
+hexdump -v -e '1/4 "%08x\n"' "$INTERMEDIATE_DIR/software.bin" >> "$OUTPUT_HEX"
 
-echo "🎉 [ASSEMBLE] Done. Payload output to: build/target/sim_payload.hex"
+echo "🎉 [ASSEMBLE] Done. Payload output to: $OUTPUT_HEX"
