@@ -2,7 +2,7 @@
 
 module rv32i_core(input logic clk, reset,
                   input logic DATA_FAULT, FETCH_FAULT,
-                  output logic debug_data[5:0],
+                  output logic[5:0] debug_data,
                   ram_bus_if.master fetch_bus,
                   ram_bus_if.master data_bus);
 
@@ -19,12 +19,14 @@ module rv32i_core(input logic clk, reset,
     logic[2:0] result_select;
     (* keep *) logic[31:0] ALU_result;
 
-    always debug_data = PC_result[7:2];
-`ifdef RISCV_FORMAL
+    assign debug_data = {INVALID_INSTRUCTION, FETCH_FAULT, STORE_FAULT || STORE_MISALIGNED || LOAD_FAULT || LOAD_MISALIGNED, ~(|PC_result), ~(|instruction), reset};
+//`ifdef RISCV_FORMAL
+/* verilator lint_off UNUSEDSIGNAL*/ //Used for formal verification and debugging.
     logic FAULT;
+    /* verilator lint_on UNUSEDSIGNAL */
     assign FAULT = LOAD_FAULT || LOAD_MISALIGNED || STORE_FAULT || STORE_MISALIGNED ||
                    FETCH_FAULT || FETCH_MISALIGNED || INVALID_INSTRUCTION;
-`endif
+//`endif
     decoder main_decoder(
         .RF_write_enable(RF_write_enable),
         .I(I), .S(S), .B(B), .U(U), .J(J),

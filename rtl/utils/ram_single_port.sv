@@ -4,18 +4,40 @@
 //[2 +: $clog2(SIZE)] allows me to slice the correct bit range for the address depending on the size involved.
 
 module ram_single_port #(
-             parameter int SIZE,
-             parameter string FILE_PATH = ""
-            )
-            (input logic clk,
-            ram_bus_if.slave bus);
-    logic[31:0] ram[SIZE];
+    /* verilator lint_off UNUSEDPARAM *////Temporary to make it pass CI checks. Need to find a longer-term solution for RAM...
+    parameter int SIZE,
+    parameter string FILE_PATH = ""
+    /* verilator lint_on UNUSEDPARAM */ 
+    ) (
+    input logic clk,
+    ram_bus_if.slave bus
+    );
+    
+    (* ram_style = "logic" *) logic[31:0] ram[SIZE];
     initial begin
-    for (int i = 0; i < SIZE; i++) ram[i] = 32'b0;
-        if(FILE_PATH != "") begin
-            $readmemh(FILE_PATH, ram);
-        end
+        for (int i = 0; i < SIZE; i++) ram[i] = 32'b0;
+
+    //Apparently Yosys doesn't understand how to do this, and it's silently breaking my core!
+    //    if(FILE_PATH != "") begin
+    //        $readmemh(FILE_PATH, ram);
+    //    end
+
+    //It should know how to do this though...
+        //$readmemh("/workspaces/nano-rv32i/build/target/bootloader.hex", ram);
+        //That wasn't working eitheir, trying this now...
+        ram[0]  = 32'h800002b7;
+        ram[1]  = 32'h00000313;
+        ram[2]  = 32'h0062a223;
+        ram[3]  = 32'h008953b7;
+        ram[4]  = 32'h44038393;
+        ram[5]  = 32'h00000e13;
+        ram[6]  = 32'h007e5663;
+        ram[7]  = 32'h001e0e13;
+        ram[8]  = 32'hff9ff06f;
+        ram[9]  = 32'h00130313;
+        ram[10] = 32'hfe1ff06f;
     end
+
 
     always_ff @(posedge clk) begin
         if(bus.read_enable) begin

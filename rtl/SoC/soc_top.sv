@@ -17,8 +17,8 @@ module soc_top(input  logic      clk_27MHz, reset_button,
                output logic[5:0] led_strip6
 
                );
-    localparam int BOOT_ROM_SIZE = 4096;
-    localparam int SYSTEM_RAM0_SIZE = 4096;
+    localparam int BOOT_ROM_SIZE = 16;
+    localparam int SYSTEM_RAM0_SIZE = 1024;
     localparam string bootloader_hex_path = "/workspaces/nano-rv32i/build/target/bootloader.hex";
     localparam string sim_payload_hex_path = "/workspaces/nano-rv32i/build/target/sim_payload.hex";
 

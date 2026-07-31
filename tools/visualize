@@ -35,24 +35,30 @@ done
 # Ensure build and log directories exist
 mkdir -p "$NANO_ROOT/build"
 mkdir -p "$NANO_ROOT/logs"
+mkdir -p "$NANO_ROOT/build/synth"
 
 # 1. Handle Netlist SVG Generation
 if [ "$GEN_NETLIST" = true ]; then
   JSON_FILE="${JSON_SYNTH:-$NANO_ROOT/build/synth/core.json}"
   OUT_SVG="$NANO_ROOT/build/netlist.svg"
+  TMP_JSON="$NANO_ROOT/build/synth/sanitized_core.json"
 
   if [ ! -f "$JSON_FILE" ]; then
     echo "❌ Error: $JSON_FILE not found. Run synthesis first!"
     exit 1
   fi
 
+  echo "🧹 Sanitizing 'inout' ports to bypass netlistsvg schema bug..."
+  # Safely replace "inout" with "output" without altering the original build artifact
+  sed 's/"direction"[[:space:]]*:[[:space:]]*"inout"/"direction": "output"/g' "$JSON_FILE" > "$TMP_JSON"
+
   echo "🎨 Generating netlist SVG at: $OUT_SVG"
 
   if command -v netlistsvg &> /dev/null; then
-    netlistsvg "$JSON_FILE" -o "$OUT_SVG"
+    netlistsvg "$TMP_JSON" -o "$OUT_SVG"
     echo "✅ Done! Generated netlist diagram in $OUT_SVG"
   elif command -v npx &> /dev/null; then
-    npx --yes netlistsvg "$JSON_FILE" -o "$OUT_SVG"
+    npx --yes netlistsvg "$TMP_JSON" -o "$OUT_SVG"
     echo "✅ Done! Generated netlist diagram in $OUT_SVG"
   else
     echo "❌ Error: Neither 'netlistsvg' nor 'npm/npx' is available in this environment."

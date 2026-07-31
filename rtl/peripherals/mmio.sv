@@ -2,7 +2,9 @@
 
 module mmio(
         input logic clk, reset,
+        /* verilator lint_off UNUSEDSIGNAL*///Debug data throws lint errors when not in use
         input logic[5:0] debug_data,
+        /* verilator lint_on UNUSEDSIGNAL */
         output logic MMIO_FAULT,
         output logic[5:0] led_strip6,
         `ifdef VERILATOR
@@ -10,7 +12,8 @@ module mmio(
         `endif
         ram_bus_if.slave bus
 );
-    logic[31:0] counter;
+    //debug logic
+    //logic[31:0] counter;
     always_ff @(posedge clk) begin
         MMIO_FAULT <= 0;
         if(reset) begin
@@ -34,7 +37,7 @@ module mmio(
                 `endif
                 32'h8000_0004: begin
                     if(bus.write_enable) begin
-                        led_strip6 <= bus.write_data[5:0];
+                        led_strip6 <= ~bus.write_data[5:0];
                     end
                     if(bus.read_enable) begin
                         bus.read_data <= '0;
@@ -44,10 +47,11 @@ module mmio(
             endcase
         end
         //Dummy test to make sure bitstream is getting to its destination.
-        //led_strip6[0] is nearest to the S1, while led_strip6 is nearest to the LVDS connector.
+        //led_strip6[0] is nearest to the LVDS connector, while led_strip6[5] is nearest to the S1 button and USB jack.
         //counter <= counter + 1;
-        //led_strip6 <= ~counter[27:22];
+        //led_strip6 <= counter[27:22];
 
-        //led_strip6 <= debug_data;
+        //led_strip6 <= ~debug_data; //Active Low
+
     end
 endmodule
