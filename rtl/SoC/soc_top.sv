@@ -1,35 +1,49 @@
 //This is the top SoC module.
 
-
+module soc
 /*
 0x0000_0000 to 0x0000_07FF: ROM (x)
 0x8000_0000 to 0x8000_07FF: MMIO (rw, volatile tag in C/C++ mandatory)
 0xC000_0000 to 0xC000_07FF: RAM (rwx)
 Memory regions expanded to 16KB, did not update map yet!
 */
-
+/*
 `default_nettype none
 
-module soc_top(input  logic      clk_27MHz, reset_button,
+module soc_top(input  logic      clk_27MHz,
+               button_1,
+               button_2,
+               bl616_uart_rx,
+               output logic bl616_uart_tx,
                `ifdef VERILATOR
                    output logic[31:0] tohost,
                 `endif
                output logic[5:0] led_strip6
 
                );
+assign bl616_uart_tx = bl616_uart_rx;
+logic[32:0] counter;
+assign led_strip6 = ~{button_1, button_2, bl616_uart_rx, counter[24:22]};
+always_ff @(posedge clk_27MHz) begin
+    counter <= counter + 1;
+end
+               
     localparam int BOOT_ROM_SIZE = 16;
     localparam int SYSTEM_RAM0_SIZE = 1024;
     localparam string bootloader_hex_path = "/workspaces/nano-rv32i/build/target/bootloader.hex";
     localparam string sim_payload_hex_path = "/workspaces/nano-rv32i/build/target/sim_payload.hex";
 
 
+
     //Leave them simple for now.
     logic sys_clk, sys_reset;
     assign sys_clk = clk_27MHz;
-    assign sys_reset = reset_button;
+    assign sys_reset = button_1; //RESET IS ACTIVE HIGH, I PROMISE YOU
     logic[5:0] debug_data;
     logic MMIO_FAULT;
     logic core0_FETCH_FAULT, core0_DATA_FAULT;
+
+    assign bl616_uart_tx = bl616_uart_rx;
 
     ram_bus_if core0_fetch_bus(); //Master 0
     ram_bus_if core0_data_bus(); //Master 1
@@ -93,14 +107,17 @@ module soc_top(input  logic      clk_27MHz, reset_button,
         .clk(sys_clk),
         .bus(boot_rom_bus)
     );
+    logic[5:0] temp_led_out;
 
+    assign led_strip6 = {temp_led_out[2:0], bl616_uart_rx, button_1, button_2};
     //Slave 2 (mmio_controller)
     mmio mmio_controller(
         .clk(sys_clk),
         .reset(sys_reset),
         .bus(mmio_bus),
-        .led_strip6(led_strip6),
+        .led_strip6(temp_led_out),
         .debug_data(debug_data),
+        //.debug_data(~{button_1, button_2, bl616_uart_rx, led_strip6[2:0]}),
         `ifdef VERILATOR
             .tohost(tohost),
         `endif
@@ -122,3 +139,4 @@ module soc_top(input  logic      clk_27MHz, reset_button,
     );
     
 endmodule
+*/
