@@ -1,6 +1,19 @@
 //This is the top SoC module.
 
-module soc
+module soc_top(
+    //input logic clk_27MHz, button_1, button_2, bl616_uart_rx,
+    //output logic bl616_uart_tx,
+    output logic[5:0] led_strip6
+);/*
+   assign led_strip6 = ~{button_1, button_2, bl616_uart_rx, counter[24:22]};
+    assign bl616_uart_tx = bl616_uart_rx;
+    logic[31:0] counter;
+    always_ff @(posedge clk_27MHz) begin
+        if(button_1) counter <= '0;
+        else counter <= counter + 1;
+    end*/
+    assign led_strip6 = 6'b001100;
+endmodule
 /*
 0x0000_0000 to 0x0000_07FF: ROM (x)
 0x8000_0000 to 0x8000_07FF: MMIO (rw, volatile tag in C/C++ mandatory)
