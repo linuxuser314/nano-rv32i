@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
+echo "Note: This script doesn't really work yet, but I'm keeping as a reference for when I do need to use it."
+
 # Fallback NANO_ROOT to current working directory if not set
 NANO_ROOT="${NANO_ROOT:-$(pwd)}"
 
