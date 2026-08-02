@@ -10,6 +10,22 @@ Memory regions expanded to 16KB, did not update map yet!
 
 `default_nettype none
 
+module soc_top(input  logic       clk_27MHz,
+               input  logic       button_1, // reset button
+               input  logic       button_2,  // user button
+               input  logic       bl616_uart_rx,
+               output logic       bl616_uart_tx,
+               output logic[5:0] led_strip6,
+`ifdef VERILATOR
+               output logic[31:0] tohost
+`endif
+               );
+
+    assign led_strip6 = ~{button_1, button_2, clk_27MHz, {3{bl616_uart_rx}}};
+    assign bl616_uart_tx = bl616_uart_rx;
+
+endmodule
+/*
 module soc_top(input  logic      clk_27MHz, reset_button,
                `ifdef VERILATOR
                    output logic[31:0] tohost,
@@ -122,3 +138,4 @@ module soc_top(input  logic      clk_27MHz, reset_button,
     );
     
 endmodule
+/**/
