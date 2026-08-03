@@ -1,5 +1,97 @@
 //This is the top SoC module.
 
+//Temporary UART test top module
+`default_nettype none
+
+module soc_top(
+    input  logic       clk_27MHz,
+    input  logic       button_1,      // Reset button (Active-High)
+    input  logic       bl616_uart_rx,
+    output logic       bl616_uart_tx,
+    output logic [5:0] led_strip6
+`ifdef VERILATOR
+    , output logic [31:0] tohost
+`endif
+);
+
+    // 1. System Reset
+    logic reset;
+    assign reset = button_1;
+
+    // 2. RX Pin Synchronizer
+    logic rx_sync_0, rx_sync;
+    always_ff @(posedge clk_27MHz) begin
+        if (reset) begin
+            rx_sync_0 <= 1'b1; // UART idles HIGH
+            rx_sync   <= 1'b1;
+        end else begin
+            rx_sync_0 <= bl616_uart_rx;
+            rx_sync   <= rx_sync_0;
+        end
+    end
+
+    // 3. UART RX Instantiation
+    logic [7:0] rx_data;
+    logic       rx_busy;
+    logic       rx_error;
+
+    uart_rx rx_inst (
+        .clk(clk_27MHz),
+        .reset(reset),
+        .rx_pin(rx_sync),
+        .rx_data(rx_data),
+        .rx_busy(rx_busy),
+        .rx_error(rx_error)
+    );
+
+    // 4. ASCII Case Inverter (Combinational)
+    logic [7:0] tx_data;
+    always_comb begin
+        if ((rx_data >= 8'h41 && rx_data <= 8'h5A) || // Uppercase A-Z
+            (rx_data >= 8'h61 && rx_data <= 8'h7A))   // Lowercase a-z
+        begin
+            tx_data = rx_data ^ 8'h20; // Toggle bit 5 to invert case
+        end else begin
+            tx_data = rx_data;         // Pass all other characters unmodified
+        end
+    end
+
+    // 5. RX to TX Handshake Logic
+    logic tx_start;
+    logic tx_busy;
+    logic rx_busy_prev;
+
+    always_ff @(posedge clk_27MHz) begin
+        if (reset) begin
+            rx_busy_prev <= 1'b0;
+            tx_start     <= 1'b0;
+        end else begin
+            rx_busy_prev <= rx_busy;
+            tx_start     <= 1'b0; // Default to single-cycle pulse
+            
+            // Trigger TX on the falling edge of rx_busy, provided there was no framing error
+            if (rx_busy_prev && !rx_busy && !rx_error && !tx_busy) begin
+                tx_start <= 1'b1;
+            end
+        end
+    end
+
+    // 6. UART TX Instantiation
+    uart_tx tx_inst (
+        .clk(clk_27MHz),
+        .reset(reset),
+        .tx_data(tx_data),
+        .tx_start(tx_start),
+        .tx_out(bl616_uart_tx),
+        .tx_busy(tx_busy)
+    );
+
+    // 7. Debug LEDs (Active-Low)
+    // Map: [Reset, RX Error, RX Busy, TX Busy, RX Line, TX Line]
+    assign led_strip6 = ~{reset, rx_error, rx_busy, tx_busy, rx_sync, bl616_uart_tx};
+
+endmodule
+
 
 /*
 0x0000_0000 to 0x0000_07FF: ROM (x)
@@ -7,7 +99,7 @@
 0xC000_0000 to 0xC000_07FF: RAM (rwx)
 Memory regions expanded to 16KB, did not update map yet!
 */
-
+/*
 `default_nettype none
 
 module soc_top (

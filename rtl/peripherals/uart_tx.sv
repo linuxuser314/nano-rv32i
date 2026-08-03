@@ -3,8 +3,8 @@
 module uart_tx(
     input  logic       clk,
     input  logic       reset,
-    input  logic [7:0] tx_DATA,
-    input  logic       tx_START,
+    input  logic [7:0] tx_data,
+    input  logic       tx_start,
     output logic       tx_out,
     output logic       tx_busy
 );
@@ -41,7 +41,7 @@ module uart_tx(
         .shift_enable(shift_enable),
         .input_enable(input_enable),
         .dout(shift_register_out),
-        .byte_in(tx_DATA),
+        .byte_in(tx_data),
 
         //Unused for tx
         .din('0),
@@ -62,7 +62,7 @@ module uart_tx(
                 IDLE: begin
                     tx_out <= 1'b1;
                     tx_busy <= 1'b0;
-                    if(tx_START) begin
+                    if(tx_start) begin
                         tx_busy <= 1'b1;
                         counter_reset <= 1'b1;
                         uart_fsm_state <= START;

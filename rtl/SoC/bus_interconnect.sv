@@ -2,22 +2,29 @@
 
 
 module bus_interconnect #(
-                          parameter int BOOT_ROM_SIZE = 4096,
-                          parameter int SYSTEM_RAM0_SIZE = 4096
-                        )(input logic clk, reset,
-                          ram_bus_if.slave core0_fetch_bus,
-                          output logic FETCH_FAULT,
+    parameter int BOOT_ROM_SIZE    = 4096,
+    parameter int SYSTEM_RAM0_SIZE = 4096
+)(
+    input  logic      clk,
+    input  logic      reset,
+    input  logic      system_mode,
 
-                          ram_bus_if.slave core0_data_bus,
-                          output logic DATA_FAULT,
+    ram_bus_if.slave  uart_dma_bus,
 
-                          ram_bus_if.master boot_rom_bus,
+    ram_bus_if.slave  core0_fetch_bus,
+    output logic      FETCH_FAULT,
 
-                          ram_bus_if.master mmio_bus,
-                          input logic MMIO_FAULT,
+    ram_bus_if.slave  core0_data_bus,
+    output logic      DATA_FAULT,
 
-                          ram_bus_if.master system_ram0_bus_A,
-                          ram_bus_if.master system_ram0_bus_B);
+    ram_bus_if.master boot_rom_bus,
+
+    ram_bus_if.master mmio_bus,
+    input  logic      MMIO_FAULT,
+
+    ram_bus_if.master system_ram0_bus_A,
+    ram_bus_if.master system_ram0_bus_B
+);
 
     logic[1:0] data_select, fetch_select;
     logic[1:0] data_select_buffered, fetch_select_buffered;

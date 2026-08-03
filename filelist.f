@@ -39,5 +39,8 @@ rtl/peripherals/mmio.sv
 rtl/peripherals/uart_shift_register.sv
 rtl/peripherals/baud_generator.sv
 rtl/peripherals/uart_tx.sv
+rtl/peripherals/uart_rx.sv
+
+rtl/SoC/uart_dma_flasher.sv
 rtl/SoC/bus_interconnect.sv
 rtl/SoC/soc_top.sv
