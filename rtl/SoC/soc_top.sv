@@ -10,6 +10,111 @@ Memory regions expanded to 16KB, did not update map yet!
 
 `default_nettype none
 
+module soc_top (
+    input  logic       clk_27MHz,
+    input  logic       button_1,      // Reset button
+    input  logic       button_2,      // User button
+    input  logic       bl616_uart_rx,
+    output logic       bl616_uart_tx,
+    output logic [5:0] led_strip6
+`ifdef VERILATOR
+    , output logic [31:0] tohost
+`endif
+);
+
+    // 1. System Reset
+    // Assuming Sipeed board standard: Buttons are pulled HIGH, go LOW when pressed.
+    // Invert them internally so active = 1.
+    logic reset;
+    assign reset = button_1;
+
+    // 2. Button 2 Synchronizer & Debouncer (~39ms at 27MHz)
+    logic        btn2_sync_0, btn2_sync_1;
+    logic        btn2_state;
+    logic [19:0] debounce_cnt;
+    logic        btn2_pulse;
+
+    always_ff @(posedge clk_27MHz) begin
+        if (reset) begin
+            btn2_sync_0  <= 1'b0;
+            btn2_sync_1  <= 1'b0;
+            btn2_state   <= 1'b0;
+            debounce_cnt <= '0;
+            btn2_pulse   <= 1'b0;
+        end else begin
+            // Double-flop synchronizer to prevent metastability
+            btn2_sync_0 <= ~button_2;
+            btn2_sync_1 <= btn2_sync_0;
+            
+            // Default: no pulse
+            btn2_pulse <= 1'b0; 
+            
+            // If the incoming signal matches our registered state, keep counter cleared
+            if (btn2_sync_1 == btn2_state) begin
+                debounce_cnt <= '0;
+            end else begin
+                debounce_cnt <= debounce_cnt + 1;
+                
+                // When counter hits ~1 million (39ms at 27MHz), the line is stable
+                if (debounce_cnt == 20'hFFFFF) begin
+                    btn2_state   <= btn2_sync_1;
+                    debounce_cnt <= '0;
+                    
+                    // Generate a 1-cycle pulse only on the PRESS (rising edge)
+                    if (btn2_sync_1 == 1'b1) begin
+                        btn2_pulse <= 1'b1;
+                    end
+                end
+            end
+        end
+    end
+
+    // 3. Payload Generation (ASCII A-Z)
+    logic [7:0] tx_data;
+    logic       tx_start;
+    logic       tx_busy;
+
+    always_ff @(posedge clk_27MHz) begin
+        if (reset) begin
+            tx_data  <= 8'h41; // ASCII 'A'
+            tx_start <= 1'b0;
+        end else begin
+            tx_start <= 1'b0; // Single-cycle strobe default
+            
+            // Trigger transmission if button pulsed and UART is idle
+            if (btn2_pulse && !tx_busy) begin
+                tx_start <= 1'b1;
+                
+                // Wrap 'Z' (0x5A) back to 'A' (0x41)
+                if (tx_data == 8'h5A) begin
+                    tx_data <= 8'h41;
+                end else begin
+                    tx_data <= tx_data + 1;
+                end
+            end
+        end
+    end
+
+    // 4. UART TX Instantiation
+    uart_tx tx_inst (
+        .clk(clk_27MHz),
+        .reset(reset),
+        .tx_data(tx_data),
+        .tx_start(tx_start),
+        .tx_out(bl616_uart_tx),
+        .tx_busy(tx_busy)
+    );
+
+    // 5. LED Debugging Output
+    // Maps status flags to LEDs so you can verify logic before minicom output
+    // LEDs are active-low. Order: [Reset, Btn2_State, TX_Busy, RX_Line...]
+    assign led_strip6 = ~{reset, btn2_state, tx_busy, {3{bl616_uart_rx}}};
+
+endmodule
+
+/*
+`default_nettype none
+
 module soc_top(input  logic       clk_27MHz,
                input  logic       button_1, // reset button
                input  logic       button_2,  // user button

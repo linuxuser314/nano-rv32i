@@ -36,5 +36,8 @@ rtl/rv32i_core/rv32i_core.sv
 
 // 4. Peripherals & SoC
 rtl/peripherals/mmio.sv
+rtl/peripherals/uart_shift_register.sv
+rtl/peripherals/baud_generator.sv
+rtl/peripherals/uart_tx.sv
 rtl/SoC/bus_interconnect.sv
 rtl/SoC/soc_top.sv
