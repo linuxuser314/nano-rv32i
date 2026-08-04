@@ -12,8 +12,9 @@ module mmio(
         `endif
         ram_bus_if.slave bus
 );
-    //debug logic
-    //logic[31:0] counter;
+
+    uart_tx uart_tx_0();
+    uart_rx uart_rx_0();
     always_ff @(posedge clk) begin
         MMIO_FAULT <= 0;
         if(reset) begin
@@ -40,18 +41,12 @@ module mmio(
                         led_strip6 <= ~bus.write_data[5:0];
                     end
                     if(bus.read_enable) begin
-                        bus.read_data <= '0;
+                        bus.read_data <= {26'b0, ~led_strip6};
                     end
                 end
                 default: MMIO_FAULT <= 1;
             endcase
         end
-        //Dummy test to make sure bitstream is getting to its destination.
-        //led_strip6[0] is nearest to the LVDS connector, while led_strip6[5] is nearest to the S1 button and USB jack.
-        //counter <= counter + 1;
-        //led_strip6 <= counter[27:22];
-
-        //led_strip6 <= ~debug_data; //Active Low
 
     end
 endmodule
