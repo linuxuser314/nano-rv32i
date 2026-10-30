@@ -1,5 +1,5 @@
 # nano-rv32i
-This is a basic starter RV32I core. It is my first large hardware design project.
+This is a basic starter RV32I core. It is my first large hardware design project. Because it was a learning project, I have left it somewhat incomplete and I hope to resume or restart it after this semester when I have some more free time.
 
 | Category | Component / Tool |
 | :--- | :--- |
@@ -30,6 +30,8 @@ This is a basic starter RV32I core. It is my first large hardware design project
 
 ## Limitations
   - **Misaligned Memory Accesses:** Currently, the core does not support misaligned memory accesses (`addr % 4 != 0` for words, `addr % 2 != 0` for halfwords). Since I am implementing an **Unprivileged Architecture**, I cannot currently add a **Trap Handler** to handle misaligned accesses.
+  - **SoC, Bootloader, and Exceptions:** Currently, while the core is formally verified, I do not handle certain exceptions very well due to a temporary patch for a combinational loop. Furthermore, the SoC is partially nonfunctional due to `gowin_pack` BRAM initialization failures.
+  - **MMIO:** Currently the core only implements basic MMIO for writing to LEDs.
 
 ## Getting Started
  - To use this processor, first set up the environment on your device. It is highly recommended to use the VSCode docker extension or GitHub Codespaces. If you have any difficulties setting up the environment, let me know. 
