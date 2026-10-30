@@ -47,15 +47,8 @@ This is a basic starter RV32I core. It is my first large hardware design project
    - Adding an automated riscv-tests script
    - Incorporating riscv-formal for **formal verification** of my processor.
    - Automating tests and verification via GitHub Actions
- - Next Up/In Progress:
-   - Add a bootloader
-   - Add an Assembly and C FSM blinker (see `linuxuser314/baremetal-blinker` for a similar example)
  - Future Plans:
-   - Pipeline the processor
-   - Integrate a high performance tightly-coupled memory
-   - Add exception handling and the Zicsr extension
-   - Add compressed instructions
-   - Add multiplication extension
+   - I will probably start afresh with a new core at some point, perhaps a multicycle core implementing full Zicsr and additional extensions with a cleaner SoC layout, or perhaps a performance-oriented Pipelined core.
 
 ## Lessons Learned & Challenges Overcome
 Throughout this process, I have spent many hours debugging weird quirks and trying to get my toolchain to work.
