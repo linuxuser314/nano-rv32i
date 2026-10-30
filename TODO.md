@@ -1,5 +1,7 @@
 
 ## TODO:
+
+** Note: ** This is an old TODO list and does not reflect the current status of the project. I have left it here for record keeping. For the current status of the project, refer to the README.
 ### Short Term
 - [x] Compile, simulate, and testbench all small components.
 - [x] Compile, simulate, and testbench all major components.
